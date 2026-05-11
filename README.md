@@ -2,7 +2,7 @@
 목포대 웹프2 5조 팀플
 
 ## 초기 생성 설정(Spring Initializr)
-- Project: `Gradle - Groovy`
+- Project: `Maven`
 - Language: `Java`
 - Spring Boot: `4.0.6`
 - Group: `com.example`
