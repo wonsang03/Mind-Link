@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 새 글 작성')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/community}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>목록으로 돌아가기</span>
+        </a>
+
+        <form th:action="@{/community}" method="post" class="card">
+            <h2 class="mb-6">새 글 작성</h2>
+
+            <div class="form-group">
+                <label for="category">카테고리</label>
+                <select id="category" name="category" class="form-select" required>
+                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}">스트레스 관리</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" class="form-input" placeholder="제목을 입력하세요" required maxlength="200"/>
+            </div>
+
+            <div class="form-group">
+                <label for="content">내용</label>
+                <textarea id="content" name="content" rows="10" class="form-textarea"
+                          placeholder="내용을 입력하세요..." required></textarea>
+            </div>
+
+            <div style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                <h4 class="mb-2" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="17" x2="12" y2="22"/>
+                            <path d="M9 10V2h6v8l3 3v3H6v-3z"/>
+                        </svg>
+                    </span>
+                    <span>커뮤니티 이용 안내</span>
+                </h4>
+                <ul class="muted" style="font-size: 0.875rem; margin: 0; padding-left: 1.25rem;">
+                    <li>서로를 존중하고 배려하는 말을 사용해주세요.</li>
+                    <li>개인정보나 민감한 내용은 공유하지 마세요.</li>
+                    <li>전문적인 의료 조언이 필요하다면 전문가와 상담하세요.</li>
+                </ul>
+            </div>
+
+            <div class="flex gap-4">
+                <a th:href="@{/community}" class="btn btn-outline" style="flex: 1;">취소</a>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">작성하기</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
