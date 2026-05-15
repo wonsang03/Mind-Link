@@ -22,36 +22,50 @@
 - `OpenAI`: OpenAI 모델 연동(LLM/임베딩 호출)
 - `Validation`: 요청 DTO/엔티티 입력값 검증
 - `Thymeleaf`: 서버 사이드 HTML 템플릿 렌더링
-- `H2`: 로컬 개발용 인메모리 DB
 
-## 로컬 실행 설정 (수정 사항)
+> **DB는 Oracle을 사용합니다.** (팀 개발·운영 기준)
 
-`pom.xml`에만 의존성이 있고 `application.properties` 설정이 없어 실행이 실패하던 문제를 해결하기 위해 아래를 반영했습니다.
+## 오류났던부분
 
-| 항목 | 내용 |
-|------|------|
-| **DB (JPA)** | H2 인메모리 DB URL·드라이버·계정 설정 추가 |
-| **Thymeleaf** | `spring-boot-starter-thymeleaf` 의존성 추가 |
-| **Spring Security** | 로컬 개발용 전체 경로 허용 (`SecurityConfig`) |
-| **Spring AI / Oracle Vector** | API 키·DB 미설정 시 자동 설정 비활성화 (운영 연동 시 별도 설정 필요) |
-| **프론트** | `templates/`, `static/` 화면 파일 통합 |
-| **백엔드** | 페이지·커뮤니티 등 MVC 컨트롤러·서비스 (`com.mindlink`) |
+처음에는 `pom.xml`에 **라이브러리(의존성)만 받아 둔 상태**였고,  
+`application.properties` **설정 파일은 거의 비어 있었습니다.**
 
-로컬 실행: `./mvnw spring-boot:run` → http://localhost:8080
+그래서 프로그램을 켤 때 Spring Boot가 이렇게 반응했습니다.
+
+- JPA를 쓰겠다고 했는데 → **DB가 어디 있는지** 모름 → 오류
+- Security를 넣었는데 → **누구에게 열어 줄지** 모름 → 막히거나 오류
+- OpenAI를 넣었는데 → **API 키가 없음** → 오류
+
+그래서 **일단 내 PC에서만** 돌아가게 아래를 임시로 넣었습니다.
+
+| 임시로 넣은 것 | 왜 넣었는지 |
+|----------------|-------------|
+| H2 + DB 설정 | Oracle 연결 전, 로컬에서만 실행 테스트 |
+| Thymeleaf | 통합해 둔 HTML 화면 보이게 |
+| Security 전체 허용 | 로그인 설정 전에 화면부터 확인 |
+| Spring AI 자동 설정 끄기 | API 키 없이도 서버가 켜지게 |
+
+Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을 넣을 예정
+
+## 로컬에서 실행
+
+```bash
+./mvnw spring-boot:run
+```
+
+브라우저: **http://localhost:8080**
 
 ## 문서 (팀원 작성용)
-
-각 영역별 상세 내용은 아래 파일에 정리합니다.
 
 | 문서 | 설명 |
 |------|------|
 | [docs/frontend.md](docs/frontend.md) | 화면(UI) 템플릿·CSS |
 | [docs/backend.md](docs/backend.md) | 서버 로직·설정 |
-| [docs/db.md](docs/db.md) | DB 스키마·연동 |
+| [docs/db.md](docs/db.md) | Oracle DB 스키마·연동 |
 | [docs/api.md](docs/api.md) | REST API 명세 |
 
 ## 현재 상태
 - Spring Initializr 프로젝트 골격 및 기본 의존성 적용 완료
 - 프론트엔드(Thymeleaf 템플릿·CSS) `main` 브랜치 통합 완료
-- 로컬 실행을 위한 H2·Security·Thymeleaf 등 최소 설정 반영 완료
-- Oracle·OpenAI 등 운영 연동 설정은 추후 `application.properties`에 추가 예정
+- 로컬 실행용 임시 설정(H2, Security, Thymeleaf 등) 반영 완료
+- Oracle DB·OpenAI 연동 설정은 추후 `application.properties`에 추가 예정
