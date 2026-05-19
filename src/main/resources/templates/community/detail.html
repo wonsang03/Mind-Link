@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 게시글')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/community}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>목록으로 돌아가기</span>
+        </a>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <div class="card mb-8">
+            <div class="flex-between mb-4">
+                <span class="tag tag-secondary" th:text="${post.category}">카테고리</span>
+                <span class="muted" style="font-size: 0.875rem;"
+                      th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-07 14:00</span>
+            </div>
+
+            <div class="flex-between mb-2">
+                <h2 th:text="${post.title}">제목</h2>
+                <div class="flex gap-2" th:if="${loginUser != null and loginUser.name == post.author}">
+                    <a th:href="@{/community/{id}/edit(id=${post.id})}"
+                       class="btn btn-secondary" style="padding: 0.5rem 1rem;">수정</a>
+                    <form th:action="@{/community/{id}/delete(id=${post.id})}" method="post"
+                          onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">삭제</button>
+                    </form>
+                </div>
+            </div>
+            <p class="muted mb-6" style="font-size: 0.875rem;" th:text="${post.author}">작성자</p>
+            <p id="postContent" style="white-space: pre-wrap; margin-bottom: 1.5rem;" th:text="${post.content}">내용</p>
+
+            <!-- 게시글 첨부파일 -->
+            <div th:if="${postAttachments != null and not #lists.isEmpty(postAttachments)}"
+                 style="margin-bottom: 1.5rem;">
+                <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+                    <div th:each="a : ${postAttachments}">
+                        <img th:if="${a.fileType.name() == 'IMAGE'}"
+                             th:src="${a.fileUrl}"
+                             th:alt="${a.originalFileName}"
+                             style="max-width:300px; max-height:300px; border-radius:8px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
+                             onclick="openLightbox(this.src)"/>
+                        <video th:if="${a.fileType.name() == 'VIDEO'}"
+                               controls
+                               style="max-width:100%; border-radius:8px; border:1px solid var(--border);">
+                            <source th:src="${a.fileUrl}"/>
+                            브라우저가 video 태그를 지원하지 않습니다.
+                        </video>
+                        <div th:if="${a.fileType.name() == 'LINK'}" style="width:100%;">
+                            <iframe th:if="${a.youTube}"
+                                    th:src="${a.youTubeEmbedUrl}"
+                                    style="width:100%; max-width:560px; height:315px; border-radius:8px; border:none; display:block;"
+                                    allowfullscreen></iframe>
+                            <a th:unless="${a.youTube}"
+                               th:href="${a.fileUrl}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               style="display:inline-block; background:var(--secondary); border:1px solid var(--border); border-radius:8px; padding:0.6rem 1rem; color:var(--primary); font-size:0.875rem; word-break:break-all; text-decoration:none; max-width:100%;">
+                                🔗 <span th:text="${a.originalFileName}">URL</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4" style="padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+                <form th:action="@{/community/{id}/like(id=${post.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                        ♥ <span th:text="${post.likes}">0</span>
+                    </button>
+                </form>
+                <span class="muted flex gap-2" style="align-items: center;">💬 댓글 <span th:text="${#lists.size(post.comments)}">0</span></span>
+            </div>
+
+            <h3 class="mb-4">댓글 <span th:text="${#lists.size(post.comments)}">0</span></h3>
+
+            <div th:if="${#lists.isEmpty(post.comments)}" class="muted center" style="padding: 1.5rem 0;">
+                아직 댓글이 없습니다. 첫 댓글을 달아보세요.
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div th:each="c : ${post.comments}"
+                     style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem;">
+                    <div class="flex-between mb-2">
+                        <span th:text="${c.author}">댓글 작성자</span>
+                        <div class="flex gap-3" style="align-items: center;">
+                            <span class="muted" style="font-size: 0.875rem;"
+                                  th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-07 14:00</span>
+                            <form th:if="${loginUser != null and loginUser.name == c.author}"
+                                  th:action="@{/community/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${c.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('이 댓글을 삭제하시겠습니까?');"
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-outline"
+                                        style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--destructive); border-color: var(--destructive);">
+                                    삭제
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <p class="muted comment-content" th:text="${c.content}">댓글 내용</p>
+
+                    <!-- 댓글 첨부파일 -->
+                    <div th:if="${commentAttachments[c.id] != null}"
+                         style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+                        <div th:each="a : ${commentAttachments[c.id]}">
+                            <img th:if="${a.fileType.name() == 'IMAGE'}"
+                                 th:src="${a.fileUrl}"
+                                 th:alt="${a.originalFileName}"
+                                 style="max-width:200px; max-height:200px; border-radius:6px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
+                                 onclick="openLightbox(this.src)"/>
+                            <video th:if="${a.fileType.name() == 'VIDEO'}"
+                                   controls
+                                   style="max-width:100%; border-radius:6px; border:1px solid var(--border);">
+                                <source th:src="${a.fileUrl}"/>
+                            </video>
+                            <div th:if="${a.fileType.name() == 'LINK'}">
+                                <iframe th:if="${a.youTube}"
+                                        th:src="${a.youTubeEmbedUrl}"
+                                        style="width:100%; max-width:400px; height:225px; border-radius:6px; border:none; display:block;"
+                                        allowfullscreen></iframe>
+                                <a th:unless="${a.youTube}"
+                                   th:href="${a.fileUrl}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   style="display:inline-block; background:var(--secondary); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.75rem; color:var(--primary); font-size:0.82rem; word-break:break-all; text-decoration:none;">
+                                    🔗 <span th:text="${a.originalFileName}">URL</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 댓글 작성 폼 -->
+            <form th:if="${loginUser != null}"
+                  th:action="@{/community/{id}/comments(id=${post.id})}" method="post"
+                  enctype="multipart/form-data"
+                  style="margin-top: 1.5rem;">
+                <textarea name="content" rows="3" class="form-textarea"
+                          placeholder="댓글을 입력하세요..." required></textarea>
+                <div style="margin-top:0.75rem;">
+                    <label style="font-size:0.875rem; color:var(--text-muted);">파일 첨부
+                        <span style="font-size:0.8rem;">(이미지/동영상 · 여러 개 가능)</span>
+                    </label>
+                    <input type="file" name="files" multiple
+                           accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                           class="form-input" style="padding:0.4rem 0.6rem; margin-top:0.3rem;"
+                           onchange="previewComment(this)"/>
+                    <div id="commentPreview" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">댓글 작성</button>
+            </form>
+            <p th:if="${loginUser == null}" class="muted center mt-6">
+                <a th:href="@{/login}" style="color: var(--primary); text-decoration: underline;">로그인</a> 후 댓글을 작성할 수 있습니다.
+            </p>
+        </div>
+    </div>
+</main>
+
+<!-- 이미지 라이트박스 -->
+<div id="lightbox"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;"
+     onclick="closeLightbox()">
+    <img id="lightboxImg" src="" style="max-width:90vw; max-height:90vh; border-radius:8px; object-fit:contain;"/>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').style.display = 'flex';
+}
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+}
+
+// YouTube URL(youtube.com / youtu.be 도메인만 허용)을 본문 내 위치 그대로 iframe으로 교체
+// 텍스트 → <span>, YouTube URL → <iframe> 으로 DOM 재구성
+function renderYoutubeInContent(elem) {
+    var text = elem.textContent;
+    // youtube.com, youtu.be 도메인만 매칭 (보안: 외부 도메인 iframe 차단)
+    var YT_REGEX = /https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?(?:[^\s&]*&)*v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)\S*/g;
+    var parts = [];
+    var lastIndex = 0;
+    var match;
+    while ((match = YT_REGEX.exec(text)) !== null) {
+        parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+        parts.push({ type: 'youtube', videoId: match[1] });
+        lastIndex = match.index + match[0].length;
+    }
+    parts.push({ type: 'text', value: text.slice(lastIndex) });
+    // YouTube URL이 없으면 원본 그대로 유지
+    if (!parts.some(function(p) { return p.type === 'youtube'; })) return;
+    elem.textContent = '';
+    parts.forEach(function(part) {
+        if (part.type === 'text') {
+            var trimmed = part.value.replace(/^\n+|\n+$/, '');
+            if (!trimmed) return;
+            var span = document.createElement('span');
+            span.style.whiteSpace = 'pre-wrap';
+            span.style.display = 'block';
+            span.textContent = trimmed;
+            elem.appendChild(span);
+        } else {
+            var iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube.com/embed/' + part.videoId;
+            iframe.style.cssText = 'width:100%; max-width:560px; height:315px; border-radius:8px; border:none; display:block; margin:0.75rem 0;';
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            elem.appendChild(iframe);
+        }
+    });
+}
+
+(function() {
+    var postContent = document.getElementById('postContent');
+    if (postContent) renderYoutubeInContent(postContent);
+    document.querySelectorAll('.comment-content').forEach(renderYoutubeInContent);
+})();
+
+function previewComment(input) {
+    var preview = document.getElementById('commentPreview');
+    preview.innerHTML = '';
+    Array.from(input.files).forEach(function(file) {
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'border-radius:6px; overflow:hidden; background:var(--secondary);';
+        if (file.type.startsWith('image/')) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.cssText = 'width:80px; height:80px; object-fit:cover; display:block;';
+                wrap.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            var url = URL.createObjectURL(file);
+            var video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.style.cssText = 'height:80px; display:block;';
+            wrap.appendChild(video);
+        }
+        preview.appendChild(wrap);
+    });
+}
+</script>
+</body>
+</html>

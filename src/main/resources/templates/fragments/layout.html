@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title} ?: '마음이음'">마음이음</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<header th:fragment="header" class="header">
+    <div class="header-inner">
+        <a th:href="@{/}" class="brand">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </span>
+            <div>
+                <div class="brand-name">마음이음</div>
+                <div class="brand-sub">Mind-Link</div>
+            </div>
+        </a>
+        <nav class="nav">
+            <a th:href="@{/}"
+               th:classappend="${currentUri == '/'} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12 12 3l9 9"/><path d="M5 10v11h14V10"/>
+                    </svg>
+                </span>
+                <span>홈</span>
+            </a>
+            <a th:href="@{/notice}"
+               th:classappend="${#strings.startsWith(currentUri, '/notice')} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                        <path d="M9 21a3 3 0 0 0 6 0"/>
+                    </svg>
+                </span>
+                <span>공지사항</span>
+            </a>
+            <a th:href="@{/info}"
+               th:classappend="${currentUri == '/info'} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 11v5"/>
+                        <circle cx="12" cy="8" r="0.6" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span>서비스 소개</span>
+            </a>
+            <a th:href="@{/self-assessment}"
+               th:classappend="${#strings.startsWith(currentUri, '/self-assessment')} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="8" y="3" width="8" height="4" rx="1"/>
+                        <path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                        <polyline points="9 14 11 16 15 12"/>
+                    </svg>
+                </span>
+                <span>자가진단</span>
+            </a>
+            <a th:href="@{/community}"
+               th:classappend="${#strings.startsWith(currentUri, '/community')} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <span>커뮤니티</span>
+            </a>
+            <a th:href="@{/counseling}"
+               th:classappend="${#strings.startsWith(currentUri, '/counseling')} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </span>
+                <span>상담소 찾기</span>
+            </a>
+
+            <th:block th:if="${loginUser != null}">
+                <a th:href="@{/user/me}" class="btn-outline nav-cta"
+                   th:classappend="${currentUri == '/user/me'} ? 'active'">
+                    <span class="nav-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                        </svg>
+                    </span>
+                    <span>내 정보</span>
+                </a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn-outline nav-cta">
+                        <span class="nav-ico" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/>
+                                <polyline points="14 17 19 12 14 7"/>
+                                <line x1="19" y1="12" x2="9" y2="12"/>
+                            </svg>
+                        </span>
+                        <span>로그아웃</span>
+                    </button>
+                </form>
+            </th:block>
+            <a th:if="${loginUser == null}" th:href="@{/login}"
+               class="btn-outline nav-cta"
+               th:classappend="${currentUri == '/login'} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                </span>
+                <span>로그인</span>
+            </a>
+        </nav>
+    </div>
+</header>
+
+<footer th:fragment="footer">
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="brand mb-4">
+                    <span class="brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </span>
+                    <span>마음이음</span>
+                </div>
+                <p class="muted">당신의 마음 건강을 위한<br/>든든한 파트너</p>
+            </div>
+            <div>
+                <h4 class="mb-4">서비스</h4>
+                <ul>
+                    <li><a th:href="@{/self-assessment}">자가진단</a></li>
+                    <li><a th:href="@{/recommendations}">맞춤 추천</a></li>
+                    <li><a th:href="@{/counseling}">상담소 찾기</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="mb-4">지원</h4>
+                <ul>
+                    <li><a th:href="@{/notice}">공지사항</a></li>
+                    <li><a href="#">이용 가이드</a></li>
+                    <li><a href="#">문의하기</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="mb-4">긴급 연락처</h4>
+                <ul>
+                    <li>자살예방상담: 1393</li>
+                    <li>정신건강위기상담: 1577-0199</li>
+                    <li>청소년상담: 1388</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Mind-Link. 당신의 마음 건강을 응원합니다.
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

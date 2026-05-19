@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - AI 정서 케어')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <div class="mb-8" style="margin-bottom: 2rem;">
+            <div class="badge">
+                <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 8V4"/>
+                        <rect x="4" y="8" width="16" height="12" rx="2"/>
+                        <path d="M2 14h2"/><path d="M20 14h2"/>
+                        <circle cx="9" cy="14" r="1" fill="currentColor"/>
+                        <circle cx="15" cy="14" r="1" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span>AI 정서 분석</span>
+            </div>
+            <h1 class="mb-4">AI 기반 정서 케어</h1>
+            <p class="muted">AI가 당신의 감정을 분석하고 맞춤형 케어를 제공합니다.</p>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="background: var(--secondary); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
+                    <div class="flex gap-3" style="align-items: center;">
+                        <div style="width: 2.5rem; height: 2.5rem; background: var(--primary); border-radius: 9999px; display: flex; align-items: center; justify-content: center; color: var(--primary-foreground);">
+                            <span class="pico" style="width: 1.4rem; height: 1.4rem; color: inherit;" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 8V4"/>
+                                    <rect x="4" y="8" width="16" height="12" rx="2"/>
+                                    <path d="M2 14h2"/><path d="M20 14h2"/>
+                                    <circle cx="9" cy="14" r="1" fill="currentColor"/>
+                                    <circle cx="15" cy="14" r="1" fill="currentColor"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <div>
+                            <h3>AI 케어 어시스턴트</h3>
+                            <p class="muted" style="font-size: 0.875rem;">언제든 이야기해주세요</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chat-area" style="height: 480px; overflow-y: auto; padding: 1.5rem;">
+                    <div class="center muted">
+                        <div style="margin: 0 auto 1rem; width: 4.5rem; height: 4.5rem; background: var(--secondary); border-radius: 9999px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <span class="pico" style="width: 2.5rem; height: 2.5rem;" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 8V4"/>
+                                    <rect x="4" y="8" width="16" height="12" rx="2"/>
+                                    <path d="M2 14h2"/><path d="M20 14h2"/>
+                                    <circle cx="9" cy="14" r="1" fill="currentColor"/>
+                                    <circle cx="15" cy="14" r="1" fill="currentColor"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <h3 class="mb-2">안녕하세요!</h3>
+                        <p style="max-width: 24rem; margin: 0 auto 1.5rem;">
+                            오늘 기분이 어떠신가요? 편하게 이야기해주세요.
+                            AI가 당신의 감정을 분석하고 도움을 드릴게요.
+                        </p>
+                        <div style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem; text-align: left; max-width: 24rem; margin: 0 auto;">
+                            <p class="mb-2" style="font-size: 0.875rem;">예시 질문:</p>
+                            <ul style="font-size: 0.875rem; margin: 0; padding-left: 1.25rem;">
+                                <li>"요즘 불안해서 잠을 잘 못 자요"</li>
+                                <li>"기분이 좋아요. 오늘 좋은 일이 있었어요"</li>
+                                <li>"스트레스가 심해서 힘들어요"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding: 1rem;">
+                    <form id="chat-form" class="flex gap-3">
+                        <input type="text" id="chat-input" class="form-input" style="flex: 1; margin: 0;"
+                               placeholder="메시지를 입력하세요..." required/>
+                        <button type="submit" class="btn btn-primary">전송</button>
+                    </form>
+                    <p class="muted mt-2" style="font-size: 0.75rem;">
+                        AI는 참고용이며, 전문적인 의료 조언을 대신할 수 없습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="card">
+                    <h3 class="mb-4" style="display: flex; align-items: center; gap: 0.45rem;">
+                        <span class="pico pico-md" style="color: var(--primary);" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="6" y1="20" x2="6" y2="13"/>
+                                <line x1="12" y1="20" x2="12" y2="6"/>
+                                <line x1="18" y1="20" x2="18" y2="10"/>
+                                <line x1="3" y1="20" x2="21" y2="20"/>
+                            </svg>
+                        </span>
+                        <span>현재 상태</span>
+                    </h3>
+                    <p class="muted" style="font-size: 0.875rem;">
+                        대화를 시작하면 AI가 감정 상태를 분석합니다.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3 class="mb-4">추천 활동</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a th:href="@{/recommendations}" style="background: var(--secondary); border-radius: 0.5rem; padding: 0.75rem; display: block;">
+                            <strong style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                </span>
+                                <span>일상 루틴 활동</span>
+                            </strong>
+                            <div class="muted" style="font-size: 0.75rem; margin-top: 0.25rem;">감정 기록, 감사 일기 쓰기</div>
+                        </a>
+                        <a th:href="@{/community}" style="background: var(--secondary); border-radius: 0.5rem; padding: 0.75rem; display: block;">
+                            <strong style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                </span>
+                                <span>커뮤니티 활동</span>
+                            </strong>
+                            <div class="muted" style="font-size: 0.75rem; margin-top: 0.25rem;">같은 고민의 사람들과 소통</div>
+                        </a>
+                        <a th:href="@{/counseling}" style="background: var(--secondary); border-radius: 0.5rem; padding: 0.75rem; display: block;">
+                            <strong style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                        <line x1="12" y1="8" x2="12" y2="16"/>
+                                        <line x1="8" y1="12" x2="16" y2="12"/>
+                                    </svg>
+                                </span>
+                                <span>전문가 상담</span>
+                            </strong>
+                            <div class="muted" style="font-size: 0.75rem; margin-top: 0.25rem;">검증된 전문가와의 1:1 상담</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1rem;">
+                    <h4 class="mb-2" style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span class="pico pico-sm" style="color: var(--primary);" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                        </span>
+                        <span>긴급 연락처</span>
+                    </h4>
+                    <ul class="muted" style="font-size: 0.875rem; margin: 0; padding-left: 1.25rem;">
+                        <li>자살예방상담: 1393</li>
+                        <li>정신건강위기: 1577-0199</li>
+                        <li>생명의전화: 1588-9191</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+(function() {
+    const HIGH = ['죽고','자살','끝내고','사라지','죽음','자해','목숨'];
+    const MID = ['불안','우울','힘들','스트레스','괴롭','외로','무기력','공황','두렵'];
+    const POS = ['기쁘','행복','좋','감사','평온','편안'];
+
+    function analyze(text) {
+        if (HIGH.some(k => text.includes(k))) {
+            return {level: '고위험', color: 'var(--destructive)', reply: '지금 많이 힘드신 것 같아 걱정됩니다.\n\n긴급 연락처:\n• 자살예방상담전화: 1393 (24시간)\n• 정신건강위기상담: 1577-0199\n\n당신은 소중한 사람입니다.'};
+        }
+        if (MID.some(k => text.includes(k))) {
+            return {level: '중등도', color: '#f59e0b', reply: '힘든 시간을 보내고 계시는군요. 감정을 표현하는 것만으로도 큰 용기입니다.\n\n• 4-7-8 호흡법 (4초 들이마시기, 7초 멈추기, 8초 내쉬기)\n• 가벼운 산책이나 운동\n• 신뢰할 수 있는 사람과 대화하기'};
+        }
+        if (POS.some(k => text.includes(k))) {
+            return {level: '경증(긍정)', color: 'var(--primary)', reply: '긍정적인 감정을 느끼고 계시는군요! 이런 순간들을 소중히 기억해두세요.\n\n• 감사 일기 작성하기\n• 좋은 감정을 느낀 활동 반복하기'};
+        }
+        return {level: '경증', color: 'var(--primary)', reply: '오늘의 감정을 나눠주셔서 감사합니다. 자신의 감정을 인식하고 표현하는 것은 마음 건강의 첫걸음입니다.'};
+    }
+
+    const chatArea = document.getElementById('chat-area');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+
+    function bubble(text, isUser, color) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display: flex; margin-bottom: 0.75rem; ' + (isUser ? 'justify-content: flex-end;' : '');
+        const b = document.createElement('div');
+        b.style.cssText = 'max-width: 80%; padding: 0.75rem 1rem; border-radius: 1rem; white-space: pre-wrap; ' +
+            (isUser ? 'background: var(--primary); color: var(--primary-foreground);' : 'background: var(--secondary);');
+        b.textContent = text;
+        wrap.appendChild(b);
+        chatArea.appendChild(wrap);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    let cleared = false;
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        if (!cleared) { chatArea.innerHTML = ''; cleared = true; }
+        bubble(text, true);
+        input.value = '';
+        setTimeout(function() {
+            const r = analyze(text);
+            bubble('[' + r.level + '] ' + r.reply, false);
+        }, 600);
+    });
+})();
+</script>
+</body>
+</html>

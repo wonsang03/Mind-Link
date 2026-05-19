@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 회원가입')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-form">
+        <div class="center mb-8">
+            <div class="badge">
+                <span style="color: var(--primary);">♥</span>
+                <span>Join Mind-Link</span>
+            </div>
+            <h1 style="font-size: 2.25rem;" class="mb-4">함께 시작해요</h1>
+            <p class="muted">마음이음과 함께하는 마음 건강 여정의 첫 걸음을 떼어보세요.</p>
+        </div>
+
+        <div class="card">
+            <form th:action="@{/signup}" method="post" th:object="${signupForm}">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-error">
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" th:field="*{name}"
+                           class="form-input" placeholder="홍길동" required/>
+                    <div th:if="${#fields.hasErrors('name')}" class="form-error" th:errors="*{name}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" th:field="*{email}"
+                           class="form-input" placeholder="you@example.com" required/>
+                    <div th:if="${#fields.hasErrors('email')}" class="form-error" th:errors="*{email}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" th:field="*{password}"
+                           class="form-input" placeholder="8자 이상 입력해주세요" minlength="8" required/>
+                    <div th:if="${#fields.hasErrors('password')}" class="form-error" th:errors="*{password}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordConfirm">비밀번호 확인</label>
+                    <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}"
+                           class="form-input" placeholder="비밀번호를 한 번 더 입력해주세요" required/>
+                    <div th:if="${#fields.hasErrors('passwordConfirm')}" class="form-error" th:errors="*{passwordConfirm}"></div>
+                </div>
+
+                <label class="flex gap-2 mb-6 muted" style="font-size: 0.875rem; cursor: pointer; align-items: flex-start;">
+                    <input type="checkbox" required style="margin-top: 0.25rem;"/>
+                    <span>
+                        <a href="#" style="color: var(--primary);">이용약관</a> 및
+                        <a href="#" style="color: var(--primary);">개인정보 처리방침</a>에 동의합니다.
+                    </span>
+                </label>
+
+                <button type="submit" class="btn btn-primary btn-block">회원가입</button>
+            </form>
+        </div>
+
+        <p class="center mt-6 muted">
+            이미 계정이 있으신가요?
+            <a th:href="@{/login}" style="color: var(--primary); text-decoration: underline;">로그인</a>
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

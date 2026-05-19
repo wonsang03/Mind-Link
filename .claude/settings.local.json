@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:localhost)",
+      "Bash(curl -s -o /dev/null -w \"H2콘솔\\(슬래시\\) HTTP %{http_code}\\\\n\" http://localhost:8080/h2-console/)",
+      "Bash(curl -sI http://localhost:8080/h2-console)",
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(curl -s http://localhost:8080/login)",
+      "Bash(curl -s http://localhost:8080/community)",
+      "Bash(curl -s http://localhost:8080/self-assessment)",
+      "Bash(curl -s http://localhost:8080/h2-console)",
+      "Bash(./mvnw compile *)",
+      "Bash(jar tf *)",
+      "Bash(python3 -c ' *)",
+      "Bash(unzip -l ~/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar)",
+      "Bash(rm -f /tmp/cookies.txt)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -X POST http://localhost:8080/signup --data-urlencode name=testuser --data-urlencode email=test@test.com --data-urlencode password=password123 --data-urlencode passwordConfirm=password123 -o /tmp/signup-response.html -w 'HTTP %{http_code} redirect: %{redirect_url}\\\\n' -L)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -X POST http://localhost:8080/signup -d 'name=testuser&email=test@test.com&password=password123&passwordConfirm=password123' -o /tmp/signup-resp.html -w 'HTTP %{http_code}\\\\n')",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -X POST http://localhost:8080/signup -d 'name=testuser2&email=test2@test.com&password=password123&passwordConfirm=password123' -D - -o /dev/null)",
+      "Bash(rm -f /tmp/c3.txt)",
+      "Bash(curl -s -c /tmp/c3.txt -b /tmp/c3.txt -X POST http://localhost:8080/signup -d 'name=Carol&email=carol@test.com&password=password123&passwordConfirm=password123' -o /dev/null)",
+      "Bash(curl -s -c /tmp/c3.txt -b /tmp/c3.txt http://localhost:8080/user/me -o /tmp/me3.html -w 'HTTP %{http_code}\\\\n')",
+      "Bash(curl -s -c /tmp/cookie.txt -b /tmp/cookie.txt \"http://localhost:8080/user/me\")",
+      "Bash(curl -s -c /tmp/cookie.txt -b /tmp/cookie.txt \"http://localhost:8080/\")",
+      "Bash(curl -s -c /tmp/fresh_cookie.txt \"http://localhost:8080/\")",
+      "PowerShell(Select-String *)",
+      "PowerShell(cd \"C:\\\\Users\\\\ask30\\\\Mind-Link-main\"; .\\\\mvnw.cmd exec:java -Dexec.mainClass=\"com.mindlink.GenerateHash\" -Dexec.classpathScope=\"test\" -q 2>&1 | Where-Object { $_ -match \"^\\\\`$2\" })",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ask30\\\\Mind-Link-main\" -Recurse -Include \"*.java\", \"*.properties\", \"*.xml\", \"*.html\")",
+      "Bash(Select-Object -Property FullName)",
+      "Bash(ConvertTo-Json)",
+      "Bash(Out-String)"
+    ]
+  }
+}

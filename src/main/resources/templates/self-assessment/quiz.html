@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 진단 진행 중')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow" style="max-width: 48rem;">
+        <div class="mb-8">
+            <a th:href="@{/self-assessment}" class="muted" style="display: inline-block; margin-bottom: 1rem;">
+                ← 검사 목록으로
+            </a>
+            <h2 class="mb-4" th:text="${test.title}">검사 제목</h2>
+            <p class="muted" th:text="${test.description}">설명</p>
+        </div>
+
+        <form th:action="@{/self-assessment/{id}/result(id=${test.id})}" method="post">
+            <div class="card">
+                <h3 class="mb-6">지난 2주 동안, 다음과 같은 문제로 얼마나 자주 방해를 받았습니까?</h3>
+
+                <div th:each="q, iter : ${questions}" style="padding-bottom: 1.5rem; margin-bottom: 1.5rem;"
+                     th:classappend="${!iter.last} ? 'border-bottom'" style="border-bottom: 1px solid var(--border);">
+                    <p class="mb-4" style="font-size: 1.125rem;">
+                        <span style="color: var(--primary); margin-right: 0.5rem;" th:text="${iter.count} + '.'">1.</span>
+                        <span th:text="${q}">질문</span>
+                    </p>
+                    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                        <label th:each="opt : ${ {0,1,2,3} }" class="option-btn"
+                               style="margin: 0; text-align: center; padding: 0.75rem;">
+                            <input type="radio" name="answer" th:value="${opt}" required
+                                   style="margin-right: 0.25rem;"/>
+                            <span th:switch="${opt}">
+                                <span th:case="0">전혀 없음</span>
+                                <span th:case="1">며칠 동안</span>
+                                <span th:case="2">절반 이상</span>
+                                <span th:case="3">거의 매일</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-6">결과 확인하기</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
