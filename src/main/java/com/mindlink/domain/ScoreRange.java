@@ -20,7 +20,7 @@ public class ScoreRange {
     @Column(name = "max_score", nullable = false)
     private int maxScore;
 
-    @Column(nullable = false, length = 30)
+    @Column(name = "result_level", nullable = false, length = 30)
     private String level;
 
     @Column(columnDefinition = "TEXT")

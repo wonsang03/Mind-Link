@@ -95,6 +95,7 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 - **베이스**: `서상원` — Oracle·AI 맞춤 추천·도서 리뷰·`recommendations.html`·`sql/ORACLE_SETUP.sql`
 - **추가**: `김동주` — 로그인/회원가입·커뮤니티(첨부·신고)·공지 CRUD·`docs/LoginCommunity.md`
 - **추가**: `김지훈` — DB 기반 자가진단(PHQ-9/GAD-7/PSS/CBI)·`SelfAssessmentController`·`sql/ASSESSMENT_SEED.sql`
+- **추가**: `윤아연` — 네이버 지역검색 상담소 찾기·예약(`bookings`)·`CounselingApiController`
 - Spring Initializr 골격, Thymeleaf UI, Oracle `.env` 연동, 네이버/Gemini API 설정 반영
 
 ---
@@ -165,10 +166,11 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 - 시드: [sql/ASSESSMENT_SEED.sql](sql/ASSESSMENT_SEED.sql) (`ORACLE_SETUP.sql` 실행 후 별도 실행)
 - 기존 `DiagnosisController` / `DiagnosisService` 결과 저장 경로는 비활성(매핑 제거)
 
-### 상담소 기능
-- 상담소 목록 조회 (`GET /counseling`) — 더미 데이터 기반 카드형 목록 표시
-- 센터 유형별 필터 및 키워드 검색 지원
-- `MapApiClient`를 통해 공공데이터/지도 API 연동 예정 (현재 더미 반환)
+### 상담소 기능 (윤아연)
+- 상담소 목록·검색 (`GET /counseling?query=`) — **네이버 지역검색 OpenAPI** (`NaverLocalSearchClient`)
+- 예약 신청 (`GET/POST /counseling/booking`) — `bookings` 테이블 저장 (로그인 시 `user_id` 연동)
+- REST API (`/api/counseling/centers`, `/api/counseling/bookings`, …) — `CounselingApiController`
+- OpenAPI 키: `.env`의 `NAVER_OPENAPI_CLIENT_*` (비우면 도서 검색용 `NAVER_API_*` 재사용)
 
 ### 내 계정 조회
 - `GET /user/me` — 로그인한 사용자 정보 조회 (`UserResponse` 반환)
