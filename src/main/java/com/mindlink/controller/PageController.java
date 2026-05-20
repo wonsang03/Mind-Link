@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,11 @@ public class PageController {
     }
 
     @GetMapping("/recommendations")
-    public String recommendations() {
+    public String recommendations(
+            // TODO: 설문 팀과 emotion 파라미터 전달 방식 협의 필요 (테스트용 구현)
+            @RequestParam(defaultValue = "NORMAL") String emotion,
+            Model model) {
+        model.addAttribute("emotion", emotion);
         return "recommendations";
     }
 
