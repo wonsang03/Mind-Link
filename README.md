@@ -145,7 +145,6 @@ cp .env.example .env   # Windows: copy .env.example .env
 | [docs/db.md](docs/db.md) | DB 연동 |
 | [docs/api.md](docs/api.md) | REST API |
 | [docs/LoginCommunity.md](docs/LoginCommunity.md) | 로그인·커뮤니티 DDL |
-| [CD_DJ.md](CD_DJ.md) | 클래스 다이어그램(초기 설계 참고) |
 
 ---
 
