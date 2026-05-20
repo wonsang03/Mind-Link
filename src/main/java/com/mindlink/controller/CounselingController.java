@@ -33,9 +33,15 @@ public class CounselingController {
     @GetMapping
     public String list(@RequestParam(required = false) String query, Model model) {
         List<CenterResponse> centers = counselingService.searchCenters(query);
+        String displayQuery = query == null ? "" : query.trim();
         model.addAttribute("centers", centers);
-        model.addAttribute("query", query == null ? "" : query);
+        model.addAttribute("query", displayQuery);
         model.addAttribute("apiConfigured", counselingService.isExternalApiConfigured());
+        model.addAttribute("effectiveQuery", counselingService.effectiveSearchQuery(displayQuery));
+        if (counselingService.isExternalApiConfigured() && centers.isEmpty()) {
+            model.addAttribute("searchHint",
+                    "검색 결과가 없습니다. 예: 「목포 심리상담센터」, 「강남 정신건강복지센터」처럼 지역+키워드로 검색해 보세요.");
+        }
         return "counseling/list";
     }
 
@@ -44,11 +50,17 @@ public class CounselingController {
                               @RequestParam(required = false) String centerTitle,
                               @RequestParam(required = false) String centerPhone,
                               @RequestParam(required = false) String centerAddress,
+                              HttpSession session,
                               Model model) {
         model.addAttribute("centerName", centerName);
         model.addAttribute("centerTitle", centerTitle == null ? "" : centerTitle);
         model.addAttribute("centerPhone", centerPhone == null ? "" : centerPhone);
         model.addAttribute("centerAddress", centerAddress == null ? "" : centerAddress);
+        User user = currentUser(session);
+        if (user != null) {
+            model.addAttribute("prefillName", user.getName());
+            model.addAttribute("prefillEmail", user.getEmail());
+        }
         return "counseling/booking";
     }
 

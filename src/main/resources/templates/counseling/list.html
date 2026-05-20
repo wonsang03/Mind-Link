@@ -15,18 +15,27 @@
         </div>
 
         <div th:if="${flash}" class="alert" style="background: var(--secondary); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;" th:text="${flash}"></div>
+        <div th:if="${searchHint}" class="alert"
+             style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;"
+             th:text="${searchHint}"></div>
 
         <div th:unless="${apiConfigured}" class="alert"
              style="background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <strong>네이버 OpenAPI 키가 설정되지 않았습니다.</strong>
+            <strong>네이버 지역검색 API 키가 설정되지 않았습니다.</strong>
             <div style="font-size: 0.875rem; margin-top: 0.25rem;">
-                <code>application.properties</code>의 <code>naver.openapi.client-id</code> / <code>naver.openapi.client-secret</code>을 설정하거나 환경변수
-                <code>NAVER_OPENAPI_CLIENT_ID</code> / <code>NAVER_OPENAPI_CLIENT_SECRET</code>으로 주입하세요.
-                키 발급: <a href="https://developers.naver.com/apps/#/register" target="_blank" rel="noopener">developers.naver.com</a>
+                <code>.env</code>에 <code>NAVER_API_CLIENT_ID</code> / <code>NAVER_API_CLIENT_SECRET</code>을 넣고,
+                네이버 개발자센터 앱에서 <strong>검색</strong> API 사용을 켜 주세요.
+                (도서 검색과 동일 키 사용 가능)
+                <a href="https://developers.naver.com/apps/#/register" target="_blank" rel="noopener">developers.naver.com</a>
             </div>
         </div>
 
-        <form method="get" th:action="@{/counseling}" class="toolbar">
+        <p th:if="${apiConfigured}" class="muted" style="font-size: 0.875rem; margin-bottom: 0.75rem;">
+            검색어: <strong th:text="${effectiveQuery}">심리상담센터</strong>
+            <span th:if="${query != null and !query.isEmpty()}"> · 네이버 지역검색 API 연동</span>
+        </p>
+
+        <form id="centerSearchForm" method="get" th:action="@{/counseling}" class="toolbar">
             <div class="search-field">
                 <span class="pico pico-sm" aria-hidden="true" style="color: var(--muted-foreground);">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -53,8 +62,15 @@
 
         <div id="centerList" style="display: flex; flex-direction: column; gap: 0.85rem;">
             <article th:each="c : ${centers}" class="center-card">
-                <div class="center-thumb">
-                    <span class="pico" aria-hidden="true">
+                <div class="center-thumb" th:classappend="${!#strings.isEmpty(c.imageUrl)} ? ' has-img' : ''">
+                    <img th:if="${!#strings.isEmpty(c.imageUrl)}"
+                         th:src="${c.imageUrl}"
+                         th:alt="${c.name + ' 이미지'}"
+                         loading="lazy"
+                         decoding="async"
+                         referrerpolicy="no-referrer"
+                         onerror="this.remove(); this.parentElement.classList.remove('has-img');"/>
+                    <span class="pico center-thumb-fallback" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 21h18"/>
                             <path d="M5 21V8l7-5 7 5v13"/>
@@ -92,11 +108,13 @@
                     <p th:if="${c.description != null and !c.description.isEmpty()}" class="muted"
                        style="font-size: 0.875rem; margin-top: 0.5rem;" th:text="${c.description}"></p>
                     <div class="center-actions">
-                        <a th:href="@{https://map.naver.com/p/search/{q}(q=${c.name})}"
+                        <a th:href="@{/counseling/booking(centerName=${c.name}, centerTitle=${c.title}, centerPhone=${c.phone}, centerAddress=${c.location})}"
+                           class="btn btn-primary btn-sm">예약하기</a>
+                        <a th:href="${c.naverMapUrl}"
                            target="_blank" rel="noopener noreferrer"
-                           class="btn btn-primary btn-sm">지도 보기</a>
+                           class="btn btn-outline btn-sm">지도 보기</a>
                         <button type="button" class="btn btn-outline btn-sm js-share"
-                                th:attr="data-name=${c.name}, data-url=@{https://map.naver.com/p/search/{q}(q=${c.name})}">
+                                th:attr="data-name=${c.name}, data-url=${c.naverMapUrl}">
                             <span class="pico pico-sm" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -111,7 +129,10 @@
             </article>
         </div>
         <div th:if="${#lists.isEmpty(centers)}" class="empty-note" style="margin-top: 1rem;">
-            <span th:if="${apiConfigured}">검색 결과가 없습니다. 다른 키워드로 시도해보세요.</span>
+            <span th:if="${apiConfigured}">
+                검색 결과가 없습니다. 지역명+「심리상담」 등으로 다시 검색해 보세요.
+                (네이버 앱에 <strong>검색 API</strong> 권한이 없으면 항상 비어 있을 수 있습니다.)
+            </span>
             <span th:unless="${apiConfigured}">API 키가 설정되지 않아 검색 결과를 가져올 수 없습니다.</span>
         </div>
 
@@ -177,6 +198,7 @@
     var btn = document.getElementById('useLocationBtn');
     var label = document.getElementById('useLocationLabel');
     var input = document.getElementById('centerSearch');
+    var form = document.getElementById('centerSearchForm');
     if (!btn || !input) return;
 
     function setLabel(text) { if (label) label.textContent = text; }
@@ -211,8 +233,9 @@
                         alert('현재 위치의 행정구역을 찾을 수 없습니다. 직접 입력해주세요.');
                         return;
                     }
-                    input.value = q;
-                    input.focus();
+                    input.value = q + ' 심리상담센터';
+                    if (form) form.submit();
+                    else input.focus();
                 })
                 .catch(function () {
                     alert('주소 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');

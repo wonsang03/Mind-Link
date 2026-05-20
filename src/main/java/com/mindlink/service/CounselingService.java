@@ -19,13 +19,19 @@ public class CounselingService {
     private final NaverLocalSearchClient naverClient;
     private final BookingRepository bookingRepository;
 
-    public CounselingService(NaverLocalSearchClient naverClient, BookingRepository bookingRepository) {
+    public CounselingService(NaverLocalSearchClient naverClient,
+                             BookingRepository bookingRepository) {
         this.naverClient = naverClient;
         this.bookingRepository = bookingRepository;
     }
 
     public List<CenterResponse> searchCenters(String query) {
         return naverClient.search(query);
+    }
+
+    /** 화면에 표시·네이버 API에 쓰는 실제 검색어 */
+    public String effectiveSearchQuery(String query) {
+        return naverClient.normalizeQuery(query);
     }
 
     public boolean isExternalApiConfigured() {

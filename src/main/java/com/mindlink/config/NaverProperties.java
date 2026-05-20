@@ -12,8 +12,12 @@ public class NaverProperties {
     private int display = 20;
 
     public boolean isConfigured() {
-        return clientId != null && !clientId.isBlank()
-                && clientSecret != null && !clientSecret.isBlank();
+        return isRealKey(clientId) && isRealKey(clientSecret);
+    }
+
+    private static boolean isRealKey(String v) {
+        if (v == null || v.isBlank()) return false;
+        return !"NOT_SET".equalsIgnoreCase(v.trim());
     }
 
     public String getClientId() { return clientId; }
