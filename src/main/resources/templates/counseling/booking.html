@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 상담 예약')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow" style="max-width: 56rem;">
+        <a th:href="@{/counseling}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>상담소 목록으로</span>
+        </a>
+
+        <div class="card">
+            <div class="mb-8" style="padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
+                <h2 class="mb-4">상담 예약</h2>
+                <div class="flex gap-4" style="align-items: center;">
+                    <div class="counselor-avatar" style="width: 4rem; height: 4rem;">👤</div>
+                    <div>
+                        <h3>
+                            <span th:text="${counselor.name}">김민수</span>
+                            <span class="muted" style="font-weight: normal;" th:text="${counselor.title}">임상심리전문가</span>
+                        </h3>
+                        <p class="muted" th:text="${counselor.location}">서울 강남구</p>
+                    </div>
+                </div>
+            </div>
+
+            <form th:action="@{/counseling/booking/{id}(id=${counselor.id})}" method="post">
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="홍길동" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">연락처</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="010-0000-0000" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="example@email.com" required/>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="date">희망 날짜</label>
+                        <input type="date" id="date" name="date" class="form-input" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">희망 시간</label>
+                        <select id="time" name="time" class="form-select" required>
+                            <option>09:00</option>
+                            <option>10:00</option>
+                            <option>11:00</option>
+                            <option>14:00</option>
+                            <option>15:00</option>
+                            <option>16:00</option>
+                            <option>17:00</option>
+                            <option>18:00</option>
+                            <option>19:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>상담 유형</label>
+                    <select name="type" class="form-select">
+                        <option>초기 상담 (50분)</option>
+                        <option>일반 상담 (50분)</option>
+                        <option>집중 상담 (100분)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="memo">상담 받고 싶은 내용 (선택)</label>
+                    <textarea id="memo" name="memo" rows="4" class="form-textarea"
+                              placeholder="편하게 작성해주세요. 상담 전 미리 파악하여 더 나은 상담을 제공하기 위한 항목입니다."></textarea>
+                </div>
+
+                <div style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                    <h4 class="mb-2">✓ 개인정보 처리 동의</h4>
+                    <p class="muted" style="font-size: 0.875rem;">
+                        상담 예약을 위해 제공하신 개인정보는 상담 목적으로만 사용되며, 안전하게 보관됩니다.
+                    </p>
+                </div>
+
+                <div class="flex gap-4">
+                    <a th:href="@{/counseling}" class="btn btn-outline" style="flex: 1;">취소</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">예약 신청하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

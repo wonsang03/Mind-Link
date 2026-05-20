@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 맞춤 추천')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <div class="mb-8" style="margin-bottom: 3rem;">
+            <div class="badge">
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3l1.8 4.6L18 9l-3.6 2.7L15 16l-3-2.4L9 16l.6-4.3L6 9l4.2-1.4z"/>
+                    </svg>
+                </span>
+                <span>개인 맞춤 추천</span>
+            </div>
+            <h1 class="mb-4">당신을 위한 추천</h1>
+            <p class="muted" style="max-width: 48rem;">
+                자가진단 결과와 선호도를 바탕으로 맞춤형 콘텐츠를 추천해드립니다.<br/>
+                도서, 활동, 커뮤니티에서 자신에게 맞는 것을 선택해보세요.
+            </p>
+        </div>
+
+        <!-- ================= 추천 도서 ================= -->
+        <!-- [맞춤추천] emotion: Thymeleaf가 URL 파라미터에서 주입 (/recommendations?emotion=DEPRESSION) -->
+        <span id="emotion-data" th:data-emotion="${emotion != null ? emotion : 'NORMAL'}" style="display:none;"></span>
+        <p id="book-recommendation-reason" class="muted" style="margin-bottom:1rem; font-style:italic;"></p>
+        <div class="section-head">
+            <div class="title">
+                <span class="pico pico-md" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/>
+                        <path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/>
+                    </svg>
+                </span>
+                <h2>추천 도서</h2>
+            </div>
+            <button type="button" class="link-all" data-toggle-all="books">
+                <span>전체 목록 보기</span>
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 6 15 12 9 18"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-field">
+                <span class="pico pico-sm" aria-hidden="true" style="color: var(--muted-foreground);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input type="text" id="bookSearch" placeholder="도서명, 저자, 키워드로 검색"/>
+            </div>
+            <div class="filter-chips" id="bookFilters">
+                <button type="button" class="chip" data-filter="all">전체</button>
+                <button type="button" class="chip" data-filter="DEPRESSION">우울</button>
+                <button type="button" class="chip" data-filter="STRESS">스트레스</button>
+                <button type="button" class="chip" data-filter="ANXIETY">불안</button>
+                <button type="button" class="chip" data-filter="LETHARGY">무기력</button>
+                <button type="button" class="chip" data-filter="RELATIONSHIP">인간관계</button>
+            </div>
+        </div>
+
+        <div id="booksGrid" class="grid grid-4" style="margin-bottom: 3rem;">
+            <p class="muted" style="text-align:center;grid-column:1/-1;padding:2rem 0;">도서를 불러오는 중...</p>
+        </div>
+
+        <!-- ================= 추천 활동 ================= -->
+        <div class="section-head">
+            <div class="title">
+                <span class="pico pico-md" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </span>
+                <h2>추천 활동</h2>
+            </div>
+            <button type="button" class="link-all" data-toggle-all="activities">
+                <span>전체 목록 보기</span>
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 6 15 12 9 18"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-field">
+                <span class="pico pico-sm" aria-hidden="true" style="color: var(--muted-foreground);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input type="text" id="actSearch" placeholder="활동명, 키워드로 검색"/>
+            </div>
+            <div class="filter-chips" id="actFilters">
+                <button type="button" class="chip active" data-filter="all">전체</button>
+                <button type="button" class="chip" data-filter="야외 활동">야외 활동</button>
+                <button type="button" class="chip" data-filter="기록 활동">기록 활동</button>
+                <button type="button" class="chip" data-filter="신체 활동">신체 활동</button>
+                <button type="button" class="chip" data-filter="예술 활동">예술 활동</button>
+                <button type="button" class="chip" data-filter="명상">명상</button>
+            </div>
+        </div>
+
+        <div id="activitiesGrid" class="grid grid-4" style="margin-bottom: 3rem;">
+            <article class="activity-card" data-category="야외 활동" data-keywords="숲 걷기 명상 야외">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2 5 12h4l-3 8 12-12h-5z"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">야외 활동</span>
+                <h3>숲속 걷기 명상</h3>
+                <p class="muted">60분 · 쉬움</p>
+                <p class="muted">자연 속에서 마음챙김 걷기를 통해 스트레스를 해소합니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card" data-category="기록 활동" data-keywords="감사 일기 기록 긍정">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">기록 활동</span>
+                <h3>감사 일기 쓰기</h3>
+                <p class="muted">15분 · 쉬움</p>
+                <p class="muted">매일 감사한 일을 기록하며 긍정적 마인드를 키웁니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card" data-category="신체 활동" data-keywords="요가 호흡 신체 이완">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">신체 활동</span>
+                <h3>요가와 호흡법</h3>
+                <p class="muted">45분 · 보통</p>
+                <p class="muted">몸과 마음을 이완시키는 요가와 심호흡 연습입니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card" data-category="예술 활동" data-keywords="미술 그림 창작 표현">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
+                            <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
+                            <path d="M12 22a10 10 0 1 1 0-20c5.5 0 10 4 10 9 0 3-2 5-5 5h-2a2 2 0 0 0-2 2 2 2 0 0 1-1 4z"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">예술 활동</span>
+                <h3>창작 미술 활동</h3>
+                <p class="muted">90분 · 보통</p>
+                <p class="muted">그림이나 공예를 통해 감정을 표현하고 치유합니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+
+            <!-- 추가 (전체 보기 시 노출) -->
+            <article class="activity-card extra hidden" data-category="명상" data-keywords="바디스캔 명상 호흡">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">명상</span>
+                <h3>바디스캔 명상</h3>
+                <p class="muted">20분 · 쉬움</p>
+                <p class="muted">신체 감각에 집중하여 긴장을 해소하는 명상입니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card extra hidden" data-category="신체 활동" data-keywords="달리기 조깅 유산소">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="13" cy="4" r="2"/><path d="M5 22l5-9 4 3 4-7"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">신체 활동</span>
+                <h3>가벼운 조깅</h3>
+                <p class="muted">30분 · 보통</p>
+                <p class="muted">유산소 운동으로 기분 전환과 활력을 얻어보세요.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card extra hidden" data-category="기록 활동" data-keywords="감정 일기 기록 자기인식">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h12l4 4v12H4z"/><path d="M16 4v4h4"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">기록 활동</span>
+                <h3>감정 일기 쓰기</h3>
+                <p class="muted">10분 · 쉬움</p>
+                <p class="muted">하루 동안의 감정을 기록하며 자기 인식을 높입니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+            <article class="activity-card extra hidden" data-category="예술 활동" data-keywords="음악 듣기 힐링 사운드">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">예술 활동</span>
+                <h3>힐링 음악 듣기</h3>
+                <p class="muted">30분 · 쉬움</p>
+                <p class="muted">차분한 음악으로 마음을 가라앉히고 휴식을 취합니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;">활동 시작하기</button>
+            </article>
+        </div>
+
+        <div style="background: var(--secondary); border-radius: 1rem; padding: 2rem;">
+            <h3 class="mb-4">추천 콘텐츠 활용 팁</h3>
+            <div class="grid grid-3">
+                <div>
+                    <h4 class="mb-2">꾸준히 실천하기</h4>
+                    <p class="muted">한 가지 활동을 최소 2주 이상 지속해보세요. 변화는 시간이 필요합니다.</p>
+                </div>
+                <div>
+                    <h4 class="mb-2">나만의 속도로</h4>
+                    <p class="muted">다른 사람과 비교하지 말고, 자신에게 맞는 속도로 진행하세요.</p>
+                </div>
+                <div>
+                    <h4 class="mb-2">기록 남기기</h4>
+                    <p class="muted">활동 후 느낀 점을 기록하면 자신의 변화를 확인할 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<style>
+.hidden { display: none !important; }
+</style>
+<script>
+(function () {
+    function setupSection(opts) {
+        const grid = document.getElementById(opts.gridId);
+        const search = document.getElementById(opts.searchId);
+        const chips = document.querySelectorAll('#' + opts.filterId + ' .chip');
+        const toggleBtn = document.querySelector('[data-toggle-all="' + opts.toggleKey + '"] span:first-child');
+        const toggleHost = document.querySelector('[data-toggle-all="' + opts.toggleKey + '"]');
+        let showAll = false;
+        let activeFilter = 'all';
+
+        function apply() {
+            const q = (search.value || '').trim().toLowerCase();
+            grid.querySelectorAll(opts.itemSelector).forEach(card => {
+                const cat = card.dataset.category || '';
+                const kw = (card.dataset.keywords || '').toLowerCase();
+                const text = (card.textContent || '').toLowerCase();
+                const matchesFilter = activeFilter === 'all' || cat === activeFilter;
+                const matchesSearch = !q || kw.includes(q) || text.includes(q);
+                const isExtra = card.classList.contains('extra');
+                const allowedByVisibility = showAll || !isExtra || q || activeFilter !== 'all';
+                if (matchesFilter && matchesSearch && allowedByVisibility) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeFilter = chip.dataset.filter;
+                apply();
+            });
+        });
+
+        search.addEventListener('input', apply);
+
+        if (toggleHost) {
+            toggleHost.addEventListener('click', () => {
+                showAll = !showAll;
+                if (toggleBtn) toggleBtn.textContent = showAll ? '추천만 보기' : '전체 목록 보기';
+                apply();
+            });
+        }
+    }
+
+    // ── 도서 섹션: 전 감정 병렬 로딩 + 감정 키워드 필터 ──────────────
+    (function () {
+        var emotionEl = document.getElementById('emotion-data');
+        var userEmotion = (emotionEl && emotionEl.dataset.emotion) ? emotionEl.dataset.emotion : 'NORMAL';
+        var grid = document.getElementById('booksGrid');
+        var searchInput = document.getElementById('bookSearch');
+        var reasonEl = document.getElementById('book-recommendation-reason');
+        var toggleHost = document.querySelector('[data-toggle-all="books"]');
+        var toggleLabel = toggleHost ? toggleHost.querySelector('span:first-child') : null;
+        var showAll = false;
+
+        var EMOTION_LABEL = {
+            DEPRESSION: '우울',
+            STRESS: '스트레스',
+            ANXIETY: '불안',
+            LETHARGY: '무기력',
+            RELATIONSHIP: '인간관계'
+        };
+        var EMOTION_DEFAULT_REASON = {
+            DEPRESSION: '지금 많이 힘드시겠어요. 따뜻한 위로가 되는 책들을 추천해드려요.',
+            STRESS: '스트레스가 많이 쌓이셨군요. 마음을 편안하게 해주는 책들을 추천해드려요.',
+            ANXIETY: '불안한 마음이 드시나요? 마음을 안정시키는 데 도움이 되는 책들을 추천해드려요.',
+            LETHARGY: '의욕이 생기지 않으실 때, 다시 힘을 내게 해주는 책들을 추천해드려요.',
+            RELATIONSHIP: '관계로 지친 마음을 보듬고 소통을 돕는 책들을 추천해드려요.'
+        };
+        var emotionReason = {};
+
+        var ALL_EMOTIONS = ['DEPRESSION', 'STRESS', 'ANXIETY', 'LETHARGY', 'RELATIONSHIP'];
+        var activeFilter = (ALL_EMOTIONS.indexOf(userEmotion) !== -1) ? userEmotion : 'all';
+
+        var chips = document.querySelectorAll('#bookFilters .chip');
+        chips.forEach(function (chip) {
+            chip.classList.toggle('active', chip.dataset.filter === activeFilter);
+        });
+
+        function updateReason() {
+            if (!reasonEl) return;
+            if (activeFilter === 'all') {
+                reasonEl.textContent = '다양한 감정 상태에 맞는 도서를 추천해드립니다.';
+            } else {
+                reasonEl.textContent = emotionReason[activeFilter] || EMOTION_DEFAULT_REASON[activeFilter] || '';
+            }
+        }
+
+        function applyFilter() {
+            var q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+            var count = 0;
+            grid.querySelectorAll('.book-card').forEach(function (card) {
+                var cardEmotion = card.dataset.emotion || '';
+                var kw = ((card.dataset.keywords || '') + ' ' + (card.textContent || '')).toLowerCase();
+                var matchesFilter = activeFilter === 'all' || cardEmotion === activeFilter;
+                var matchesSearch = !q || kw.includes(q);
+                var show = false;
+                if (matchesFilter && matchesSearch) {
+                    if (showAll || q) {
+                        show = true;
+                    } else {
+                        count++;
+                        show = count <= 3;
+                    }
+                }
+                card.classList.toggle('hidden', !show);
+            });
+            updateReason();
+        }
+
+        function createBookCard(book, emotionKey) {
+            var article = document.createElement('article');
+            article.className = 'book-card';
+            article.dataset.emotion = emotionKey;
+            article.dataset.keywords = [book.title, book.author, book.publisher, EMOTION_LABEL[emotionKey] || '']
+                .filter(Boolean).join(' ').toLowerCase();
+
+            var cover = document.createElement('div');
+            cover.className = 'book-cover';
+            if (book.image) {
+                var img = document.createElement('img');
+                img.src = book.image;
+                img.alt = '';
+                img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:0.25rem;';
+                cover.appendChild(img);
+            } else {
+                cover.innerHTML = '<span class="pico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg></span>';
+            }
+
+            var tag = document.createElement('span');
+            tag.className = 'tag tag-secondary';
+            tag.style.alignSelf = 'flex-start';
+            tag.textContent = EMOTION_LABEL[emotionKey] || '';
+
+            var h3 = document.createElement('h3');
+            h3.textContent = book.title || '';
+
+            var meta = document.createElement('p');
+            meta.className = 'muted';
+            meta.textContent = [book.author, book.publisher].filter(Boolean).join(' · ');
+
+            var btn = document.createElement('button');
+            btn.className = 'btn btn-primary btn-sm';
+            btn.style.marginTop = 'auto';
+            btn.textContent = '자세히 보기';
+            if (book.link) {
+                btn.addEventListener('click', function () { window.open(book.link, '_blank'); });
+            }
+
+            article.appendChild(cover);
+            article.appendChild(tag);
+            article.appendChild(h3);
+            article.appendChild(meta);
+            article.appendChild(btn);
+            return article;
+        }
+
+        chips.forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                chips.forEach(function (c) { c.classList.remove('active'); });
+                chip.classList.add('active');
+                activeFilter = chip.dataset.filter;
+                showAll = false;
+                if (toggleLabel) toggleLabel.textContent = '전체 목록 보기';
+                applyFilter();
+            });
+        });
+
+        if (toggleHost) {
+            toggleHost.addEventListener('click', function () {
+                showAll = !showAll;
+                if (showAll) {
+                    activeFilter = 'all';
+                    chips.forEach(function (c) {
+                        c.classList.toggle('active', c.dataset.filter === 'all');
+                    });
+                }
+                if (toggleLabel) toggleLabel.textContent = showAll ? '추천만 보기' : '전체 목록 보기';
+                applyFilter();
+            });
+        }
+        if (searchInput) searchInput.addEventListener('input', applyFilter);
+
+        // TODO: emotion 파라미터 전달 방식이 변경되면 이 URL 수정 필요
+        var orderedEmotions;
+        if (ALL_EMOTIONS.indexOf(userEmotion) !== -1) {
+            orderedEmotions = [userEmotion].concat(ALL_EMOTIONS.filter(function (e) { return e !== userEmotion; }));
+        } else {
+            orderedEmotions = ALL_EMOTIONS.slice();
+        }
+
+        Promise.all(orderedEmotions.map(function (em) {
+            return fetch('/api/recommendations?emotion=' + em + '&size=100')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.reason) emotionReason[em] = data.reason;
+                    return (data.books || []).map(function (b) { return { book: b, emotion: em }; });
+                })
+                .catch(function () { return []; });
+        })).then(function (results) {
+            grid.innerHTML = '';
+            var flat = [];
+            results.forEach(function (r) { flat = flat.concat(r); });
+            if (flat.length === 0) {
+                grid.innerHTML = '<p class="muted" style="text-align:center;grid-column:1/-1;padding:2rem 0;">추천 도서를 찾을 수 없습니다.</p>';
+                return;
+            }
+            flat.forEach(function (item) {
+                grid.appendChild(createBookCard(item.book, item.emotion));
+            });
+            applyFilter();
+        }).catch(function () {
+            grid.innerHTML = '<p class="muted" style="text-align:center;grid-column:1/-1;padding:2rem 0;">도서 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>';
+        });
+    })();
+    // ─────────────────────────────────────────────────────────────
+
+    setupSection({
+        gridId: 'activitiesGrid',
+        searchId: 'actSearch',
+        filterId: 'actFilters',
+        toggleKey: 'activities',
+        itemSelector: '.activity-card'
+    });
+})();
+</script>
+</body>
+</html>

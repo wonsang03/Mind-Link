@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 상담소 찾기')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <div class="mb-8" style="margin-bottom: 2rem;">
+            <div class="badge">
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </span>
+                <span>가까운 상담 센터</span>
+            </div>
+            <h1 class="mb-4">상담소 찾기</h1>
+            <p class="muted" style="max-width: 48rem;">
+                내 주변의 검증된 상담 센터를 한눈에 비교해보세요.<br/>
+                위치, 운영 시간, 전문 분야 정보를 확인하고 바로 예약할 수 있습니다.
+            </p>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-field">
+                <span class="pico pico-sm" aria-hidden="true" style="color: var(--muted-foreground);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input type="text" id="centerSearch" placeholder="센터명, 지역, 전문분야로 검색"/>
+            </div>
+            <div class="filter-chips" id="centerFilters">
+                <button type="button" class="chip active" data-filter="all">전체</button>
+                <button type="button" class="chip" data-filter="심리상담센터">심리상담센터</button>
+                <button type="button" class="chip" data-filter="정신건강복지센터">정신건강복지센터</button>
+                <button type="button" class="chip" data-filter="청소년상담복지센터">청소년상담</button>
+                <button type="button" class="chip" data-filter="가족상담센터">가족상담</button>
+                <button type="button" class="chip" data-filter="병원 부설 상담센터">병원 부설</button>
+            </div>
+        </div>
+
+        <div id="centerList" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <article th:each="c : ${centers}" class="center-card"
+                     th:attr="data-category=${c.title}, data-keywords=${c.name + ' ' + c.location + ' ' + #strings.listJoin(c.specialty, ' ')}">
+                <div class="center-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 21h18"/>
+                            <path d="M5 21V8l7-5 7 5v13"/>
+                            <path d="M9 21v-6h6v6"/>
+                            <path d="M12 11v3"/><path d="M10.5 12.5h3"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="center-body">
+                    <div class="center-title">
+                        <h3 th:text="${c.name}">상담 센터명</h3>
+                        <span class="muted" style="font-size: 0.85rem;" th:text="${c.title}">유형</span>
+                    </div>
+                    <div class="center-meta">
+                        <span class="star">★</span>
+                        <span th:text="${c.rating}">4.9</span>
+                        <span>(<span th:text="${c.reviews}">128</span>)</span>
+                        <span class="dot">·</span>
+                        <span th:if="${c.openNow}" class="status-open">영업 중</span>
+                        <span th:unless="${c.openNow}" class="status-closed">영업 종료</span>
+                        <span class="dot">·</span>
+                        <span th:text="${c.distance}">1.2km</span>
+                    </div>
+                    <div class="center-info">
+                        <div class="row">
+                            <span class="pico" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                                </svg>
+                            </span>
+                            <span th:text="${c.location}">서울 강남구</span>
+                        </div>
+                        <div class="row">
+                            <span class="pico" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>
+                                </svg>
+                            </span>
+                            <span th:text="${c.hours}">평일 09:00 - 18:00</span>
+                        </div>
+                        <div class="row">
+                            <span class="pico" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/>
+                                </svg>
+                            </span>
+                            <span th:text="${c.phone}">02-1234-5678</span>
+                        </div>
+                    </div>
+                    <div class="center-tags">
+                        <span th:each="s : ${c.specialty}" class="tag tag-secondary" th:text="${s}">우울증</span>
+                    </div>
+                    <div class="center-actions">
+                        <a th:href="@{/counseling/booking/{id}(id=${c.id})}" class="btn btn-primary btn-sm">예약하기</a>
+                        <button type="button" class="btn btn-outline btn-sm">길찾기</button>
+                        <button type="button" class="btn btn-outline btn-sm">전화</button>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div id="centerEmpty" class="empty-note hidden" style="margin-top: 1rem;">
+            검색 조건에 맞는 상담 센터가 없습니다.
+        </div>
+
+        <div class="section-highlight" style="margin-top: 3rem;">
+            <h3 class="mb-6">상담 예약 안내</h3>
+            <div class="grid grid-2">
+                <div class="flex gap-3" style="align-items: flex-start;">
+                    <span class="pico pico-md" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h4 class="mb-2">예약 확정</h4>
+                        <p class="muted">예약 신청 후 24시간 내 센터에서 확인하여 연락드립니다.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3" style="align-items: flex-start;">
+                    <span class="pico pico-md" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h4 class="mb-2">상담 진행</h4>
+                        <p class="muted">첫 상담은 50분 진행되며, 이후 상담 계획을 함께 수립합니다.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3" style="align-items: flex-start;">
+                    <span class="pico pico-md" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h4 class="mb-2">변경 및 취소</h4>
+                        <p class="muted">예약 변경은 3일 전까지 가능하며, 당일 취소 시 취소 수수료가 발생합니다.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3" style="align-items: flex-start;">
+                    <span class="pico pico-md" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="11" width="16" height="10" rx="2"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h4 class="mb-2">비밀 보장</h4>
+                        <p class="muted">상담 내용은 철저히 비밀이 보장되며, 법적 의무 사항을 준수합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<style>
+.hidden { display: none !important; }
+</style>
+<script>
+(function () {
+    const list = document.getElementById('centerList');
+    const empty = document.getElementById('centerEmpty');
+    const search = document.getElementById('centerSearch');
+    const chips = document.querySelectorAll('#centerFilters .chip');
+    let activeFilter = 'all';
+
+    function apply() {
+        const q = (search.value || '').trim().toLowerCase();
+        let visible = 0;
+        list.querySelectorAll('.center-card').forEach(card => {
+            const cat = card.dataset.category || '';
+            const kw = (card.dataset.keywords || '').toLowerCase();
+            const text = (card.textContent || '').toLowerCase();
+            const matchesFilter = activeFilter === 'all' || cat === activeFilter;
+            const matchesSearch = !q || kw.includes(q) || text.includes(q);
+            if (matchesFilter && matchesSearch) {
+                card.classList.remove('hidden');
+                visible++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        if (visible === 0) empty.classList.remove('hidden'); else empty.classList.add('hidden');
+    }
+
+    chips.forEach(chip => chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.filter;
+        apply();
+    }));
+    search.addEventListener('input', apply);
+})();
+</script>
+</body>
+</html>

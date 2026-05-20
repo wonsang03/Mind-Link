@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 공지사항')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/notice}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>공지사항 목록</span>
+        </a>
+
+        <article class="card">
+            <div class="flex-between mb-4">
+                <span class="tag tag-secondary" th:text="${notice.category}">중요</span>
+                <span class="muted" style="font-size: 0.875rem;" th:text="${notice.date}">2026-05-10</span>
+            </div>
+            <h2 class="mb-4" th:text="${notice.title}">공지 제목</h2>
+            <p class="muted mb-6" th:text="${notice.summary}" style="font-size: 1.02rem;">요약</p>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <p style="white-space: pre-wrap; line-height: 1.8;" th:text="${notice.content}">본문 내용</p>
+            </div>
+        </article>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

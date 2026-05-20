@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 공지사항')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="mb-8" style="margin-bottom: 2rem;">
+            <div class="badge">
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                        <path d="M9 21a3 3 0 0 0 6 0"/>
+                    </svg>
+                </span>
+                <span>새로운 소식</span>
+            </div>
+            <h1 class="mb-2">공지사항</h1>
+            <p class="muted">마음이음의 업데이트와 안내 사항을 확인하세요.</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <a th:each="n : ${notices}"
+               th:href="@{/notice/{id}(id=${n.id})}"
+               class="card card-link" style="display: block;">
+                <div class="flex-between mb-2">
+                    <span class="tag tag-secondary" th:text="${n.category}">중요</span>
+                    <span class="muted" style="font-size: 0.85rem;" th:text="${n.date}">2026-05-10</span>
+                </div>
+                <h3 class="mb-2" th:text="${n.title}">공지 제목</h3>
+                <p class="muted" th:text="${n.summary}">요약</p>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

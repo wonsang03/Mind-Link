@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 게시글')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/community}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>목록으로 돌아가기</span>
+        </a>
+
+        <div class="card mb-8">
+            <div class="flex-between mb-4">
+                <span class="tag tag-secondary" th:text="${post.category}">카테고리</span>
+                <span class="muted" style="font-size: 0.875rem;"
+                      th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-07 14:00</span>
+            </div>
+
+            <div class="flex-between mb-2">
+                <h2 th:text="${post.title}">제목</h2>
+                <form th:if="${loginUser != null and loginUser.name == post.author}"
+                      th:action="@{/community/{id}/delete(id=${post.id})}" method="post"
+                      onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
+                      style="display: inline;">
+                    <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">삭제</button>
+                </form>
+            </div>
+            <p class="muted mb-6" style="font-size: 0.875rem;" th:text="${post.author}">작성자</p>
+            <p style="white-space: pre-wrap; margin-bottom: 1.5rem;" th:text="${post.content}">내용</p>
+
+            <div class="flex gap-4" style="padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+                <form th:action="@{/community/{id}/like(id=${post.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                        ♥ <span th:text="${post.likes}">0</span>
+                    </button>
+                </form>
+                <span class="muted flex gap-2" style="align-items: center;">💬 댓글 <span th:text="${#lists.size(post.comments)}">0</span></span>
+            </div>
+
+            <h3 class="mb-4">댓글 <span th:text="${#lists.size(post.comments)}">0</span></h3>
+
+            <div th:if="${#lists.isEmpty(post.comments)}" class="muted center" style="padding: 1.5rem 0;">
+                아직 댓글이 없습니다. 첫 댓글을 달아보세요.
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div th:each="c : ${post.comments}"
+                     style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem;">
+                    <div class="flex-between mb-2">
+                        <span th:text="${c.author}">댓글 작성자</span>
+                        <div class="flex gap-3" style="align-items: center;">
+                            <span class="muted" style="font-size: 0.875rem;"
+                                  th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-07 14:00</span>
+                            <form th:if="${loginUser != null and loginUser.name == c.author}"
+                                  th:action="@{/community/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${c.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('이 댓글을 삭제하시겠습니까?');"
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-outline"
+                                        style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--destructive); border-color: var(--destructive);">
+                                    삭제
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <p class="muted" th:text="${c.content}">댓글 내용</p>
+                </div>
+            </div>
+
+            <form th:if="${loginUser != null}" th:action="@{/community/{id}/comments(id=${post.id})}" method="post" style="margin-top: 1.5rem;">
+                <textarea name="content" rows="3" class="form-textarea" placeholder="댓글을 입력하세요..." required></textarea>
+                <button type="submit" class="btn btn-primary mt-4">댓글 작성</button>
+            </form>
+            <p th:if="${loginUser == null}" class="muted center mt-6">
+                <a th:href="@{/login}" style="color: var(--primary); text-decoration: underline;">로그인</a> 후 댓글을 작성할 수 있습니다.
+            </p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
