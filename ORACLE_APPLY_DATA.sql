@@ -25,6 +25,23 @@ END;
 ALTER TABLE recommendation_books ADD CONSTRAINT chk_recommendation_books_emotion
 CHECK (emotion IN ('DEPRESSION', 'STRESS', 'ANXIETY', 'LETHARGY', 'RELATIONSHIP', 'NORMAL'));
 
+-- description NULL 허용 (이미 NULL 허용이면 건너뜀 — ORA-01451 방지)
+DECLARE
+  v_nullable VARCHAR2(1);
+BEGIN
+  SELECT nullable INTO v_nullable
+    FROM user_tab_columns
+   WHERE table_name = 'RECOMMENDATION_BOOKS'
+     AND column_name = 'DESCRIPTION';
+
+  IF v_nullable = 'N' THEN
+    EXECUTE IMMEDIATE 'ALTER TABLE recommendation_books MODIFY description NULL';
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN NULL; -- 테이블/컬럼 없음 시 스킵
+END;
+/
+
 -- 1) 기존 도서 전체 삭제 (네이버 캐시 포함 전부 초기화)
 DELETE FROM recommendation_books;
 

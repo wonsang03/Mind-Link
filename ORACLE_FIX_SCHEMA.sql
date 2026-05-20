@@ -18,6 +18,23 @@ ALTER TABLE recommendation_books MODIFY (publisher VARCHAR2(500 CHAR));
 ALTER TABLE recommendation_books MODIFY (link VARCHAR2(2000 CHAR));
 ALTER TABLE recommendation_books MODIFY (image VARCHAR2(2000 CHAR));
 
+-- 수동 적용 데이터에서 description 생략(NULL) 허용 (이미 NULL 허용이면 건너뜀)
+DECLARE
+  v_nullable VARCHAR2(1);
+BEGIN
+  SELECT nullable INTO v_nullable
+    FROM user_tab_columns
+   WHERE table_name = 'RECOMMENDATION_BOOKS'
+     AND column_name = 'DESCRIPTION';
+
+  IF v_nullable = 'N' THEN
+    EXECUTE IMMEDIATE 'ALTER TABLE recommendation_books MODIFY description NULL';
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN NULL;
+END;
+/
+
 -- CONTENT 컬럼을 CLOB으로 강제 보정 (필요 시에만 변환)
 DECLARE
     v_type VARCHAR2(30);
@@ -64,6 +81,21 @@ BEGIN
         EXECUTE IMMEDIATE 'ALTER TABLE recommendation_books DROP COLUMN description';
         EXECUTE IMMEDIATE 'ALTER TABLE recommendation_books RENAME COLUMN description_new TO description';
     END IF;
+END;
+/
+
+-- recommendation_books: 네이버·AI 검색에 사용된 키워드 캐시 (ddl-auto=none 시 수동 적용)
+DECLARE
+  v_cnt NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_cnt
+    FROM user_tab_columns
+   WHERE table_name = 'RECOMMENDATION_BOOKS'
+     AND column_name = 'SEARCH_KEYWORD';
+
+  IF v_cnt = 0 THEN
+    EXECUTE IMMEDIATE 'ALTER TABLE recommendation_books ADD (search_keyword VARCHAR2(500 CHAR))';
+  END IF;
 END;
 /
 
