@@ -90,15 +90,15 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 
 환경 변수: `gemini.api.key`, `naver.api.client-id`, `naver.api.client-secret` (미설정 시 각 단계에서 안전하게 fallback).
 
-## 현재 상태
-- Spring Initializr 프로젝트 골격 및 기본 의존성 적용 완료
-- 프론트엔드(Thymeleaf 템플릿·CSS) `main` 브랜치 통합 완료
-- 로컬 실행용 임시 설정(H2, Security, Thymeleaf 등) 반영 완료
-- Oracle DB·OpenAI 연동 설정은 추후 `application.properties`에 추가 예정
+## 현재 상태 (통합 기준)
+
+- **베이스**: `서상원` — Oracle·AI 맞춤 추천·도서 리뷰·`recommendations.html`·`sql/ORACLE_SETUP.sql`
+- **추가**: `김동주` — 로그인/회원가입·커뮤니티(첨부·신고)·공지 CRUD·자가진단 DB(`DiagnosisController`)·`docs/LoginCommunity.md`
+- Spring Initializr 골격, Thymeleaf UI, Oracle `.env` 연동, 네이버/Gemini API 설정 반영
 
 ---
 
-## 구현
+## 김동주 통합 — 로그인·커뮤니티·공지
 
 ### 로그인 / 회원가입
 - `POST /signup` — 이름, 이메일, 비밀번호로 회원가입 (기본 등급: `USER`)

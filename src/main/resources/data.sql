@@ -1,5 +1,5 @@
--- H2 전용 샘플 (Oracle 은 sql/ORACLE_SETUP.sql 사용, spring.sql.init.mode=never 기준으로 기본 미실행)
--- 로컬에서 H2 프로필로 띄울 때만 활성화하려면 해당 프로필에서 spring.sql.init.mode=always 로 전환
+-- H2 전용 샘플 (Oracle 은 sql/ORACLE_SETUP.sql + sql/ASSESSMENT_SEED.sql 사용)
+-- spring.sql.init.mode=never 이면 기본 미실행
 
 INSERT INTO posts (author, title, content, category, likes, created_at)
 VALUES
