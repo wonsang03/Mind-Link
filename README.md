@@ -93,7 +93,8 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 ## 현재 상태 (통합 기준)
 
 - **베이스**: `서상원` — Oracle·AI 맞춤 추천·도서 리뷰·`recommendations.html`·`sql/ORACLE_SETUP.sql`
-- **추가**: `김동주` — 로그인/회원가입·커뮤니티(첨부·신고)·공지 CRUD·자가진단 DB(`DiagnosisController`)·`docs/LoginCommunity.md`
+- **추가**: `김동주` — 로그인/회원가입·커뮤니티(첨부·신고)·공지 CRUD·`docs/LoginCommunity.md`
+- **추가**: `김지훈` — DB 기반 자가진단(PHQ-9/GAD-7/PSS/CBI)·`SelfAssessmentController`·`sql/ASSESSMENT_SEED.sql`
 - Spring Initializr 골격, Thymeleaf UI, Oracle `.env` 연동, 네이버/Gemini API 설정 반영
 
 ---
@@ -158,10 +159,11 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 - 댓글 삭제 시 연결된 첨부파일(파일·링크 모두)도 DB에서 함께 삭제
 - 게시글 삭제 시 게시글 첨부파일 + 모든 댓글 첨부파일 일괄 삭제
 
-### 자가진단 기능
-- 진단 목록 / 퀴즈 / 결과 처리 (`/self-assessment/**`)
-- `DiagnosisService`에서 점수 계산, 위험군 분류, 결과 DB 저장 (로그인 사용자만)
-- 등급: 정상(≤4) / 경미(≤9) / 중등도(≤14) / 심각(15+)
+### 자가진단 기능 (김지훈)
+- 진단 목록 / 퀴즈 / 결과 처리 (`GET/POST /self-assessment/**`)
+- `AssessmentService` + Oracle 테이블(`assessment_types`, `assessment_questions`, …) — 우울·불안·스트레스·번아웃 4종
+- 시드: [sql/ASSESSMENT_SEED.sql](sql/ASSESSMENT_SEED.sql) (`ORACLE_SETUP.sql` 실행 후 별도 실행)
+- 기존 `DiagnosisController` / `DiagnosisService` 결과 저장 경로는 비활성(매핑 제거)
 
 ### 상담소 기능
 - 상담소 목록 조회 (`GET /counseling`) — 더미 데이터 기반 카드형 목록 표시
@@ -228,7 +230,9 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 ### 새로 추가한 Controller
 | 파일 | 설명 |
 |------|------|
-| `controller/DiagnosisController.java` | 자가진단 요청 처리 (`/self-assessment/**`) |
+| `controller/SelfAssessmentController.java` | DB 문항 기반 자가진단 (`/self-assessment/**`) |
+| `domain/AssessmentType.java` 등 | 자가진단 유형·문항·선택지·점수 구간 Entity |
+| `service/AssessmentService.java` | 문항 로드·점수 구간 평가 |
 | `controller/UserController.java` | 내 계정 조회 및 수정 (`/user/**`) |
 | `controller/NoticeController.java` | 공지사항 CRUD (`/notice/**`), ADMIN 권한 제어 포함 |
 
@@ -263,7 +267,8 @@ Oracle·OpenAI는 나중에 `application.properties`에 **팀에서 쓸 값**을
 | `resources/application.properties` | `spring.servlet.multipart.*` 설정, `app.upload.dir=uploads` 추가 | 멀티파트 업로드 활성화 |
 | `templates/community/new.html` | `enctype="multipart/form-data"`, 파일 input 추가, JS 미리보기 추가 | 게시글 파일 첨부 UI |
 | `templates/community/detail.html` | 첨부파일 표시 영역(img/video), 수정 버튼, 댓글 폼 파일 input, 라이트박스 추가 | 첨부파일 표시 및 댓글 파일 첨부 UI |
-| `controller/SelfAssessmentController.java` | `@Controller` 제거, deprecated 처리 | `DiagnosisController`와의 URL 충돌 방지 |
+| `controller/DiagnosisController.java` | `@Controller` 매핑 제거(deprecated stub) | `SelfAssessmentController`와 URL 충돌 방지 |
+| `controller/SelfAssessmentController.java` | 김지훈 DB 기반 자가진단으로 교체 | PHQ-9/GAD-7/PSS/CBI 문항·구간 |
 | `repository/PostCommentRepository.java` | `@NoRepositoryBean` + `CommentRepository` 상속으로 교체 | `CommentRepository`로 대체, Spring bean 중복 방지 |
 | `dto/LoginForm.java` | `LoginRequest` 상속 + deprecated 처리 | 레거시 호환성 유지 |
 | `dto/SignupForm.java` | `SignupRequest` 상속 + deprecated 처리 | 레거시 호환성 유지 |
