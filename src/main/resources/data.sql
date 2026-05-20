@@ -1,4 +1,6 @@
--- 샘플 게시글 (커뮤니티)
+-- H2 전용 샘플 (Oracle 은 sql/ORACLE_SETUP.sql 사용, spring.sql.init.mode=never 기준으로 기본 미실행)
+-- 로컬에서 H2 프로필로 띄울 때만 활성화하려면 해당 프로필에서 spring.sql.init.mode=always 로 전환
+
 INSERT INTO posts (author, title, content, category, likes, created_at)
 VALUES
 ('익명123', '불안할 때 도움이 되는 호흡법 공유합니다',
@@ -17,7 +19,6 @@ VALUES
  '매일 감사한 일 3가지씩 기록하는 챌린지 시작합니다. 함께 하실 분 있으면 댓글 남겨주세요 :) 작은 것에도 감사하는 마음을 가지면 삶이 달라진다고 하더라고요.',
  '함께 해요', 38, CURRENT_TIMESTAMP);
 
--- 샘플 댓글
 INSERT INTO post_comments (post_id, author, content, created_at)
 VALUES (1, '응원해요', '좋은 정보 감사합니다! 저도 한번 시도해볼게요.', CURRENT_TIMESTAMP);
 

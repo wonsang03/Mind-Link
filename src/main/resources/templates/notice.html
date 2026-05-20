@@ -16,8 +16,22 @@
                 </span>
                 <span>새로운 소식</span>
             </div>
-            <h1 class="mb-2">공지사항</h1>
-            <p class="muted">마음이음의 업데이트와 안내 사항을 확인하세요.</p>
+            <div class="flex-between" style="align-items: flex-end;">
+                <div>
+                    <h1 class="mb-2">공지사항</h1>
+                    <p class="muted">마음이음의 업데이트와 안내 사항을 확인하세요.</p>
+                </div>
+                <a th:if="${loginUser != null and loginUser.role.name() == 'ADMIN'}"
+                   th:href="@{/notice/new}" class="btn btn-primary" style="white-space: nowrap;">
+                    공지 작성
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${flash}" style="padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; background: var(--secondary); border-radius: 0.5rem; font-size: 0.9rem;" th:text="${flash}"></div>
+
+        <div th:if="${#lists.isEmpty(notices)}" class="center muted" style="padding: 4rem 0;">
+            등록된 공지사항이 없습니다.
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -26,7 +40,8 @@
                class="card card-link" style="display: block;">
                 <div class="flex-between mb-2">
                     <span class="tag tag-secondary" th:text="${n.category}">중요</span>
-                    <span class="muted" style="font-size: 0.85rem;" th:text="${n.date}">2026-05-10</span>
+                    <span class="muted" style="font-size: 0.85rem;"
+                          th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd')}">2026-05-10</span>
                 </div>
                 <h3 class="mb-2" th:text="${n.title}">공지 제목</h3>
                 <p class="muted" th:text="${n.summary}">요약</p>

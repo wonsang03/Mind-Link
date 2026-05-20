@@ -14,17 +14,16 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 50)
     private String author;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, length = 200)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 30)
     private String category;
 
     @Column(nullable = false)

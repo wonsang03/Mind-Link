@@ -15,7 +15,7 @@
             <span>목록으로 돌아가기</span>
         </a>
 
-        <form th:action="@{/community}" method="post" class="card">
+        <form th:action="@{/community}" method="post" enctype="multipart/form-data" class="card">
             <h2 class="mb-6">새 글 작성</h2>
 
             <div class="form-group">
@@ -31,9 +31,18 @@
             </div>
 
             <div class="form-group">
-                <label for="content">내용</label>
+                <label for="content">내용 <span class="muted" style="font-size:0.85rem;">(YouTube 등 영상 링크를 본문에 포함하면 자동으로 재생 가능하게 표시됩니다)</span></label>
                 <textarea id="content" name="content" rows="10" class="form-textarea"
                           placeholder="내용을 입력하세요..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="files">파일 첨부 <span class="muted" style="font-size:0.85rem;">(이미지: jpg/png/gif/webp 최대 10MB · 동영상: mp4/webm 최대 100MB · 여러 개 선택 가능)</span></label>
+                <input type="file" id="files" name="files" multiple
+                       accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                       class="form-input" style="padding: 0.4rem 0.6rem;"
+                       onchange="previewFiles(this)"/>
+                <div id="preview" style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.75rem;"></div>
             </div>
 
             <div style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
@@ -62,5 +71,45 @@
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+function previewFiles(input) {
+    const preview = document.getElementById('preview');
+    preview.innerHTML = '';
+    Array.from(input.files).forEach(function(file) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative; border-radius:8px; overflow:hidden; background:var(--secondary);';
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.cssText = 'width:120px; height:120px; object-fit:cover; display:block;';
+                wrap.appendChild(img);
+                addLabel(wrap, file.name);
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            const url = URL.createObjectURL(file);
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.style.cssText = 'width:200px; max-height:120px; display:block;';
+            wrap.appendChild(video);
+            addLabel(wrap, file.name);
+        }
+        preview.appendChild(wrap);
+    });
+}
+
+function addLabel(wrap, name) {
+    const label = document.createElement('div');
+    label.textContent = name.length > 20 ? name.substring(0, 20) + '…' : name;
+    label.style.cssText = 'font-size:0.75rem; padding:0.25rem 0.4rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+    wrap.appendChild(label);
+}
+
+</script>
 </body>
 </html>

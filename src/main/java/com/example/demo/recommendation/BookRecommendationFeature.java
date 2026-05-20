@@ -58,7 +58,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * 11.  RecommendationController     — GET /api/recommendations
  * ============================================================
  * [도서 데이터 관리]
- *  초기 적재: ORACLE_SEED.sql 최초 1회 수동 실행
+ *  초기 적재: sql/ORACLE_SETUP.sql 수동 실행(파일 주석 참고)
  *  추가·수정: Oracle에 직접 INSERT/UPDATE
  *  자동 캐싱: 네이버 신규 도서 → 비동기 INSERT (isbn 기준 중복 방지)
  * ============================================================

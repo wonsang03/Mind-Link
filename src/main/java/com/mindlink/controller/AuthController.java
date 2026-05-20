@@ -1,8 +1,8 @@
 package com.mindlink.controller;
 
 import com.mindlink.domain.User;
-import com.mindlink.dto.LoginForm;
-import com.mindlink.dto.SignupForm;
+import com.mindlink.dto.LoginRequest;
+import com.mindlink.dto.SignupRequest;
 import com.mindlink.service.UserService;
 import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
@@ -26,12 +26,12 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
+    public String loginForm(@ModelAttribute("loginForm") LoginRequest form) {
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute("loginForm") LoginForm form,
+    public String login(@Valid @ModelAttribute("loginForm") LoginRequest form,
                         BindingResult bindingResult,
                         HttpSession session) {
         if (bindingResult.hasErrors()) return "login";
@@ -53,12 +53,12 @@ public class AuthController {
     }
 
     @GetMapping("/signup")
-    public String signupForm(@ModelAttribute("signupForm") SignupForm form) {
+    public String signupForm(@ModelAttribute("signupForm") SignupRequest form) {
         return "signup";
     }
 
     @PostMapping("/signup")
-    public String signup(@Valid @ModelAttribute("signupForm") SignupForm form,
+    public String signup(@Valid @ModelAttribute("signupForm") SignupRequest form,
                          BindingResult bindingResult,
                          HttpSession session) {
         if (!form.passwordMatches()) {

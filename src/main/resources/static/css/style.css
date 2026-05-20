@@ -399,10 +399,10 @@ p { margin: 0; }
   box-shadow: 0 8px 14px -6px rgba(0,0,0,0.08);
 }
 .book-cover {
-  aspect-ratio: 3 / 4; border-radius: 0.6rem;
+  height: 7.5rem; border-radius: 0.6rem;
   background: linear-gradient(135deg, rgba(107,142,111,0.18), rgba(107,142,111,0.05));
   display: flex; align-items: center; justify-content: center;
-  color: var(--primary); overflow: hidden;
+  color: var(--primary);
 }
 .book-cover .pico { width: 2.25rem; height: 2.25rem; }
 .activity-thumb {

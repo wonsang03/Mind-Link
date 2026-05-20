@@ -63,16 +63,6 @@
                 </span>
                 <span>자가진단</span>
             </a>
-            <a th:href="@{/recommendations}"
-               th:classappend="${#strings.startsWith(currentUri, '/recommendations')} ? 'active'">
-                <span class="nav-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/>
-                        <path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/>
-                    </svg>
-                </span>
-                <span>맞춤 추천</span>
-            </a>
             <a th:href="@{/community}"
                th:classappend="${#strings.startsWith(currentUri, '/community')} ? 'active'">
                 <span class="nav-ico" aria-hidden="true">
@@ -97,6 +87,16 @@
             </a>
 
             <th:block th:if="${loginUser != null}">
+                <a th:href="@{/user/me}" class="btn-outline nav-cta"
+                   th:classappend="${currentUri == '/user/me'} ? 'active'">
+                    <span class="nav-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                        </svg>
+                    </span>
+                    <span>내 정보</span>
+                </a>
                 <form th:action="@{/logout}" method="post" style="display: inline;">
                     <button type="submit" class="btn-outline nav-cta">
                         <span class="nav-ico" aria-hidden="true">
