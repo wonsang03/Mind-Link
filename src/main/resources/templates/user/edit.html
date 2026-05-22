@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 회원 정보 수정')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <section class="hero" style="padding: 3rem 0 2rem;">
+            <h1 class="mb-2">회원 정보 수정</h1>
+            <p class="text-muted">이름과 이메일을 수정할 수 있습니다.</p>
+        </section>
+
+        <section style="max-width: 480px; margin: 0 auto 3rem;">
+            <div class="card" style="padding: 2rem;">
+                <form th:action="@{/user/me/edit}" method="post" th:object="${updateForm}">
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+                        <div>
+                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이름</label>
+                            <input type="text" th:field="*{name}"
+                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                                   placeholder="이름을 입력하세요"/>
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이메일</label>
+                            <input type="email" th:field="*{email}"
+                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                                   placeholder="이메일을 입력하세요"/>
+                            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.5rem 0.5rem; align-items: center; padding-top: 0.25rem; border-top: 1px solid var(--border);">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">등급</span>
+                            <span th:switch="${user.role.name()}">
+                                <span th:case="'ADMIN'" class="tag tag-primary">관리자</span>
+                                <span th:case="'COUNSELOR'" class="tag tag-secondary">상담사</span>
+                                <span th:case="*" class="tag">일반 사용자</span>
+                            </span>
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">가입일</span>
+                            <span th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}" style="font-size: 0.9rem;">2026-01-01</span>
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top: 1.75rem; display: flex; gap: 0.75rem;">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <a th:href="@{/user/me}" class="btn btn-secondary">취소</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

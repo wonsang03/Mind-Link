@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 게시글 수정')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/community/{id}(id=${post.id})}" class="btn-back">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>게시글로 돌아가기</span>
+        </a>
+
+        <form th:action="@{/community/{id}/edit(id=${post.id})}" method="post"
+              enctype="multipart/form-data" class="card">
+            <h2 class="mb-6">게시글 수정</h2>
+
+            <div class="form-group">
+                <label for="category">카테고리</label>
+                <select id="category" name="category" class="form-select" required>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat}"
+                            th:text="${cat}"
+                            th:selected="${cat == post.category}">스트레스 관리</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" class="form-input"
+                       th:value="${post.title}" required maxlength="200"/>
+            </div>
+
+            <div class="form-group">
+                <label for="content">내용 <span class="muted" style="font-size:0.85rem;">(YouTube 등 영상 링크를 본문에 포함하면 자동으로 재생 가능하게 표시됩니다)</span></label>
+                <textarea id="content" name="content" rows="10" class="form-textarea"
+                          required th:text="${post.content}"></textarea>
+            </div>
+
+            <!-- 기존 첨부파일 -->
+            <div th:if="${postAttachments != null and not #lists.isEmpty(postAttachments)}"
+                 class="form-group">
+                <label>기존 첨부파일 <span class="muted" style="font-size:0.85rem;">(체크하면 삭제됩니다)</span></label>
+                <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.5rem;">
+                    <div th:each="a : ${postAttachments}"
+                         style="position:relative; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--secondary); padding:0.5rem;">
+                        <label style="display:flex; flex-direction:column; align-items:center; gap:0.4rem; cursor:pointer;">
+                            <img th:if="${a.fileType.name() == 'IMAGE'}"
+                                 th:src="${a.fileUrl}"
+                                 style="width:100px; height:100px; object-fit:cover; border-radius:4px;"/>
+                            <video th:if="${a.fileType.name() == 'VIDEO'}"
+                                   th:src="${a.fileUrl}"
+                                   style="width:140px; max-height:100px; border-radius:4px;"
+                                   controls></video>
+                            <span th:if="${a.fileType.name() == 'LINK'}"
+                                  style="font-size:0.8rem; color:var(--primary); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;"
+                                  th:text="${'🔗 ' + a.originalFileName}"></span>
+                            <span class="muted" style="font-size:0.75rem; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                                  th:if="${a.fileType.name() != 'LINK'}"
+                                  th:text="${a.originalFileName}"></span>
+                            <span style="display:flex; align-items:center; gap:0.3rem; color:var(--destructive); font-size:0.82rem;">
+                                <input type="checkbox" name="removeAttachmentIds" th:value="${a.id}"/>
+                                삭제
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 새 파일 첨부 -->
+            <div class="form-group">
+                <label for="files">새 파일 추가 <span class="muted" style="font-size:0.85rem;">(이미지 최대 10MB · 동영상 최대 100MB)</span></label>
+                <input type="file" id="files" name="files" multiple
+                       accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                       class="form-input" style="padding: 0.4rem 0.6rem;"
+                       onchange="previewFiles(this)"/>
+                <div id="preview" style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.75rem;"></div>
+            </div>
+
+            <div class="flex gap-4" style="margin-top:1rem;">
+                <a th:href="@{/community/{id}(id=${post.id})}" class="btn btn-outline" style="flex:1;">취소</a>
+                <button type="submit" class="btn btn-primary" style="flex:1;">수정 완료</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+function previewFiles(input) {
+    const preview = document.getElementById('preview');
+    preview.innerHTML = '';
+    Array.from(input.files).forEach(function(file) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative; border-radius:8px; overflow:hidden; background:var(--secondary);';
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.cssText = 'width:120px; height:120px; object-fit:cover; display:block;';
+                wrap.appendChild(img);
+                addLabel(wrap, file.name);
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            const url = URL.createObjectURL(file);
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.style.cssText = 'width:200px; max-height:120px; display:block;';
+            wrap.appendChild(video);
+            addLabel(wrap, file.name);
+        }
+        preview.appendChild(wrap);
+    });
+}
+
+function addLabel(wrap, name) {
+    const label = document.createElement('div');
+    label.textContent = name.length > 20 ? name.substring(0, 20) + '…' : name;
+    label.style.cssText = 'font-size:0.75rem; padding:0.25rem 0.4rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+    wrap.appendChild(label);
+}
+
+</script>
+</body>
+</html>

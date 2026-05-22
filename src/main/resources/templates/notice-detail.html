@@ -6,19 +6,34 @@
 
 <main>
     <div class="page-narrow">
-        <a th:href="@{/notice}" class="btn-back">
-            <span class="pico" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 6 9 12 15 18"/>
-                </svg>
-            </span>
-            <span>공지사항 목록</span>
-        </a>
+        <div class="flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+            <a th:href="@{/notice}" class="btn-back">
+                <span class="pico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 6 9 12 15 18"/>
+                    </svg>
+                </span>
+                <span>공지사항 목록</span>
+            </a>
+            <div th:if="${loginUser != null and loginUser.role.name() == 'ADMIN'}"
+                 style="display: flex; gap: 0.5rem;">
+                <a th:href="@{/notice/{id}/edit(id=${notice.id})}" class="btn btn-secondary"
+                   style="padding: 0.5rem 1.1rem; font-size: 0.9rem;">수정</a>
+                <form th:action="@{/notice/{id}/delete(id=${notice.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger"
+                            style="padding: 0.5rem 1.1rem; font-size: 0.9rem;"
+                            onclick="return confirm('이 공지를 삭제하시겠습니까?')">삭제</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${flash}" style="padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; background: var(--secondary); border-radius: 0.5rem; font-size: 0.9rem;" th:text="${flash}"></div>
 
         <article class="card">
             <div class="flex-between mb-4">
                 <span class="tag tag-secondary" th:text="${notice.category}">중요</span>
-                <span class="muted" style="font-size: 0.875rem;" th:text="${notice.date}">2026-05-10</span>
+                <span class="muted" style="font-size: 0.875rem;"
+                      th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2026-05-10</span>
             </div>
             <h2 class="mb-4" th:text="${notice.title}">공지 제목</h2>
             <p class="muted mb-6" th:text="${notice.summary}" style="font-size: 1.02rem;">요약</p>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 공지 작성')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <a th:href="@{/notice}" class="btn-back" style="margin-bottom: 1.5rem; display: inline-flex;">
+            <span class="pico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 6 9 12 15 18"/>
+                </svg>
+            </span>
+            <span>공지사항 목록</span>
+        </a>
+
+        <section class="hero" style="padding: 2rem 0 1.5rem; text-align: left;">
+            <h1 class="mb-2" th:text="${isEdit} ? '공지 수정' : '공지 작성'">공지 작성</h1>
+        </section>
+
+        <div class="card" style="padding: 2rem;">
+            <form th:action="${isEdit} ? @{/notice/{id}/edit(id=${noticeId})} : @{/notice}"
+                  method="post" th:object="${noticeForm}">
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">카테고리</label>
+                        <input type="text" th:field="*{category}"
+                               style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                               placeholder="예: 중요, 서비스, 점검"/>
+                        <p th:if="${#fields.hasErrors('category')}" th:errors="*{category}"
+                           style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">제목</label>
+                        <input type="text" th:field="*{title}"
+                               style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                               placeholder="공지 제목을 입력하세요"/>
+                        <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
+                           style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">요약</label>
+                        <input type="text" th:field="*{summary}"
+                               style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                               placeholder="공지의 핵심 내용을 한 줄로 요약해주세요"/>
+                        <p th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}"
+                           style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">내용</label>
+                        <textarea th:field="*{content}" rows="10"
+                                  style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; resize: vertical; font-family: inherit;"
+                                  placeholder="공지 내용을 입력하세요"></textarea>
+                        <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}"
+                           style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 1.75rem; display: flex; gap: 0.75rem;">
+                    <button type="submit" class="btn btn-primary"
+                            th:text="${isEdit} ? '수정 완료' : '등록'">등록</button>
+                    <a th:href="${isEdit} ? @{/notice/{id}(id=${noticeId})} : @{/notice}"
+                       class="btn btn-secondary">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

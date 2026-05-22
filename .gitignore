@@ -40,7 +40,7 @@ out/
 ### VS Code ###
 .vscode/
 
-### Secrets (로컬 전용) ###
+# 로컬 전용
 .env
-.env.local
-.env.*.local
+uploads/
+.claude/

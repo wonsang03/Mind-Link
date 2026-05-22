@@ -16,11 +16,15 @@
             <div style="background: var(--secondary); border-radius: 0.5rem; padding: 1.5rem; text-align: left; margin-bottom: 2rem;">
                 <h4 class="mb-4">예약 정보</h4>
                 <div class="muted" style="display: grid; gap: 0.5rem;">
-                    <div>상담 센터: <span style="color: var(--foreground);" th:text="${counselor.name} + ' (' + ${counselor.title} + ')'">마음다움 심리상담센터 (심리상담센터)</span></div>
-                    <div>이름: <span style="color: var(--foreground);" th:text="${name}">홍길동</span></div>
-                    <div>연락처: <span style="color: var(--foreground);" th:text="${phone}">010-0000-0000</span></div>
-                    <div>이메일: <span style="color: var(--foreground);" th:text="${email}">user@example.com</span></div>
-                    <div>희망 일시: <span style="color: var(--foreground);" th:text="${date} + ' ' + ${time}">2026-05-10 14:00</span></div>
+                    <div>예약 번호: <span style="color: var(--foreground);" th:text="${'#' + booking.id}">#1</span></div>
+                    <div>상담 센터: <span style="color: var(--foreground);" th:text="${booking.centerName} + (${booking.centerTitle != null and !booking.centerTitle.isEmpty()} ? ' (' + ${booking.centerTitle} + ')' : '')">마음다움 심리상담센터 (심리상담센터)</span></div>
+                    <div th:if="${booking.centerAddress != null and !booking.centerAddress.isEmpty()}">센터 주소: <span style="color: var(--foreground);" th:text="${booking.centerAddress}">주소</span></div>
+                    <div th:if="${booking.centerPhone != null and !booking.centerPhone.isEmpty()}">센터 연락처: <span style="color: var(--foreground);" th:text="${booking.centerPhone}">전화</span></div>
+                    <div>이름: <span style="color: var(--foreground);" th:text="${booking.name}">홍길동</span></div>
+                    <div>연락처: <span style="color: var(--foreground);" th:text="${booking.phone}">010-0000-0000</span></div>
+                    <div>이메일: <span style="color: var(--foreground);" th:text="${booking.email}">user@example.com</span></div>
+                    <div>희망 일시: <span style="color: var(--foreground);" th:text="${booking.date} + ' ' + ${booking.time}">2026-05-10 14:00</span></div>
+                    <div th:if="${booking.type}">상담 유형: <span style="color: var(--foreground);" th:text="${booking.type}">초기 상담 (50분)</span></div>
                 </div>
             </div>
 

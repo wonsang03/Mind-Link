@@ -1,7 +1,11 @@
 package com.mindlink.repository;
 
-import com.mindlink.domain.PostComment;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
-public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
+/**
+ * @deprecated CommentRepository 로 대체되었습니다.
+ */
+@Deprecated
+@NoRepositoryBean
+public interface PostCommentRepository extends CommentRepository {
 }

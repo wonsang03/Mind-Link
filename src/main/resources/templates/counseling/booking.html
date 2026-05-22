@@ -22,18 +22,25 @@
                     <div class="counselor-avatar" style="width: 4rem; height: 4rem;">👤</div>
                     <div>
                         <h3>
-                            <span th:text="${counselor.name}">김민수</span>
-                            <span class="muted" style="font-weight: normal;" th:text="${counselor.title}">임상심리전문가</span>
+                            <span th:text="${centerName}">상담 센터</span>
+                            <span class="muted" style="font-weight: normal;" th:text="${centerTitle}">유형</span>
                         </h3>
-                        <p class="muted" th:text="${counselor.location}">서울 강남구</p>
+                        <p class="muted" th:if="${centerAddress != null and !centerAddress.isEmpty()}" th:text="${centerAddress}">주소</p>
+                        <p class="muted" th:if="${centerPhone != null and !centerPhone.isEmpty()}" th:text="${centerPhone}">전화</p>
                     </div>
                 </div>
             </div>
 
-            <form th:action="@{/counseling/booking/{id}(id=${counselor.id})}" method="post">
+            <form th:action="@{/counseling/booking}" method="post">
+                <input type="hidden" name="centerName" th:value="${centerName}"/>
+                <input type="hidden" name="centerTitle" th:value="${centerTitle}"/>
+                <input type="hidden" name="centerPhone" th:value="${centerPhone}"/>
+                <input type="hidden" name="centerAddress" th:value="${centerAddress}"/>
+
                 <div class="form-group">
                     <label for="name">이름</label>
-                    <input type="text" id="name" name="name" class="form-input" placeholder="홍길동" required/>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="홍길동"
+                           th:value="${prefillName}" required/>
                 </div>
 
                 <div class="form-group">
@@ -43,7 +50,8 @@
 
                 <div class="form-group">
                     <label for="email">이메일</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="example@email.com" required/>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="example@email.com"
+                           th:value="${prefillEmail}" required/>
                 </div>
 
                 <div class="grid grid-2">

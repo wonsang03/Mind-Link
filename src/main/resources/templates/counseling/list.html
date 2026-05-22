@@ -7,46 +7,70 @@
 <main>
     <div class="page">
         <div class="mb-8" style="margin-bottom: 2rem;">
-            <div class="badge">
-                <span class="pico pico-sm" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                </span>
-                <span>가까운 상담 센터</span>
-            </div>
             <h1 class="mb-4">상담소 찾기</h1>
             <p class="muted" style="max-width: 48rem;">
-                내 주변의 검증된 상담 센터를 한눈에 비교해보세요.<br/>
-                위치, 운영 시간, 전문 분야 정보를 확인하고 바로 예약할 수 있습니다.
+                네이버 지역검색에서 실시간으로 가져온 상담 센터 목록입니다.<br/>
+                키워드와 지역을 함께 입력하면 더 정확한 결과를 얻을 수 있습니다.
             </p>
         </div>
 
-        <div class="toolbar">
+        <div th:if="${flash}" class="alert" style="background: var(--secondary); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;" th:text="${flash}"></div>
+        <div th:if="${searchHint}" class="alert"
+             style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;"
+             th:text="${searchHint}"></div>
+
+        <div th:unless="${apiConfigured}" class="alert"
+             style="background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <strong>네이버 지역검색 API 키가 설정되지 않았습니다.</strong>
+            <div style="font-size: 0.875rem; margin-top: 0.25rem;">
+                <code>.env</code>에 <code>NAVER_API_CLIENT_ID</code> / <code>NAVER_API_CLIENT_SECRET</code>을 넣고,
+                네이버 개발자센터 앱에서 <strong>검색</strong> API 사용을 켜 주세요.
+                (도서 검색과 동일 키 사용 가능)
+                <a href="https://developers.naver.com/apps/#/register" target="_blank" rel="noopener">developers.naver.com</a>
+            </div>
+        </div>
+
+        <p th:if="${apiConfigured}" class="muted" style="font-size: 0.875rem; margin-bottom: 0.75rem;">
+            검색어: <strong th:text="${effectiveQuery}">심리상담센터</strong>
+            <span th:if="${query != null and !query.isEmpty()}"> · 네이버 지역검색 API 연동</span>
+        </p>
+
+        <form id="centerSearchForm" method="get" th:action="@{/counseling}" class="toolbar">
             <div class="search-field">
                 <span class="pico pico-sm" aria-hidden="true" style="color: var(--muted-foreground);">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
                 </span>
-                <input type="text" id="centerSearch" placeholder="센터명, 지역, 전문분야로 검색"/>
+                <input id="centerSearch" type="text" name="query" th:value="${query}" placeholder="예) 강남 심리상담센터, 마포 정신건강복지센터" autocomplete="off"/>
             </div>
-            <div class="filter-chips" id="centerFilters">
-                <button type="button" class="chip active" data-filter="all">전체</button>
-                <button type="button" class="chip" data-filter="심리상담센터">심리상담센터</button>
-                <button type="button" class="chip" data-filter="정신건강복지센터">정신건강복지센터</button>
-                <button type="button" class="chip" data-filter="청소년상담복지센터">청소년상담</button>
-                <button type="button" class="chip" data-filter="가족상담센터">가족상담</button>
-                <button type="button" class="chip" data-filter="병원 부설 상담센터">병원 부설</button>
-            </div>
-        </div>
+            <button type="button" id="useLocationBtn" class="btn btn-outline btn-sm"
+                    title="현재 위치로 검색어 채우기" aria-label="현재 위치로 검색어 채우기">
+                <span class="pico pico-sm" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <line x1="12" y1="2" x2="12" y2="5"/>
+                        <line x1="12" y1="19" x2="12" y2="22"/>
+                        <line x1="2" y1="12" x2="5" y2="12"/>
+                        <line x1="19" y1="12" x2="22" y2="12"/>
+                    </svg>
+                </span>
+                <span id="useLocationLabel">현재 위치</span>
+            </button>
+            <button type="submit" class="btn btn-primary btn-sm">검색</button>
+        </form>
 
         <div id="centerList" style="display: flex; flex-direction: column; gap: 0.85rem;">
-            <article th:each="c : ${centers}" class="center-card"
-                     th:attr="data-category=${c.title}, data-keywords=${c.name + ' ' + c.location + ' ' + #strings.listJoin(c.specialty, ' ')}">
-                <div class="center-thumb">
-                    <span class="pico" aria-hidden="true">
+            <article th:each="c : ${centers}" class="center-card">
+                <div class="center-thumb" th:classappend="${!#strings.isEmpty(c.imageUrl)} ? ' has-img' : ''">
+                    <img th:if="${!#strings.isEmpty(c.imageUrl)}"
+                         th:src="${c.imageUrl}"
+                         th:alt="${c.name + ' 이미지'}"
+                         loading="lazy"
+                         decoding="async"
+                         referrerpolicy="no-referrer"
+                         onerror="this.remove(); this.parentElement.classList.remove('has-img');"/>
+                    <span class="pico center-thumb-fallback" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 21h18"/>
                             <path d="M5 21V8l7-5 7 5v13"/>
@@ -60,18 +84,8 @@
                         <h3 th:text="${c.name}">상담 센터명</h3>
                         <span class="muted" style="font-size: 0.85rem;" th:text="${c.title}">유형</span>
                     </div>
-                    <div class="center-meta">
-                        <span class="star">★</span>
-                        <span th:text="${c.rating}">4.9</span>
-                        <span>(<span th:text="${c.reviews}">128</span>)</span>
-                        <span class="dot">·</span>
-                        <span th:if="${c.openNow}" class="status-open">영업 중</span>
-                        <span th:unless="${c.openNow}" class="status-closed">영업 종료</span>
-                        <span class="dot">·</span>
-                        <span th:text="${c.distance}">1.2km</span>
-                    </div>
                     <div class="center-info">
-                        <div class="row">
+                        <div class="row" th:if="${c.location != null and !c.location.isEmpty()}">
                             <span class="pico" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -79,15 +93,7 @@
                             </span>
                             <span th:text="${c.location}">서울 강남구</span>
                         </div>
-                        <div class="row">
-                            <span class="pico" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>
-                                </svg>
-                            </span>
-                            <span th:text="${c.hours}">평일 09:00 - 18:00</span>
-                        </div>
-                        <div class="row">
+                        <div class="row" th:if="${c.phone != null and !c.phone.isEmpty()}">
                             <span class="pico" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/>
@@ -96,19 +102,38 @@
                             <span th:text="${c.phone}">02-1234-5678</span>
                         </div>
                     </div>
-                    <div class="center-tags">
-                        <span th:each="s : ${c.specialty}" class="tag tag-secondary" th:text="${s}">우울증</span>
+                    <div class="center-tags" th:if="${not #lists.isEmpty(c.specialty)}">
+                        <span th:each="s : ${c.specialty}" class="tag tag-secondary" th:text="${s}">분류</span>
                     </div>
+                    <p th:if="${c.description != null and !c.description.isEmpty()}" class="muted"
+                       style="font-size: 0.875rem; margin-top: 0.5rem;" th:text="${c.description}"></p>
                     <div class="center-actions">
-                        <a th:href="@{/counseling/booking/{id}(id=${c.id})}" class="btn btn-primary btn-sm">예약하기</a>
-                        <button type="button" class="btn btn-outline btn-sm">길찾기</button>
-                        <button type="button" class="btn btn-outline btn-sm">전화</button>
+                        <a th:href="@{/counseling/booking(centerName=${c.name}, centerTitle=${c.title}, centerPhone=${c.phone}, centerAddress=${c.location})}"
+                           class="btn btn-primary btn-sm">예약하기</a>
+                        <a th:href="${c.naverMapUrl}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="btn btn-outline btn-sm">지도 보기</a>
+                        <button type="button" class="btn btn-outline btn-sm js-share"
+                                th:attr="data-name=${c.name}, data-url=${c.naverMapUrl}">
+                            <span class="pico pico-sm" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                                </svg>
+                            </span>
+                            <span>공유</span>
+                        </button>
                     </div>
                 </div>
             </article>
         </div>
-        <div id="centerEmpty" class="empty-note hidden" style="margin-top: 1rem;">
-            검색 조건에 맞는 상담 센터가 없습니다.
+        <div th:if="${#lists.isEmpty(centers)}" class="empty-note" style="margin-top: 1rem;">
+            <span th:if="${apiConfigured}">
+                검색 결과가 없습니다. 지역명+「심리상담」 등으로 다시 검색해 보세요.
+                (네이버 앱에 <strong>검색 API</strong> 권한이 없으면 항상 비어 있을 수 있습니다.)
+            </span>
+            <span th:unless="${apiConfigured}">API 키가 설정되지 않아 검색 결과를 가져올 수 없습니다.</span>
         </div>
 
         <div class="section-highlight" style="margin-top: 3rem;">
@@ -168,43 +193,106 @@
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 
-<style>
-.hidden { display: none !important; }
-</style>
 <script>
 (function () {
-    const list = document.getElementById('centerList');
-    const empty = document.getElementById('centerEmpty');
-    const search = document.getElementById('centerSearch');
-    const chips = document.querySelectorAll('#centerFilters .chip');
-    let activeFilter = 'all';
+    var btn = document.getElementById('useLocationBtn');
+    var label = document.getElementById('useLocationLabel');
+    var input = document.getElementById('centerSearch');
+    var form = document.getElementById('centerSearchForm');
+    if (!btn || !input) return;
 
-    function apply() {
-        const q = (search.value || '').trim().toLowerCase();
-        let visible = 0;
-        list.querySelectorAll('.center-card').forEach(card => {
-            const cat = card.dataset.category || '';
-            const kw = (card.dataset.keywords || '').toLowerCase();
-            const text = (card.textContent || '').toLowerCase();
-            const matchesFilter = activeFilter === 'all' || cat === activeFilter;
-            const matchesSearch = !q || kw.includes(q) || text.includes(q);
-            if (matchesFilter && matchesSearch) {
-                card.classList.remove('hidden');
-                visible++;
+    function setLabel(text) { if (label) label.textContent = text; }
+    function reset() { btn.disabled = false; setLabel('현재 위치'); }
+
+    btn.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+            alert('이 브라우저에서는 위치 정보를 사용할 수 없습니다.');
+            return;
+        }
+        btn.disabled = true;
+        setLabel('위치 확인 중…');
+
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            var lat = pos.coords.latitude;
+            var lon = pos.coords.longitude;
+            var url = 'https://nominatim.openstreetmap.org/reverse?lat=' + encodeURIComponent(lat)
+                    + '&lon=' + encodeURIComponent(lon)
+                    + '&format=json&accept-language=ko&zoom=12';
+
+            fetch(url, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var a = data.address || {};
+                    var parts = [];
+                    var region = a.city || a.province || a.state;
+                    if (region) parts.push(region);
+                    var district = a.borough || a.city_district || a.county || a.suburb;
+                    if (district) parts.push(district);
+                    var q = parts.filter(Boolean).join(' ').trim();
+                    if (!q) {
+                        alert('현재 위치의 행정구역을 찾을 수 없습니다. 직접 입력해주세요.');
+                        return;
+                    }
+                    input.value = q + ' 심리상담센터';
+                    if (form) form.submit();
+                    else input.focus();
+                })
+                .catch(function () {
+                    alert('주소 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+                })
+                .finally(reset);
+        }, function (err) {
+            reset();
+            if (err.code === err.PERMISSION_DENIED) {
+                alert('위치 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.');
             } else {
-                card.classList.add('hidden');
+                alert('위치 정보를 가져올 수 없습니다.');
             }
-        });
-        if (visible === 0) empty.classList.remove('hidden'); else empty.classList.add('hidden');
+        }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
+    });
+})();
+
+(function () {
+    function fallbackCopy(text) {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            var ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            return ok;
+        } catch (e) { return false; }
     }
 
-    chips.forEach(chip => chip.addEventListener('click', () => {
-        chips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        activeFilter = chip.dataset.filter;
-        apply();
-    }));
-    search.addEventListener('input', apply);
+    document.querySelectorAll('.js-share').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var name = btn.dataset.name || '';
+            var url = btn.dataset.url || '';
+            var shareText = name + ' - 마음이음에서 추천하는 상담센터';
+
+            if (navigator.share) {
+                navigator.share({ title: name, text: shareText, url: url }).catch(function () {});
+                return;
+            }
+
+            var payload = name + '\n' + url;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(payload).then(function () {
+                    alert('상담센터 정보가 클립보드에 복사되었습니다.');
+                }).catch(function () {
+                    if (!fallbackCopy(payload)) prompt('아래 링크를 복사하세요:', url);
+                    else alert('상담센터 정보가 클립보드에 복사되었습니다.');
+                });
+            } else if (fallbackCopy(payload)) {
+                alert('상담센터 정보가 클립보드에 복사되었습니다.');
+            } else {
+                prompt('아래 링크를 복사하세요:', url);
+            }
+        });
+    });
 })();
 </script>
 </body>

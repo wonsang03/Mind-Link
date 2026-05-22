@@ -12,14 +12,35 @@
                     <span class="icon-emoji">✓</span>
                 </div>
                 <h2 class="mb-4">검사 완료</h2>
-                <p class="muted" th:text="${test.title}">검사 제목</p>
+                <p class="muted" th:text="${assessment.name}">검사 제목</p>
             </div>
 
-            <div style="background: var(--secondary); border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+            <!-- 일반 결과 (번아웃 제외) -->
+            <div th:unless="${isBurnout}"
+                 style="background: var(--secondary); border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem; text-align: center;">
                 <div class="muted mb-2">총점</div>
-                <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;" th:text="${score}">15</div>
+                <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;" th:text="${score}">0</div>
                 <div style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary);" th:text="${level}">정상</div>
                 <p class="muted" th:text="${message}">메시지</p>
+            </div>
+
+            <!-- 번아웃 결과 (2파트) -->
+            <div th:if="${isBurnout}" style="margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                        <div class="muted mb-2" style="font-size: 0.875rem;">Part 1. 개인 번아웃</div>
+                        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem;" th:text="${personalScore}">0</div>
+                        <div style="font-size: 1rem; color: var(--primary); font-weight: 600;" th:text="${personalLevel}">낮음</div>
+                    </div>
+                    <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                        <div class="muted mb-2" style="font-size: 0.875rem;">Part 2. 업무 번아웃</div>
+                        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem;" th:text="${workScore}">0</div>
+                        <div style="font-size: 1rem; color: var(--primary); font-weight: 600;" th:text="${workLevel}">낮음</div>
+                    </div>
+                </div>
+                <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+                    <p class="muted" th:text="${message}">메시지</p>
+                </div>
             </div>
 
             <div class="mb-8">
@@ -35,7 +56,7 @@
 
                 <div class="alert alert-info mb-4">
                     <h4 class="mb-2">🤖 AI 정서 케어</h4>
-                    <p class="mb-4 muted">AI와 대화하며 실시간으로 감정 상태를 분석하고 맞춤 케어를 받아보세요.</p>
+                    <p class="mb-4 muted">키워드 기반 상담 데모를 체험해 보세요. (실제 AI API 연동 예정)</p>
                     <a th:href="@{/ai-care}" style="color: var(--primary); text-decoration: underline;">
                         AI 케어 시작하기 →
                     </a>
@@ -44,9 +65,7 @@
                 <div style="background: rgba(108,92,231,0.05); border: 1px solid rgba(108,92,231,0.2); border-radius: 0.5rem; padding: 1rem;">
                     <h4 class="mb-2">개인화된 콘텐츠 추천</h4>
                     <p class="mb-4 muted">검사 결과를 바탕으로 맞춤 도서, 활동, 커뮤니티를 추천해드립니다.</p>
-                    <!-- TODO: 설문 팀과 emotion 값 포맷 협의 후 매핑 확정 필요 -->
-                    <a th:href="@{/recommendations(emotion=${test.id == 'depression' ? 'DEPRESSION' : test.id == 'anxiety' ? 'ANXIETY' : test.id == 'stress' ? 'STRESS' : test.id == 'burnout' ? 'LETHARGY' : 'NORMAL'})}"
-                       style="color: var(--primary); text-decoration: underline;">
+                    <a th:href="@{/recommendations}" style="color: var(--primary); text-decoration: underline;">
                         추천 콘텐츠 보기 →
                     </a>
                 </div>
@@ -54,8 +73,30 @@
 
             <div class="flex gap-4">
                 <a th:href="@{/self-assessment}" class="btn btn-outline" style="flex: 1;">다른 검사 하기</a>
-                <a th:href="@{/self-assessment/{id}(id=${test.id})}" class="btn btn-primary" style="flex: 1;">다시 검사하기</a>
+                <a th:href="@{/self-assessment/{key}(key=${assessment.typeKey})}" class="btn btn-primary" style="flex: 1;">다시 검사하기</a>
             </div>
+
+            <p th:if="${assessment.typeKey == 'depression'}"
+               style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
+                PHQ-9는 Pfizer Inc.의 저작물입니다. Spitzer, Williams, Kroenke 외 연구진이 Pfizer Inc.의 교육 지원을 받아 개발하였습니다.
+                복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
+            </p>
+            <p th:if="${assessment.typeKey == 'anxiety'}"
+               style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
+                GAD-7은 Pfizer Inc.의 교육 지원을 받아 Spitzer, Williams, Kroenke 외 연구진이 개발하였습니다.
+                복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
+            </p>
+            <p th:if="${assessment.typeKey == 'stress'}"
+               style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
+                Cohen, S., Kamarck, T., &amp; Mermelstein, R. (1983). A global measure of perceived stress.
+                Journal of Health and Social Behavior, 24(4), 385–396.
+            </p>
+            <p th:if="${assessment.typeKey == 'burnout'}"
+               style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
+                Kristensen, T. S., Borritz, M., Villadsen, E., &amp; Christensen, K. B. (2005).
+                The Copenhagen Burnout Inventory: A new tool for the assessment of burnout.
+                Work &amp; Stress, 19(3), 192–207.
+            </p>
         </div>
     </div>
 </main>
