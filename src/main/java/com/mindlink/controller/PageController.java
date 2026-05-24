@@ -18,9 +18,10 @@ public class PageController {
         return "info";
     }
 
+    /** 구 데모 채팅 → AI 위로 편지 위저드로 연결 */
     @GetMapping("/ai-care")
     public String aiCare() {
-        return "ai-care";
+        return "redirect:/care-report/wizard";
     }
 
     @GetMapping("/recommendations")

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 내 보고서 목록')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="mb-8" style="margin-bottom: 2rem;">
+            <div class="flex-between" style="align-items: flex-end;">
+                <div>
+                    <h1 class="mb-2">내 보고서 목록</h1>
+                    <p class="muted">지금까지 받은 AI 위로 편지를 다시 열어 볼 수 있어요.</p>
+                </div>
+                <a th:href="@{/care-report}" class="btn btn-primary" style="white-space: nowrap;">
+                    새 보고서 받기
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(items)}" class="center muted" style="padding: 4rem 0;">
+            아직 받은 보고서가 없어요. 위 「새 보고서 받기」 버튼을 눌러 첫 번째 편지를 받아 보세요.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <a th:each="r : ${items}"
+               th:href="@{/care-report/{id}(id=${r.id})}"
+               class="card card-link" style="display: block; padding: 1.25rem 1.5rem;">
+                <div class="flex-between mb-2">
+                    <span class="tag tag-secondary"
+                          th:text="${r.riskLevel == 'CRISIS' ? '안전 안내 포함'
+                                   : (r.riskLevel == 'ELEVATED' ? '살피기' : '평온')}">상태</span>
+                    <span class="muted" style="font-size: 0.85rem;"
+                          th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-22</span>
+                </div>
+                <p class="muted" style="margin: 0;" th:text="${r.excerpt}">편지 발췌</p>
+                <div th:if="${r.themes != null and !#strings.isEmpty(r.themes)}"
+                     class="muted" style="font-size: 0.8rem; margin-top: 0.5rem;"
+                     th:text="'주제: ' + ${r.themes}">주제</div>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

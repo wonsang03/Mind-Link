@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 나를 위한 편지')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+            <a th:href="@{/care-report/list}" class="btn-back">
+                <span class="pico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 6 9 12 15 18"/>
+                    </svg>
+                </span>
+                <span>보고서 목록</span>
+            </a>
+            <div style="display: flex; gap: 0.5rem;">
+                <a th:href="@{/care-report}" class="btn btn-secondary"
+                   style="padding: 0.5rem 1.1rem; font-size: 0.9rem;">새 보고서</a>
+                <a th:href="@{/api/care-reports/{id}/pdf(id=${report.id})}" class="btn btn-primary"
+                   style="padding: 0.5rem 1.1rem; font-size: 0.9rem;">PDF 다운로드</a>
+            </div>
+        </div>
+
+        <article class="card" style="padding: 2rem;">
+            <div class="flex-between mb-4">
+                <span class="tag tag-secondary"
+                      th:text="${report.riskLevel.name() == 'CRISIS' ? '안전 안내 포함' : (report.riskLevel.name() == 'ELEVATED' ? '조심스럽게 살피기' : '평온 상태')}">
+                    상태
+                </span>
+                <span class="muted" style="font-size: 0.875rem;"
+                      th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-22</span>
+            </div>
+            <h2 class="mb-4">마음이음 — 나를 위한 편지</h2>
+
+            <div th:if="${report.riskLevel.name() == 'CRISIS'}"
+                 style="background: #fff3f3; border: 1px solid var(--destructive); border-radius: 0.5rem;
+                        padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+                <strong style="color: var(--destructive);">긴급 상담 안내</strong>
+                <p style="margin: 0.5rem 0 0; font-size: 0.95rem;">
+                    혼자 견디기 힘들다면 24시간 자살예방 상담전화 <strong>1393</strong>,
+                    정신건강 위기 상담 <strong>1577-0199</strong>, 긴급 상황은 <strong>119</strong>로 연락해 주세요.
+                </p>
+            </div>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; line-height: 1.85;">
+                <p th:each="para : ${paragraphs}"
+                   th:text="${para}"
+                   style="white-space: pre-wrap; margin: 0 0 1.1rem;">단락</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(themes)}" style="margin-top: 1.5rem;">
+                <div class="muted" style="font-size: 0.85rem; margin-bottom: 0.4rem;">이번 보고서가 다룬 주제</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                    <span th:each="t : ${themes}"
+                          class="tag tag-secondary"
+                          th:text="${t}">주제</span>
+                </div>
+            </div>
+
+            <p class="muted mt-6" style="font-size: 0.8rem; margin-top: 1.5rem;">
+                본 편지는 마음이음 AI 가 생성한 참고용 메시지이며 전문 상담을 대체하지 않습니다.
+            </p>
+        </article>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

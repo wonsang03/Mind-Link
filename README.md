@@ -15,7 +15,7 @@
 | DB | **Oracle** (운영·팀 개발 기준), H2는 로컬 테스트용 |
 | UI | Thymeleaf, 정적 CSS |
 | 인증 | HttpSession + BCrypt (Spring Security 필터 미사용) |
-| 외부 API | 네이버 검색(지역·도서·이미지), Google Gemini |
+| 외부 API | 네이버 검색(지역·도서·이미지), OpenAI(종합 보고서), Google Gemini(도서 추천) |
 
 ---
 
@@ -34,7 +34,9 @@ cp .env.example .env   # Windows: copy .env.example .env
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Oracle 접속 |
 | `NAVER_API_CLIENT_ID`, `NAVER_API_CLIENT_SECRET` | 도서·지역·이미지 검색 |
 | `NAVER_OPENAPI_CLIENT_*` | (선택) 지역검색만 별도 키 |
-| `GEMINI_API_KEY` | AI 맞춤 도서 추천 |
+| `GEMINI_API_KEY` | AI 맞춤 **도서 추천** |
+| `OPENAI_API_KEY` | AI 종합 **보고서(위로 편지)** |
+| `CARE_LLM_PROVIDER` | 보고서 LLM (`openai` 기본, `gemini` 선택) |
 
 네이버 개발자센터 앱에서 **검색 API** 사용을 켜야 상담소·도서 검색이 동작합니다.
 
@@ -45,6 +47,7 @@ cp .env.example .env   # Windows: copy .env.example .env
 1. [docs/LoginCommunity.md](docs/LoginCommunity.md) — 기본 테이블 DDL  
 2. [sql/ORACLE_SETUP.sql](sql/ORACLE_SETUP.sql) — 스키마 보정, 시드(관리자·공지·커뮤니티·추천도서·예약 등)  
 3. [sql/ASSESSMENT_SEED.sql](sql/ASSESSMENT_SEED.sql) — 자가진단 문항·점수 구간
+4. [sql/CARE_REPORT.sql](sql/CARE_REPORT.sql) — AI 종합 보고서(`care_reports`, `care_daily_inputs`)
 
 ### 3. 서버 실행
 
@@ -69,7 +72,7 @@ cp .env.example .env   # Windows: copy .env.example .env
 | 공지 | `/notice/**` | ✅ | ADMIN만 작성·수정·삭제 |
 | 내 정보 | `/user/me` | ✅ | 조회·이름/이메일 수정 (비밀번호 변경 미구현) |
 | AI 맞춤 추천 | `/recommendations` | ✅ | Gemini + 네이버 도서 검색 (`POST /api/recommendations/ai`) |
-| AI 정서 케어 | `/ai-care` | 🔶 데모 | 키워드 기반 챗봇 UI (실제 LLM API 미연동) |
+| AI 정서 케어 (위로 편지) | `/care-report` · `/ai-care` | ✅ | 10단계 위저드 → OpenAI 장문 편지 + PDF — [docs/care-report.md](docs/care-report.md) |
 
 ---
 
@@ -169,7 +172,7 @@ Oracle 없이 화면만 볼 때는 `application.properties` 프로필에 따라 
 
 ## 추후 작업
 
-- `/ai-care` — OpenAI 또는 Gemini 실제 대화 API 연동  
+- (완료) `/ai-care` → `/care-report/wizard` 위로 편지 위저드로 통합  
 - 관리자 화면 — 등급 변경, 신고 목록  
 - 게시글 페이지네이션, 작성자–`User` FK 정리  
 

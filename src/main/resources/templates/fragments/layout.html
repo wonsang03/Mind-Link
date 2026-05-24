@@ -73,6 +73,17 @@
                 </span>
                 <span>맞춤 추천</span>
             </a>
+            <a th:href="@{/care-report}"
+               th:classappend="${#strings.startsWith(currentUri, '/care-report')} ? 'active'">
+                <span class="nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16v12H5.17L4 17.17z"/>
+                        <line x1="8" y1="9" x2="16" y2="9"/>
+                        <line x1="8" y1="13" x2="13" y2="13"/>
+                    </svg>
+                </span>
+                <span>AI 정서 케어</span>
+            </a>
             <a th:href="@{/community}"
                th:classappend="${#strings.startsWith(currentUri, '/community')} ? 'active'">
                 <span class="nav-ico" aria-hidden="true">
