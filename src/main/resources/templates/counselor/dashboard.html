@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 상담사')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="mb-8">
+            <div class="badge"><span>상담사 전용</span></div>
+            <h1 class="mb-2" th:text="|${loginUser.name}님, 환영합니다|">상담사님, 환영합니다</h1>
+            <p class="muted">배치된 관리 대상 유저의 상태를 조회합니다.</p>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <div class="flex-between mb-4">
+            <h2>관리 대상 유저</h2>
+            <span class="tag tag-muted" th:text="|총 ${#lists.size(managedUsers)}명|">총 0명</span>
+        </div>
+        <p class="muted mb-4" style="font-size:0.88rem;">
+            고위험 자가진단 결과 또는 상담 예약 이력이 있는 유저입니다. 유저별 게시물·자가진단·예약 이력을 확인할 수 있습니다.
+        </p>
+
+        <div th:if="${#lists.isEmpty(managedUsers)}" class="empty-note">관리 대상 유저가 없습니다.</div>
+
+        <div th:unless="${#lists.isEmpty(managedUsers)}" class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>이름</th><th>이메일</th><th>상태</th>
+                    <th class="num">게시글</th><th class="num">예약</th>
+                    <th>최근 자가진단</th><th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${managedUsers}">
+                    <td th:text="${m.name}">홍길동</td>
+                    <td class="muted" th:text="${m.email}">a@b.com</td>
+                    <td>
+                        <span th:if="${m.highRisk}" class="risk-badge">고위험</span>
+                        <span th:if="${m.hasCounselingHistory}" class="tag tag-secondary">상담이력</span>
+                    </td>
+                    <td class="num" th:text="${m.postCount}">0</td>
+                    <td class="num" th:text="${m.bookingCount}">0</td>
+                    <td>
+                        <span th:if="${m.latestLevel}" th:text="${m.latestLevel}">정상</span>
+                        <span th:unless="${m.latestLevel}" class="muted">기록 없음</span>
+                    </td>
+                    <td><a th:href="@{/counselor/users/{id}(id=${m.id})}" class="btn btn-outline btn-sm">상세</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 회원 정보 수정')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <section class="hero" style="padding: 2rem 0 0.75rem;">
+            <h1 class="mb-2">회원 정보 수정</h1>
+            <p class="text-muted">이름과 이메일, 비밀번호를 수정할 수 있습니다.</p>
+        </section>
+
+        <section style="max-width: 480px; margin: 0 auto 3rem;">
+            <div th:if="${flash}" class="card" style="padding: 1rem 1.5rem; margin-bottom: 1rem; background: var(--primary-light, #e8f5e9); border-left: 3px solid var(--primary);">
+                <p th:text="${flash}" style="margin: 0; font-size: 0.9rem;"></p>
+            </div>
+
+            <div class="card" style="padding: 2rem;">
+                <form th:action="@{/user/me/edit}" method="post" th:object="${updateForm}">
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+                        <div>
+                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이름</label>
+                            <input type="text" th:field="*{name}"
+                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                                   placeholder="이름을 입력하세요"/>
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이메일</label>
+                            <input type="email" th:field="*{email}"
+                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
+                                   placeholder="이메일을 입력하세요"/>
+                            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                        </div>
+
+                        <details class="pw-toggle">
+                            <summary>
+                                <span class="pw-ico" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4" y="11" width="16" height="10" rx="2"/>
+                                        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                                    </svg>
+                                </span>
+                                <span>비밀번호 변경</span>
+                                <span class="pw-caret" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"/>
+                                    </svg>
+                                </span>
+                            </summary>
+                            <div class="pw-body">
+                                <p class="pw-hint">변경할 때만 입력하세요. 비워두면 그대로 유지됩니다.</p>
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <input type="password" name="currentPassword" autocomplete="current-password"
+                                           class="pw-input" placeholder="현재 비밀번호"/>
+                                    <input type="password" name="newPassword" minlength="4" autocomplete="new-password"
+                                           class="pw-input" placeholder="새 비밀번호 (4자 이상)"/>
+                                    <input type="password" name="newPasswordConfirm" minlength="4" autocomplete="new-password"
+                                           class="pw-input" placeholder="새 비밀번호 확인"/>
+                                </div>
+                            </div>
+                        </details>
+
+                        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.5rem 0.5rem; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">등급</span>
+                            <span th:switch="${user.role.name()}" style="font-size: 0.9rem;">
+                                <span th:case="'ADMIN'">관리자</span>
+                                <span th:case="'COUNSELOR'">상담사</span>
+                                <span th:case="*">일반 사용자</span>
+                            </span>
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">가입일</span>
+                            <span th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}" style="font-size: 0.9rem;">2026-01-01</span>
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top: 1.75rem; display: flex; gap: 0.75rem;">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <a th:href="@{/user/me}" class="btn btn-secondary">취소</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

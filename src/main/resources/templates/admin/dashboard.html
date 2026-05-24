@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 관리자')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="mb-8">
+            <div class="badge"><span>관리자 전용</span></div>
+            <h1 class="mb-2">관리자 대시보드</h1>
+            <p class="muted">서비스 현황을 한눈에 확인하고 유저·게시글·신고·공지를 관리하세요.</p>
+        </div>
+
+        <nav th:replace="~{fragments/layout :: adminNav('dashboard')}"></nav>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- 통계 카드 -->
+        <section class="grid grid-3 mb-8">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.totalUsers}">0</div>
+                <div class="stat-label">전체 회원</div>
+                <div class="stat-sub"
+                     th:text="|관리자 ${stats.adminCount} · 상담사 ${stats.counselorCount} · 유저 ${stats.userCount}|">
+                    관리자 0 · 상담사 0 · 유저 0
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.postCount}">0</div>
+                <div class="stat-label">게시글</div>
+                <div class="stat-sub" th:text="|댓글 ${stats.commentCount}개|">댓글 0개</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.highRiskUserCount}">0</div>
+                <div class="stat-label">고위험 유저</div>
+                <div class="stat-sub" th:text="|예약 ${stats.bookingCount} · 자가진단 ${stats.assessmentCount}|">
+                    예약 0 · 자가진단 0
+                </div>
+            </div>
+        </section>
+
+        <!-- 관리 대상 유저 -->
+        <section class="mb-8">
+            <div class="flex-between mb-4">
+                <h2>관리 대상 유저</h2>
+                <span class="tag tag-muted" th:text="|총 ${#lists.size(managedUsers)}명|">총 0명</span>
+            </div>
+            <p class="muted mb-4" style="font-size: 0.88rem;">고위험 자가진단 결과 또는 상담 예약 이력이 있는 유저입니다.</p>
+
+            <div th:if="${#lists.isEmpty(managedUsers)}" class="empty-note">관리 대상 유저가 없습니다.</div>
+
+            <div th:unless="${#lists.isEmpty(managedUsers)}" class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>이름</th><th>이메일</th><th>상태</th>
+                        <th class="num">게시글</th><th class="num">예약</th>
+                        <th>최근 자가진단</th><th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${managedUsers}">
+                        <td th:text="${m.name}">홍길동</td>
+                        <td class="muted" th:text="${m.email}">a@b.com</td>
+                        <td>
+                            <span th:if="${m.highRisk}" class="risk-badge">고위험</span>
+                            <span th:if="${m.hasCounselingHistory}" class="tag tag-secondary">상담이력</span>
+                        </td>
+                        <td class="num" th:text="${m.postCount}">0</td>
+                        <td class="num" th:text="${m.bookingCount}">0</td>
+                        <td>
+                            <span th:if="${m.latestLevel}" th:text="${m.latestLevel}">정상</span>
+                            <span th:unless="${m.latestLevel}" class="muted">기록 없음</span>
+                        </td>
+                        <td><a th:href="@{/admin/users/{id}(id=${m.id})}" class="btn btn-outline btn-sm">상세</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 공지 관리 -->
+        <section>
+            <div class="flex-between mb-4">
+                <h2>공지 관리</h2>
+                <a th:href="@{/notice/new}" class="btn btn-primary btn-sm"
+                   onclick="return confirm('공지를 작성하시겠습니까?');">공지 작성</a>
+            </div>
+            <div th:if="${#lists.isEmpty(notices)}" class="empty-note">등록된 공지사항이 없습니다.</div>
+            <div th:unless="${#lists.isEmpty(notices)}" style="display:flex; flex-direction:column; gap:0.6rem;">
+                <div th:each="n : ${notices}" class="card" style="padding:1rem 1.25rem;">
+                    <div class="flex-between mb-2">
+                        <span class="tag tag-secondary" th:text="${n.category}">중요</span>
+                        <span class="muted" style="font-size:0.82rem;"
+                              th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd')}">2026-05-23</span>
+                    </div>
+                    <h3 class="mb-2" th:text="${n.title}">공지 제목</h3>
+                    <div class="flex gap-2">
+                        <a th:href="@{/notice/{id}(id=${n.id})}" class="btn btn-outline btn-sm">보기</a>
+                        <a th:href="@{/notice/{id}/edit(id=${n.id})}" class="btn btn-secondary btn-sm">수정</a>
+                        <form th:action="@{/notice/{id}/delete(id=${n.id})}" method="post"
+                              onsubmit="return confirm('이 공지를 삭제하시겠습니까?');" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

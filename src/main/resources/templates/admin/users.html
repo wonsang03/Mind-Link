@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 유저 관리')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <div class="mb-8">
+            <div class="badge"><span>관리자 전용</span></div>
+            <h1 class="mb-2">유저 관리</h1>
+            <p class="muted">전체 회원을 조회하고 등급을 변경하거나 상세 정보를 관리합니다.</p>
+        </div>
+
+        <nav th:replace="~{fragments/layout :: adminNav('users')}"></nav>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th class="num">ID</th><th>이름</th><th>이메일</th>
+                    <th>등급 변경</th><th>가입일</th><th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users}">
+                    <td class="num" th:text="${u.id}">1</td>
+                    <td th:text="${u.name}">홍길동</td>
+                    <td class="muted" th:text="${u.email}">a@b.com</td>
+                    <td>
+                        <form th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post"
+                              class="flex gap-2" style="align-items:center;">
+                            <select name="role" class="form-select" style="width:auto; padding:0.4rem 0.6rem;">
+                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+                                        th:selected="${r == u.role}">USER</option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary btn-sm">변경</button>
+                        </form>
+                    </td>
+                    <td class="muted" style="font-size:0.82rem;"
+                        th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd')}">2026-05-23</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a th:href="@{/admin/users/{id}(id=${u.id})}" class="btn btn-outline btn-sm">상세</a>
+                            <form th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post"
+                                  onsubmit="return confirm('이 계정을 삭제하시겠습니까? 되돌릴 수 없습니다.');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

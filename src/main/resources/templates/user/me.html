@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 내 계정')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page">
+        <section class="hero" style="padding: 3rem 0 2rem;">
+            <h1 class="mb-2">내 계정</h1>
+            <p class="text-muted">계정 정보를 확인하세요.</p>
+        </section>
+
+        <section style="max-width: 480px; margin: 0 auto 3rem;">
+            <div th:if="${flash}" class="card" style="padding: 1rem 1.5rem; margin-bottom: 1rem; background: var(--primary-light, #e8f5e9); border-left: 3px solid var(--primary);">
+                <p th:text="${flash}" style="margin: 0; font-size: 0.9rem;"></p>
+            </div>
+
+            <div class="card" style="padding: 2rem;">
+                <dl style="display: grid; grid-template-columns: 120px 1fr; gap: 1rem 0.5rem; align-items: center;">
+                    <dt style="color: var(--text-muted); font-size: 0.9rem;">이름</dt>
+                    <dd th:text="${user.name}">이름</dd>
+
+                    <dt style="color: var(--text-muted); font-size: 0.9rem;">이메일</dt>
+                    <dd th:text="${user.email}">email@example.com</dd>
+
+                    <dt style="color: var(--text-muted); font-size: 0.9rem;">등급</dt>
+                    <dd th:switch="${user.role.name()}">
+                        <span th:case="'ADMIN'">관리자</span>
+                        <span th:case="'COUNSELOR'">상담사</span>
+                        <span th:case="*">일반 사용자</span>
+                    </dd>
+
+                    <dt style="color: var(--text-muted); font-size: 0.9rem;">가입일</dt>
+                    <dd th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">2026-01-01</dd>
+                </dl>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                <a th:href="@{/user/me/edit}" class="btn btn-primary">회원 정보 수정</a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">로그아웃</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

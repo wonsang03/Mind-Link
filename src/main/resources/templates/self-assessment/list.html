@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 자가진단')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow">
+        <h1 class="mb-4">자가진단</h1>
+        <p class="muted mb-8" style="margin-bottom: 3rem;">
+            과학적으로 검증된 심리 검사 도구로 현재 나의 마음 상태를 확인해보세요.<br/>
+            모든 검사는 무료이며, 결과는 안전하게 보관됩니다.
+        </p>
+
+        <div class="grid grid-2">
+            <a th:each="assessment : ${assessments}"
+               th:href="@{/self-assessment/{key}(key=${assessment.typeKey})}"
+               class="card card-link" style="cursor: pointer;">
+                <h3 class="mb-4" th:text="${assessment.name}">검사 제목</h3>
+                <p class="muted mb-4" th:text="${assessment.description}">설명</p>
+                <div class="flex-between">
+                    <span class="muted" style="font-size: 0.875rem;">
+                        <span th:text="${#lists.size(assessment.questions)}">5</span>개 문항 ·
+                        <span th:text="${assessment.duration}">약 2분</span>
+                    </span>
+                    <span style="color: var(--primary);">→</span>
+                </div>
+            </a>
+        </div>
+
+        <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.5rem; margin-top: 3rem;">
+            <h3 class="mb-4">자가진단 전 안내사항</h3>
+            <ul class="muted" style="list-style: none; padding: 0; margin: 0;">
+                <li class="mb-2">✓ 각 검사의 안내 기간을 기준으로 솔직하게 답변해주세요.</li>
+                <li class="mb-2">✓ 자가진단 결과는 참고 자료이며, 확정 진단이 아닙니다.</li>
+                <li>✓ 심각한 증상이 있다면 반드시 전문가와 상담하세요.</li>
+            </ul>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
