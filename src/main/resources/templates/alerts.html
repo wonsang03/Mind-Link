@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 알림')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="page-narrow" style="max-width: 52rem;">
+        <div class="page-header flex-between" style="margin-bottom: 1.5rem;">
+            <h1 style="margin: 0;">알림</h1>
+            <div class="flex gap-2" th:if="${alerts != null and !#lists.isEmpty(alerts)}">
+                <form th:action="@{/alerts/read-all}" method="post">
+                    <button type="submit" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+                        모두 읽음
+                    </button>
+                </form>
+                <form th:action="@{/alerts/delete-all}" method="post">
+                    <button type="submit" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 1rem;"
+                            onclick="return confirm('모든 알림을 삭제할까요?')">
+                        모두 삭제
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${alerts == null or #lists.isEmpty(alerts)}" class="card" style="text-align: center; padding: 4rem 2rem;">
+            <div style="margin-bottom: 1rem; color: var(--muted);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" style="opacity:0.35;">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                    <path d="M9 21a3 3 0 0 0 6 0"/>
+                </svg>
+            </div>
+            <p class="muted">새로운 알림이 없습니다.</p>
+        </div>
+
+        <div th:if="${alerts != null and !#lists.isEmpty(alerts)}" class="alert-list">
+            <div th:each="alert : ${alerts}"
+                 class="alert-item"
+                 th:with="isWarn=${alert.alertType == 'HIGH_RISK' or alert.alertType == 'DETERIORATION'},
+                          isInfo=${alert.alertType == 'NOTICE' or alert.alertType == 'POST_COMMENT' or alert.alertType == 'COMMENT_REPLY' or alert.alertType == 'ADMIN_MESSAGE'},
+                          isRecommend=${alert.alertType == 'RECOMMEND'},
+                          isImprove=${alert.alertType == 'IMPROVEMENT' or alert.alertType == 'IMPROVEMENT_MIN'},
+                          adminTitle=${alert.alertType == 'ADMIN_MESSAGE' ? (alert.title != null and !#strings.isEmpty(alert.title) ? alert.title : (alert.linkUrl != null and !#strings.startsWith(alert.linkUrl, '/') ? alert.linkUrl : null)) : null},
+                          adminLink=${alert.alertType == 'ADMIN_MESSAGE' and alert.linkUrl != null and #strings.startsWith(alert.linkUrl, '/') ? alert.linkUrl : null}"
+                 th:classappend="${!alert.read} ?
+                     (${isWarn} ? 'alert-item-unread' :
+                     (${isRecommend} ? 'alert-item-unread-recommend' :
+                     (${isImprove} ? 'alert-item-unread-improvement' :
+                     (${isInfo} ? 'alert-item-unread-info' : '')))) : ''">
+
+                <div class="alert-item-icon" aria-hidden="true"
+                     th:classappend="${isWarn} ? '' :
+                                    (${isRecommend} ? 'alert-item-icon-recommend' :
+                                    (${isImprove} ? 'alert-item-icon-improvement' :
+                                    (${isInfo} ? 'alert-item-icon-info' : '')))">
+
+                    <svg th:if="${isRecommend}"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <path d="M12 2 L14.09 8.26 L20.82 8.63 L15.64 12.97 L17.27 19.64 L12 16.12 L6.73 19.64 L8.36 12.97 L3.18 8.63 L9.91 8.26 Z"/>
+                    </svg>
+                    <svg th:if="${isImprove}"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                    <svg th:if="${isWarn}"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <svg th:if="${isInfo}"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                        <path d="M9 21a3 3 0 0 0 6 0"/>
+                    </svg>
+                </div>
+
+                <div class="alert-item-body">
+                    <div th:if="${!alert.read}" style="margin-bottom: 0.35rem;">
+                        <span th:if="${isRecommend}" class="alert-new-badge alert-new-badge-recommend">NEW</span>
+                        <span th:if="${isImprove}" class="alert-new-badge alert-new-badge-improvement">NEW</span>
+                        <span th:if="${isWarn}" class="alert-new-badge alert-new-badge-warn">NEW</span>
+                        <span th:if="${isInfo}" class="alert-new-badge alert-new-badge-info">NEW</span>
+                    </div>
+
+                    <th:block th:if="${alert.alertType == 'ADMIN_MESSAGE'}">
+                        <p th:if="${adminTitle != null}"
+                           class="alert-item-title"
+                           th:text="${adminTitle}"
+                           style="margin: 0 0 0.35rem;"></p>
+                        <p th:if="${alert.message != null and !#strings.isEmpty(alert.message)}"
+                           class="alert-item-content muted"
+                           th:text="${alert.message}"
+                           style="margin: 0 0 0.4rem; white-space: pre-wrap;"></p>
+                        <div th:if="${adminLink != null}" style="margin-bottom: 0.4rem;">
+                            <a th:href="${adminLink}" class="alert-shortcut alert-shortcut-info">바로가기 →</a>
+                        </div>
+                    </th:block>
+
+                    <th:block th:unless="${alert.alertType == 'ADMIN_MESSAGE'}">
+                        <p th:text="${alert.message}" style="margin: 0 0 0.4rem;"></p>
+                        <div th:if="${isWarn or isRecommend or isImprove or isInfo}" style="margin-bottom: 0.4rem;">
+                            <a th:if="${alert.alertType == 'HIGH_RISK'}" th:href="@{/counseling}"
+                               class="alert-shortcut alert-shortcut-warn">상담소 찾기 →</a>
+                            <a th:if="${alert.alertType == 'DETERIORATION'}" th:href="@{/counseling}"
+                               class="alert-shortcut alert-shortcut-warn">상담소 찾기 →</a>
+                            <a th:if="${alert.alertType == 'RECOMMEND'}" th:href="@{/recommendations}"
+                               class="alert-shortcut alert-shortcut-recommend">맞춤 추천 보기 →</a>
+                            <a th:if="${alert.alertType == 'IMPROVEMENT' or alert.alertType == 'IMPROVEMENT_MIN'}"
+                               th:href="@{/recommendations}" class="alert-shortcut alert-shortcut-improvement">맞춤 추천 보기 →</a>
+                            <a th:if="${alert.alertType == 'POST_COMMENT' or alert.alertType == 'COMMENT_REPLY'}"
+                               th:href="${alert.linkUrl != null ? alert.linkUrl : '/community/' + alert.relatedPostId}"
+                               class="alert-shortcut alert-shortcut-info">게시글 보기 →</a>
+                            <a th:if="${alert.alertType == 'NOTICE'}"
+                               th:href="${alert.linkUrl != null ? alert.linkUrl : '/notice/' + alert.noticeId}"
+                               class="alert-shortcut alert-shortcut-info">공지 보기 →</a>
+                        </div>
+                    </th:block>
+
+                    <span class="alert-item-time muted"
+                          th:text="${#temporals.format(alert.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+                </div>
+
+                <span th:if="${!alert.read}" class="alert-unread-dot"
+                      th:classappend="${isImprove} ? 'alert-unread-dot-improvement' : (${isInfo} ? 'alert-unread-dot-info' : (${isRecommend} ? 'alert-unread-dot-recommend' : ''))"
+                      aria-label="읽지 않음"></span>
+
+                <form th:action="@{/alerts/{id}/delete(id=${alert.id})}" method="post" style="margin: 0;">
+                    <button type="submit" class="alert-delete-btn" aria-label="알림 삭제">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

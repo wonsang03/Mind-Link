@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,35 +23,25 @@ import java.util.Set;
 
 /**
  * AI 종합 보고서(위로 편지) 위저드 파이프라인.
- *
- * 순서:
- *   1) 입력 검증 (필수 자유 입력 5개, 자가진단은 선택)
- *   2) 자가진단 채점 (AssessmentService → 점수·구간 라벨)
- *   3) 정보 종합 (CareContextAggregator) — DB 활동 데이터는 일절 참조 안 함
- *   4) 보안 필터 — 입력 마스킹/위기 표현 차단은 Aggregator 호출 전에 적용
- *   5) Gemini 편지 생성
- *   6) 출력 필터 — 의료 진단·자해 조장·약물 처방 표현 제거
- *   7) DB 저장
- * 한도: 같은 사용자 24시간 내 N 회 (기본 3)
+ * 1) 입력 검증 → 2) 자가진단 채점 → 3) 정보 종합 → 4) 입력 안전 필터 →
+ * 5) OpenAI 편지 생성 → 6) 출력 안전 필터 + fallback → 7) DB 저장.
+ * 한도: 같은 사용자 24시간 내 N 회 (기본 3).
  */
 @Service
 public class CareReportService {
 
     private static final Logger log = LoggerFactory.getLogger(CareReportService.class);
 
-    /** 위저드에서 선택 가능한 자가진단 종류 */
     private static final List<String> OPTIONAL_ASSESSMENTS = List.of("stress", "depression", "anxiety");
 
-    /** 자가진단 결과가 '고위험' 수준이면 ELEVATED 로 분류할 라벨 (대소문자 무관) */
     private static final Set<String> HIGH_RISK_LEVELS = Set.of(
             "고위험군", "중증", "중등도-중증", "높음", "심함", "심한 우울", "심한 불안");
 
     private final AssessmentService assessmentService;
     private final CareContextAggregator aggregator;
     private final CareSafetyFilter safetyFilter;
-    private final CareLetterAiRouter letterAi;
+    private final CareLetterService letterService;
     private final CareReportRepository reportRepository;
-    private final CareDailyInputRepository dailyInputRepository;
 
     @Value("${care-report.daily-limit:3}")
     private int dailyLimit;
@@ -58,15 +49,13 @@ public class CareReportService {
     public CareReportService(AssessmentService assessmentService,
                               CareContextAggregator aggregator,
                               CareSafetyFilter safetyFilter,
-                              CareLetterAiRouter letterAi,
-                              CareReportRepository reportRepository,
-                              CareDailyInputRepository dailyInputRepository) {
+                              CareLetterService letterService,
+                              CareReportRepository reportRepository) {
         this.assessmentService = assessmentService;
         this.aggregator = aggregator;
         this.safetyFilter = safetyFilter;
-        this.letterAi = letterAi;
+        this.letterService = letterService;
         this.reportRepository = reportRepository;
-        this.dailyInputRepository = dailyInputRepository;
     }
 
     @Transactional
@@ -79,7 +68,6 @@ public class CareReportService {
         }
         validateRequired(req);
 
-        // 한도 체크
         LocalDateTime since = LocalDateTime.now().minusDays(1);
         long recentCount = reportRepository.countByUserIdAndCreatedAtAfter(user.getId(), since);
         if (recentCount >= dailyLimit) {
@@ -87,44 +75,34 @@ public class CareReportService {
                     "하루에 최대 " + dailyLimit + "회까지 보고서를 받을 수 있어요. 잠시 후 다시 시도해 주세요.");
         }
 
-        // 1) 입력 정제 — 안전 필터를 통과시킨 값만 AI 에 전달
-        String safeMood = safetyFilter.sanitizeUserInput(req.getMood(), 300);
-        String safeHardship = safetyFilter.sanitizeUserInput(req.getRecentHardship(), 700);
-        String safeConcern = safetyFilter.sanitizeUserInput(req.getConcern(), 700);
-        String safeComfort = safetyFilter.sanitizeUserInput(req.getSmallComfort(), 500);
-        String safeHope = safetyFilter.sanitizeUserInput(req.getHopeForward(), 500);
-        String safeMessage = safetyFilter.sanitizeUserInput(req.getOneLineMessage(), 400);
+        // 입력 정제 — 안전 필터를 통과시킨 값만 AI 에 전달
+        String safeMood = safetyFilter.sanitizeUserInput(req.mood(), 300);
+        String safeHardship = safetyFilter.sanitizeUserInput(req.recentHardship(), 700);
+        String safeConcern = safetyFilter.sanitizeUserInput(req.concern(), 700);
+        String safeComfort = safetyFilter.sanitizeUserInput(req.smallComfort(), 500);
+        String safeHope = safetyFilter.sanitizeUserInput(req.hopeForward(), 500);
+        String safeMessage = safetyFilter.sanitizeUserInput(req.oneLineMessage(), 400);
 
-        // 2) 자가진단 채점 (완료한 검사만)
+        // 완료된 자가진단만 채점
         List<CareContextAggregator.AssessmentScore> scores =
-                scoreCompletedAssessments(req.getAssessments());
+                scoreCompletedAssessments(req.assessments());
 
-        // 3) 정보 종합
+        // 정보 종합 → AI 스냅샷
         CareContextAggregator.WizardInput wizardInput = new CareContextAggregator.WizardInput(
                 safeMood, safeHardship, safeConcern, safeComfort, safeHope, safeMessage);
         CareContextAggregator.Snapshot snapshot = aggregator.collect(user, wizardInput, scores);
-
-        // 일일 입력 저장
-        CareDailyInput entity = new CareDailyInput();
-        entity.setUserId(user.getId());
-        entity.setMood(notBlankOrNull(req.getMood(), 500));
-        entity.setHardship(notBlankOrNull(req.getRecentHardship(), 1000));
-        entity.setCurrentThought(notBlankOrNull(combineTextFields(
-                req.getConcern(), req.getSmallComfort(), req.getHopeForward(), req.getOneLineMessage()), 1000));
-        dailyInputRepository.save(entity);
-
         CareReport.RiskLevel risk = snapshot.riskLevel();
 
-        // 5) LLM 호출 (care.llm.provider=openai 기본, .env OPENAI_API_KEY)
-        CareLetterAiResult.GenerateResult aiResult =
-                letterAi.generateLetter(snapshot.snapshotJson(), risk);
+        // LLM 호출
+        CareLetterService.GenerateResult aiResult =
+                letterService.generateLetter(snapshot.snapshotJson(), risk);
 
-        // 6) 출력 필터 + fallback
+        // 출력 필터 + fallback
         String finalLetter;
         List<String> themes;
         boolean usedFallback;
         if (aiResult.isSuccess()) {
-            CareLetterAiResult.LetterDraft draft = aiResult.draft().orElseThrow();
+            CareLetterService.LetterDraft draft = aiResult.draft().orElseThrow();
             CareSafetyFilter.LetterReview review =
                     safetyFilter.reviewGeneratedLetter(draft.letterBody(), risk);
             if (review.rejected() || review.sanitizedLetter() == null) {
@@ -138,13 +116,11 @@ public class CareReportService {
                 usedFallback = false;
             }
         } else {
-            finalLetter = buildFallbackLetter(snapshot, scores, risk,
-                    resolveFallbackReason(aiResult));
+            finalLetter = buildFallbackLetter(snapshot, scores, risk, resolveFallbackReason(aiResult));
             themes = List.of();
             usedFallback = true;
         }
 
-        // 7) 저장
         CareReport report = new CareReport();
         report.setUserId(user.getId());
         report.setSnapshotJson(snapshot.snapshotJson());
@@ -153,8 +129,8 @@ public class CareReportService {
         report.setThemes(joinThemes(themes));
         CareReport saved = reportRepository.save(report);
 
-        log.info("CareReport(wizard) generated userId={} reportId={} risk={} provider={} fallback={}",
-                user.getId(), saved.getId(), risk, letterAi.activeProvider(), usedFallback);
+        log.info("CareReport generated userId={} reportId={} risk={} fallback={}",
+                user.getId(), saved.getId(), risk, usedFallback);
 
         return new GenerationResult(saved, themes, usedFallback);
     }
@@ -180,30 +156,27 @@ public class CareReportService {
     // ─────────────────────────────────────────────────────────────────────
 
     private void validateRequired(CareReportDtos.GenerateRequest req) {
-        if (blank(req.getMood())) throw new ValidationException("「오늘의 기분」을 입력해 주세요.");
-        if (blank(req.getRecentHardship())) throw new ValidationException("「최근 가장 힘든 일」을 입력해 주세요.");
-        if (blank(req.getConcern())) throw new ValidationException("「요즘 가장 큰 고민」을 입력해 주세요.");
-        if (blank(req.getSmallComfort())) throw new ValidationException("「잠깐이라도 위로가 됐던 순간」을 입력해 주세요.");
-        if (blank(req.getHopeForward())) throw new ValidationException("「앞으로 바라는 한 가지」를 입력해 주세요.");
+        if (blank(req.mood())) throw new ValidationException("「오늘의 기분」을 입력해 주세요.");
+        if (blank(req.recentHardship())) throw new ValidationException("「최근 가장 힘든 일」을 입력해 주세요.");
+        if (blank(req.concern())) throw new ValidationException("「요즘 가장 큰 고민」을 입력해 주세요.");
+        if (blank(req.smallComfort())) throw new ValidationException("「잠깐이라도 위로가 됐던 순간」을 입력해 주세요.");
+        if (blank(req.hopeForward())) throw new ValidationException("「앞으로 바라는 한 가지」를 입력해 주세요.");
     }
 
-    /** JSON·희소 배열에서 null 슬롯이 오는 경우를 막기 위한 완료 검사 */
     private static boolean isCompleteAnswers(List<Integer> answers, int questionCount) {
         if (answers == null || questionCount <= 0) return false;
         for (int i = 0; i < questionCount; i++) {
             if (i >= answers.size()) return false;
-            Integer v = answers.get(i);
-            if (v == null) return false;
+            if (answers.get(i) == null) return false;
         }
         return true;
     }
 
-    /** 완료한 자가진단만 채점. 미완료·미응시 검사는 건너뜀 */
     private List<CareContextAggregator.AssessmentScore> scoreCompletedAssessments(Map<String, List<Integer>> answers) {
         if (answers == null || answers.isEmpty()) {
             return List.of();
         }
-        List<CareContextAggregator.AssessmentScore> scored = new java.util.ArrayList<>();
+        List<CareContextAggregator.AssessmentScore> scored = new ArrayList<>();
         for (String typeKey : OPTIONAL_ASSESSMENTS) {
             if (!answers.containsKey(typeKey)) continue;
 
@@ -240,9 +213,7 @@ public class CareReportService {
         return scored;
     }
 
-    /**
-     * 위저드는 선택지 인덱스(0-based)를 보낸다. 과거/오류 payload 에 점수 값이 오면 score 로 매칭한다.
-     */
+    /** 위저드는 선택지 인덱스(0-based)를 보낸다. 과거 payload 가 점수로 오면 score 로 매칭. */
     private static int resolveChoiceIndex(int answerVal, List<AssessmentChoice> choices) {
         if (answerVal >= 0 && answerVal < choices.size()) {
             return answerVal;
@@ -274,24 +245,7 @@ public class CareReportService {
         return s == null || s.trim().isEmpty();
     }
 
-    private static String notBlankOrNull(String s, int max) {
-        if (s == null) return null;
-        String t = s.trim();
-        if (t.isBlank()) return null;
-        return t.length() <= max ? t : t.substring(0, max);
-    }
-
-    private static String combineTextFields(String... parts) {
-        StringBuilder sb = new StringBuilder();
-        for (String p : parts) {
-            if (p == null || p.isBlank()) continue;
-            if (sb.length() > 0) sb.append("\n\n");
-            sb.append(p.trim());
-        }
-        return sb.isEmpty() ? null : sb.toString();
-    }
-
-    private static String resolveFallbackReason(CareLetterAiResult.GenerateResult aiResult) {
+    private static String resolveFallbackReason(CareLetterService.GenerateResult aiResult) {
         if (aiResult.userHint() != null && !aiResult.userHint().isBlank()) {
             return aiResult.userHint() + " 기본 위로 메시지를 보여드려요.";
         }
@@ -299,7 +253,7 @@ public class CareReportService {
             case DISABLED -> "AI API 키가 설정되지 않아 기본 위로 메시지를 보여드려요.";
             case QUOTA_EXCEEDED ->
                     "AI API 한도 또는 잔액 문제로 편지를 만들지 못했어요. 기본 위로 메시지를 보여드려요.";
-            case PARSE_ERROR, TOO_SHORT ->
+            case PARSE_ERROR ->
                     "AI 응답 형식이 올바르지 않아 기본 위로 메시지를 보여드려요.";
             default -> "AI 응답을 받지 못해 기본 위로 메시지를 보여드려요.";
         };
@@ -345,7 +299,7 @@ public class CareReportService {
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // 예외
+    // 예외 / 결과
     // ─────────────────────────────────────────────────────────────────────
 
     public static class ValidationException extends RuntimeException {

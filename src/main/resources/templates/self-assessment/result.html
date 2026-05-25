@@ -6,39 +6,84 @@
 
 <main>
     <div class="page-narrow" style="max-width: 48rem;">
-        <div class="card">
+        <div th:if="${saveResultHint}" class="alert alert-info mb-6" th:text="${saveResultHint}">로그인 안내</div>
+
+        <!-- 검사 직후 알림 배너 (고위험·악화·추천·개선) -->
+        <div th:if="${resultAlert}" class="alert alert-deterioration mb-6"
+             th:classappend="${resultAlert.alertType == 'IMPROVEMENT' or resultAlert.alertType == 'IMPROVEMENT_MIN'} ? ' alert-improvement-banner' : ''">
+            <div class="alert-deterioration-inner">
+                <span class="alert-deterioration-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </span>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;"
+                         th:switch="${resultAlert.alertType}">
+                        <span th:case="'DETERIORATION'">이전보다 마음이 조금 더 힘들어진 것 같아요</span>
+                        <span th:case="'HIGH_RISK'">검사 결과, 지금 많이 힘드실 수 있어요</span>
+                        <span th:case="'RECOMMEND'">꾸준한 관리를 위한 안내가 도착했어요</span>
+                        <span th:case="'IMPROVEMENT'">이전보다 나아진 것 같아요</span>
+                        <span th:case="'IMPROVEMENT_MIN'">건강한 상태를 잘 유지하고 계세요</span>
+                        <span th:case="*">새 알림이 있습니다</span>
+                    </div>
+                    <p class="muted" th:text="${resultAlert.message}" style="margin: 0; font-size: 0.9rem;"></p>
+                </div>
+                <a th:href="@{/alerts}" class="alert-deterioration-link">알림 보기 →</a>
+            </div>
+        </div>
+
+        <div class="card" th:classappend="${highRisk} ? 'card-result-highrisk'">
             <div class="center mb-8">
-                <div class="icon-circle icon-circle-lg" style="margin: 0 auto 1rem; width: 5rem; height: 5rem;">
+                <div class="icon-circle icon-circle-lg"
+                     style="margin: 0 auto 1rem; width: 5rem; height: 5rem;"
+                     th:classappend="${highRisk} ? 'icon-circle-highrisk'">
                     <span class="icon-emoji">✓</span>
                 </div>
-                <h2 class="mb-4">검사 완료</h2>
+                <h2 class="mb-4" th:text="${highRisk} ? '지금 많이 힘드시겠어요' : '검사 완료'">검사 완료</h2>
                 <p class="muted" th:text="${assessment.name}">검사 제목</p>
             </div>
 
             <!-- 일반 결과 (번아웃 제외) -->
             <div th:unless="${isBurnout}"
-                 style="background: var(--secondary); border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+                 class="result-score-box"
+                 th:classappend="${highRisk} ? 'result-score-box-highrisk'">
                 <div class="muted mb-2">총점</div>
-                <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;" th:text="${score}">0</div>
-                <div style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary);" th:text="${level}">정상</div>
+                <div class="result-score-num" th:classappend="${highRisk} ? 'result-score-num-highrisk'"
+                     th:text="${score}">0</div>
+                <div class="result-level" th:classappend="${highRisk} ? 'result-level-highrisk'"
+                     th:text="${level}">정상</div>
                 <p class="muted" th:text="${message}">메시지</p>
             </div>
 
             <!-- 번아웃 결과 (2파트) -->
             <div th:if="${isBurnout}" style="margin-bottom: 2rem;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                    <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                    <div class="result-score-box result-score-box-sm"
+                         th:classappend="${highRisk} ? 'result-score-box-highrisk'">
                         <div class="muted mb-2" style="font-size: 0.875rem;">Part 1. 개인 번아웃</div>
-                        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem;" th:text="${personalScore}">0</div>
-                        <div style="font-size: 1rem; color: var(--primary); font-weight: 600;" th:text="${personalLevel}">낮음</div>
+                        <div class="result-score-num result-score-num-sm"
+                             th:classappend="${highRisk} ? 'result-score-num-highrisk'"
+                             th:text="${personalScore}">0</div>
+                        <div class="result-level"
+                             th:classappend="${highRisk} ? 'result-level-highrisk'"
+                             th:text="${personalLevel}">낮음</div>
                     </div>
-                    <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                    <div class="result-score-box result-score-box-sm"
+                         th:classappend="${highRisk} ? 'result-score-box-highrisk'">
                         <div class="muted mb-2" style="font-size: 0.875rem;">Part 2. 업무 번아웃</div>
-                        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem;" th:text="${workScore}">0</div>
-                        <div style="font-size: 1rem; color: var(--primary); font-weight: 600;" th:text="${workLevel}">낮음</div>
+                        <div class="result-score-num result-score-num-sm"
+                             th:classappend="${highRisk} ? 'result-score-num-highrisk'"
+                             th:text="${workScore}">0</div>
+                        <div class="result-level"
+                             th:classappend="${highRisk} ? 'result-level-highrisk'"
+                             th:text="${workLevel}">낮음</div>
                     </div>
                 </div>
-                <div style="background: var(--secondary); border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+                <div class="result-score-box" style="padding: 1.25rem;"
+                     th:classappend="${highRisk} ? 'result-score-box-highrisk'">
                     <p class="muted" th:text="${message}">메시지</p>
                 </div>
             </div>
@@ -47,18 +92,18 @@
                 <h3 class="mb-4">추천 사항</h3>
 
                 <div th:if="${highRisk}" class="alert alert-error mb-4">
-                    <h4 class="mb-2">⚠ 전문가 상담 권장</h4>
-                    <p class="mb-4">현재 상태에서는 전문가의 도움을 받는 것이 좋습니다.</p>
+                    <h4 class="mb-2">혼자 버티지 않아도 괜찮아요</h4>
+                    <p class="mb-4">지금 많이 힘드시죠? 도움을 받아보는 것도 충분히 용기 있는 선택이에요.</p>
                     <a th:href="@{/counseling}" style="color: var(--destructive); text-decoration: underline;">
                         상담 예약하기 →
                     </a>
                 </div>
 
                 <div class="alert alert-info mb-4">
-                    <h4 class="mb-2">🤖 AI 위로 편지</h4>
+                    <h4 class="mb-2">🤖 AI 정서 케어</h4>
                     <p class="mb-4 muted">키워드 기반 상담 데모를 체험해 보세요. (실제 AI API 연동 예정)</p>
-                    <a th:href="@{/care-report/wizard}" style="color: var(--primary); text-decoration: underline;">
-                        AI 위로 편지 받기 →
+                    <a th:href="@{/ai-care}" style="color: var(--primary); text-decoration: underline;">
+                        AI 케어 시작하기 →
                     </a>
                 </div>
 

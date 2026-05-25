@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 게시글 작성')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('posts')}"></aside>
+
+    <div class="admin-main">
+        <a th:href="@{/admin/posts}" class="admin-back-btn">← 게시글 목록</a>
+        <h1 style="margin:1rem 0 1.5rem; font-size:1.35rem;">게시글 작성</h1>
+
+        <form th:action="@{/admin/posts/new}" method="post" enctype="multipart/form-data"
+              class="card" style="max-width:48rem; padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+            <div class="form-group">
+                <label class="admin-field-label">카테고리</label>
+                <select name="category" class="form-select" required>
+                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}">스트레스</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="admin-field-label">제목</label>
+                <input class="form-input" type="text" name="title" placeholder="제목을 입력하세요" required maxlength="200"/>
+            </div>
+            <div class="form-group">
+                <label class="admin-field-label">내용</label>
+                <textarea class="form-textarea" name="content" rows="14" placeholder="내용을 입력하세요" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="admin-field-label">파일 첨부 <span class="muted" style="font-weight:normal;">(선택)</span></label>
+                <input type="file" name="files" multiple
+                       accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                       class="form-input" style="padding:0.4rem 0.6rem;"/>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+                <button type="submit" class="btn btn-primary">작성하기</button>
+                <a th:href="@{/admin/posts}" class="btn btn-outline">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

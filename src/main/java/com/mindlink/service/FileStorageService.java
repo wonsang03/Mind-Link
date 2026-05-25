@@ -129,6 +129,34 @@ public class FileStorageService {
                 .stream().map(AttachmentResponse::new).collect(Collectors.toList());
     }
 
+    public String saveProfileImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) return null;
+        String original = Objects.requireNonNullElse(file.getOriginalFilename(), "profile");
+        String ext = extension(original).toLowerCase();
+        if (!IMAGE_EXTS.contains(ext)) {
+            throw new IllegalArgumentException("프로필 사진은 이미지 파일만 업로드할 수 있습니다. (jpg/jpeg/png/gif/webp)");
+        }
+        long maxProfileSize = 5L * 1024 * 1024;
+        if (file.getSize() > maxProfileSize) {
+            throw new IllegalArgumentException("프로필 사진 크기가 5MB를 초과합니다.");
+        }
+        String stored = UUID.randomUUID() + "." + ext;
+        try {
+            file.transferTo(uploadPath.resolve(stored));
+        } catch (IOException e) {
+            throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
+        }
+        return "/uploads/" + stored;
+    }
+
+    public void deleteProfileImage(String profileImageUrl) {
+        if (profileImageUrl == null || profileImageUrl.isBlank()) return;
+        String stored = profileImageUrl.startsWith("/uploads/")
+                ? profileImageUrl.substring("/uploads/".length())
+                : profileImageUrl;
+        deleteFile(stored);
+    }
+
     private void deleteFile(String storedFileName) {
         if (storedFileName == null || storedFileName.isBlank()) return;
         try {

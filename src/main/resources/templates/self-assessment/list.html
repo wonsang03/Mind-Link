@@ -6,10 +6,20 @@
 
 <main>
     <div class="page-narrow">
-        <h1 class="mb-4">자가진단</h1>
-        <p class="muted mb-8" style="margin-bottom: 3rem;">
-            과학적으로 검증된 심리 검사 도구로 현재 나의 마음 상태를 확인해보세요.<br/>
-            모든 검사는 무료이며, 결과는 안전하게 보관됩니다.
+        <div class="page-header">
+            <h1>자가진단</h1>
+            <p class="muted">
+                과학적으로 검증된 심리 검사 도구로 현재 나의 마음 상태를 확인해보세요.<br/>
+                모든 검사는 무료이며, 결과는 안전하게 보관됩니다.
+            </p>
+        </div>
+        <div th:if="${loginUser != null}" class="alert alert-info mb-8">
+            <strong>알림 안내</strong> — 로그인 상태로 검사하면 결과가 저장됩니다.
+            <strong>고위험</strong>이거나 <strong>이전보다 악화</strong>되면 상단 메뉴 <a th:href="@{/alerts}" style="color: var(--primary); font-weight: 600;">알림</a>에 표시됩니다.
+            (첫 검사는 비교할 이전 결과가 없어 악화 알림은 두 번째 검사부터 가능합니다.)
+        </div>
+        <p th:if="${loginUser == null}" class="muted mb-8" style="margin-bottom: 3rem;">
+            <a th:href="@{/login}" style="color: var(--primary);">로그인</a> 후 검사하면 결과 저장·알림 기능을 사용할 수 있습니다.
         </p>
 
         <div class="grid grid-2">

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 게시글 수정')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('posts')}"></aside>
+
+    <div class="admin-main">
+        <a th:href="@{/admin/posts}" class="admin-back-btn">← 게시글 목록</a>
+        <h1 style="margin:1rem 0 1.5rem; font-size:1.35rem;">게시글 수정</h1>
+
+        <form th:action="@{/admin/posts/{id}/edit(id=${post.id})}" method="post"
+              class="card" style="max-width:48rem; padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+            <div class="form-group">
+                <label style="display:block; margin-bottom:0.35rem; font-size:0.9rem; color:var(--muted-foreground);">제목</label>
+                <input class="form-input" type="text" name="title" th:value="${post.title}" required/>
+            </div>
+            <div class="form-group">
+                <label style="display:block; margin-bottom:0.35rem; font-size:0.9rem; color:var(--muted-foreground);">분류</label>
+                <select name="category" class="form-select" required>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat}"
+                            th:text="${cat}"
+                            th:selected="${cat == post.category}">스트레스</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display:block; margin-bottom:0.35rem; font-size:0.9rem; color:var(--muted-foreground);">내용</label>
+                <textarea class="form-textarea" name="content" rows="14" required
+                          th:text="${post.content}"></textarea>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+                <button type="submit" class="btn btn-primary">저장</button>
+                <a th:href="@{/admin/posts}" class="btn btn-outline">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

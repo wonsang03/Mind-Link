@@ -9,7 +9,6 @@ import com.mindlink.domain.AssessmentType;
 import com.mindlink.domain.User;
 import com.mindlink.service.AssessmentService;
 import com.mindlink.service.UserService;
-import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,17 +25,16 @@ import java.util.Optional;
 
 /**
  * AI 종합 보고서 위저드 + 결과/목록 페이지.
- *  - /care-report           — /care-report/wizard 로 리다이렉트
- *  - /care-report/wizard    — 10단계 온보딩 위저드 (단일 페이지, JS 가 step 전환)
- *  - /care-report/list      — 내 보고서 목록
- *  - /care-report/{id}      — 편지 읽기
+ *  /care-report           → /care-report/wizard 리다이렉트
+ *  /care-report/wizard    10단계 위저드
+ *  /care-report/list      내 보고서 목록
+ *  /care-report/{id}      편지 읽기
  * 비로그인은 모두 /login 으로.
  */
 @Controller
 @RequestMapping("/care-report")
 public class CareReportPageController {
 
-    /** 위저드에 보낼 자가진단 순서 — 명세 4단계 표(스트레스→우울→불안) */
     private static final List<String> WIZARD_ASSESSMENTS = List.of("stress", "depression", "anxiety");
 
     private final CareReportService service;
@@ -58,10 +57,9 @@ public class CareReportPageController {
 
     @GetMapping("/wizard")
     public String wizard(HttpSession session, Model model) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return "redirect:/login";
 
-        // 자가진단 3종을 위저드용 JSON 으로 직렬화 (문항·선택지를 클라이언트에 노출)
         ArrayNode arr = mapper.createArrayNode();
         for (String typeKey : WIZARD_ASSESSMENTS) {
             Optional<AssessmentType> opt = assessmentService.findByTypeKey(typeKey);
@@ -101,7 +99,7 @@ public class CareReportPageController {
 
     @GetMapping("/list")
     public String list(HttpSession session, Model model) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return "redirect:/login";
         List<CareReport> reports = service.myList(user.getId());
         List<Map<String, Object>> items = new ArrayList<>();
@@ -110,7 +108,7 @@ public class CareReportPageController {
             m.put("id", r.getId());
             m.put("createdAt", r.getCreatedAt());
             m.put("riskLevel", r.getRiskLevel() != null ? r.getRiskLevel().name() : "NORMAL");
-            m.put("excerpt", excerpt(r.getLetterBody(), 140));
+            m.put("excerpt", CareWebSupport.excerpt(r.getLetterBody(), 140));
             m.put("themes", r.getThemes() == null ? "" : r.getThemes());
             items.add(m);
         }
@@ -120,7 +118,7 @@ public class CareReportPageController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, HttpSession session, Model model) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return "redirect:/login";
         Optional<CareReport> opt = service.findMine(user.getId(), id);
         if (opt.isEmpty()) return "redirect:/care-report/list";
@@ -131,26 +129,12 @@ public class CareReportPageController {
         return "care-report/detail";
     }
 
-    private User currentUser(HttpSession session) {
-        Object uid = session.getAttribute(SessionConst.LOGIN_USER_ID);
-        if (uid instanceof Long id) {
-            return userService.findById(id).orElse(null);
-        }
-        return null;
-    }
-
     private static List<String> splitParagraphs(String body) {
         if (body == null || body.isBlank()) return List.of();
         String[] parts = body.replace("\r", "").split("\n\\s*\n");
-        return java.util.Arrays.stream(parts)
+        return Arrays.stream(parts)
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
                 .toList();
-    }
-
-    private static String excerpt(String body, int max) {
-        if (body == null || body.isBlank()) return "";
-        String t = body.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim();
-        return t.length() <= max ? t : t.substring(0, max) + "…";
     }
 }

@@ -1,15 +1,49 @@
 package com.mindlink.config;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.env.Environment;
 
 @ConfigurationProperties(prefix = "naver.openapi")
-public class NaverProperties {
+public class NaverProperties implements InitializingBean {
 
     private String clientId = "";
     private String clientSecret = "";
     private String localSearchUrl = "https://openapi.naver.com/v1/search/local.json";
     private String defaultQuery = "심리상담센터";
     private int display = 20;
+
+    @Autowired
+    private Environment environment;
+
+    @Override
+    public void afterPropertiesSet() {
+        if (!isRealKey(clientId)) {
+            clientId = firstRealKey("naver.openapi.client-id",
+                    "NAVER_OPENAPI_CLIENT_ID", "NAVER_API_CLIENT_ID");
+        }
+        if (!isRealKey(clientSecret)) {
+            clientSecret = firstRealKey("naver.openapi.client-secret",
+                    "NAVER_OPENAPI_CLIENT_SECRET", "NAVER_API_CLIENT_SECRET");
+        }
+    }
+
+    private String firstRealKey(String... keys) {
+        for (String key : keys) {
+            if (environment != null) {
+                String v = environment.getProperty(key);
+                if (isRealKey(v)) {
+                    return v.trim();
+                }
+            }
+            String env = System.getenv(key);
+            if (isRealKey(env)) {
+                return env.trim();
+            }
+        }
+        return "";
+    }
 
     public boolean isConfigured() {
         return isRealKey(clientId) && isRealKey(clientSecret);

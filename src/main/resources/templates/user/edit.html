@@ -8,48 +8,119 @@
     <div class="page">
         <section class="hero" style="padding: 3rem 0 2rem;">
             <h1 class="mb-2">회원 정보 수정</h1>
-            <p class="text-muted">이름과 이메일을 수정할 수 있습니다.</p>
+            <p class="muted">개인 정보를 수정할 수 있습니다.</p>
         </section>
 
-        <section style="max-width: 480px; margin: 0 auto 3rem;">
+        <section style="max-width: 520px; margin: 0 auto 3rem;">
             <div class="card" style="padding: 2rem;">
-                <form th:action="@{/user/me/edit}" method="post" th:object="${updateForm}">
+                <form th:action="@{/user/me/edit}" method="post"
+                      enctype="multipart/form-data"
+                      th:object="${updateForm}">
+
+                    <!-- 프로필 사진 -->
+                    <div style="margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+                        <label style="display: block; font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.75rem; font-weight: 500;">프로필 사진</label>
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <div class="avatar-circle avatar-lg" id="avatarPreview">
+                                <img th:if="${user.profileImageUrl != null}"
+                                     th:src="${user.profileImageUrl}"
+                                     alt="프로필 사진"
+                                     id="avatarImg"/>
+                                <span th:if="${user.profileImageUrl == null}" id="avatarPlaceholder">👤</span>
+                            </div>
+                            <div>
+                                <label for="profileImage" class="avatar-upload-label">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    사진 변경
+                                </label>
+                                <input type="file" id="profileImage" name="profileImage"
+                                       accept="image/jpeg,image/png,image/gif,image/webp"
+                                       style="display: none;"
+                                       onchange="previewProfile(this)"/>
+                                <p class="muted" style="font-size: 0.8rem; margin-top: 0.4rem;">jpg/png/gif/webp · 최대 5MB</p>
+                                <div th:if="${imageError}" style="font-size: 0.82rem; color: var(--destructive); margin-top: 0.3rem;" th:text="${imageError}"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
 
+                        <!-- 필수 항목 -->
                         <div>
-                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이름</label>
-                            <input type="text" th:field="*{name}"
-                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
-                                   placeholder="이름을 입력하세요"/>
+                            <label class="form-group" style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.4rem; display: block;">
+                                이름 <span style="color: var(--destructive);">*</span>
+                            </label>
+                            <input type="text" th:field="*{name}" class="form-input" placeholder="이름을 입력하세요"/>
                             <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
-                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
                         </div>
 
                         <div>
-                            <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.4rem;">이메일</label>
-                            <input type="email" th:field="*{email}"
-                                   style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;"
-                                   placeholder="이메일을 입력하세요"/>
+                            <label style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.4rem; display: block;">
+                                이메일 <span style="color: var(--destructive);">*</span>
+                            </label>
+                            <input type="email" th:field="*{email}" class="form-input" placeholder="이메일을 입력하세요"/>
                             <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
-                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--danger, #e53e3e);"></p>
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.5rem 0.5rem; align-items: center; padding-top: 0.25rem; border-top: 1px solid var(--border);">
-                            <span style="font-size: 0.9rem; color: var(--text-muted);">등급</span>
+                        <!-- 선택 항목 구분선 -->
+                        <div style="padding-top: 0.5rem; border-top: 1px solid var(--border);">
+                            <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">아래 항목은 선택 입력입니다.</p>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.4rem; display: block;">닉네임</label>
+                            <input type="text" th:field="*{nickname}" class="form-input" placeholder="닉네임을 입력하세요"/>
+                            <p th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.4rem; display: block;">전화번호</label>
+                            <input type="tel" th:field="*{phone}" class="form-input" placeholder="010-0000-0000"/>
+                            <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.4rem; display: block;">거주 지역</label>
+                            <input type="text" th:field="*{region}" class="form-input" placeholder="예: 서울시 마포구"/>
+                            <p th:if="${#fields.hasErrors('region')}" th:errors="*{region}"
+                               style="margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--destructive);"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.9375rem;">
+                                <input type="checkbox" th:field="*{notificationEnabled}"
+                                       style="width: 1rem; height: 1rem; accent-color: var(--primary); cursor: pointer; flex-shrink: 0;"/>
+                                <span>알림 수신</span>
+                            </label>
+                            <p class="muted" style="font-size: 0.8rem; margin-top: 0.3rem; padding-left: 1.6rem;">서비스 알림 및 공지사항 수신에 동의합니다.</p>
+                        </div>
+
+                        <!-- 변경 불가 항목 -->
+                        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 0.5rem 0.75rem; align-items: center;
+                                    padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                            <span class="muted" style="font-size: 0.875rem;">등급</span>
                             <span th:switch="${user.role.name()}">
                                 <span th:case="'ADMIN'" class="tag tag-primary">관리자</span>
                                 <span th:case="'COUNSELOR'" class="tag tag-secondary">상담사</span>
                                 <span th:case="*" class="tag">일반 사용자</span>
                             </span>
-                            <span style="font-size: 0.9rem; color: var(--text-muted);">가입일</span>
+                            <span class="muted" style="font-size: 0.875rem;">가입일</span>
                             <span th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}" style="font-size: 0.9rem;">2026-01-01</span>
                         </div>
 
                     </div>
 
-                    <div style="margin-top: 1.75rem; display: flex; gap: 0.75rem;">
-                        <button type="submit" class="btn btn-primary">저장</button>
-                        <a th:href="@{/user/me}" class="btn btn-secondary">취소</a>
+                    <div style="margin-top: 1.75rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1; min-width: 100px;">저장</button>
+                        <a th:href="@{/user/me}" class="btn btn-secondary" style="flex: 1; min-width: 100px;">취소</a>
                     </div>
                 </form>
             </div>
@@ -58,5 +129,17 @@
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+function previewProfile(input) {
+    if (!input.files || !input.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var preview = document.getElementById('avatarPreview');
+        preview.innerHTML = '<img src="' + e.target.result + '" alt="프로필 미리보기" style="width:100%; height:100%; object-fit:cover; display:block;"/>';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>
 </body>
 </html>

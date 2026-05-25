@@ -13,9 +13,12 @@ import java.util.Optional;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final UserNotificationService notificationService;
 
-    public NoticeService(NoticeRepository noticeRepository) {
+    public NoticeService(NoticeRepository noticeRepository,
+                         UserNotificationService notificationService) {
         this.noticeRepository = noticeRepository;
+        this.notificationService = notificationService;
     }
 
     public List<Notice> findAll() {
@@ -27,13 +30,17 @@ public class NoticeService {
     }
 
     @Transactional
-    public Notice create(NoticeRequest req) {
+    public Notice create(NoticeRequest req, boolean sendPushAlert) {
         Notice notice = new Notice();
         notice.setCategory(req.getCategory());
         notice.setTitle(req.getTitle());
         notice.setSummary(req.getSummary());
         notice.setContent(req.getContent());
-        return noticeRepository.save(notice);
+        Notice saved = noticeRepository.save(notice);
+        if (sendPushAlert) {
+            notificationService.notifyNewNotice(saved);
+        }
+        return saved;
     }
 
     @Transactional

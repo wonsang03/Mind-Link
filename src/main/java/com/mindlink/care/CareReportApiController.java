@@ -2,7 +2,6 @@ package com.mindlink.care;
 
 import com.mindlink.domain.User;
 import com.mindlink.service.UserService;
-import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,10 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * REST API for the AI 종합 보고서 feature.
- * 로그인 검증은 HttpSession 의 LOGIN_USER_ID 로만 수행한다(SessionConst, AuthController 패턴).
- * - 비로그인: 401
- * - 타인 보고서 ID 접근: 404 (존재 자체를 흘리지 않기 위해 403 대신 404)
+ * AI 종합 보고서 REST API.
+ * 비로그인: 401 · 타인 보고서 ID: 404 (존재 노출 방지)
  */
 @RestController
 @RequestMapping("/api/care-reports")
@@ -45,12 +42,12 @@ public class CareReportApiController {
 
     @GetMapping
     public ResponseEntity<?> listMine(HttpSession session) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return unauthorized();
         List<CareReportDtos.SummaryResponse> list = service.myList(user.getId()).stream()
                 .map(r -> new CareReportDtos.SummaryResponse(
                         r.getId(), r.getCreatedAt(),
-                        excerpt(r.getLetterBody(), 140),
+                        CareWebSupport.excerpt(r.getLetterBody(), 140),
                         r.getRiskLevel() != null ? r.getRiskLevel().name() : "NORMAL",
                         CareReportService.splitThemes(r.getThemes())))
                 .toList();
@@ -59,7 +56,7 @@ public class CareReportApiController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable Long id, HttpSession session) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return unauthorized();
         Optional<CareReport> opt = service.findMine(user.getId(), id);
         if (opt.isEmpty()) {
@@ -77,7 +74,7 @@ public class CareReportApiController {
     @PostMapping("/generate")
     public ResponseEntity<?> generate(@RequestBody(required = false) CareReportDtos.GenerateRequest body,
                                        HttpSession session) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return unauthorized();
         try {
             CareReportService.GenerationResult result =
@@ -104,7 +101,7 @@ public class CareReportApiController {
 
     @GetMapping("/{id}/pdf")
     public ResponseEntity<?> downloadPdf(@PathVariable Long id, HttpSession session) {
-        User user = currentUser(session);
+        User user = CareWebSupport.currentUser(session, userService);
         if (user == null) return unauthorized();
         Optional<CareReport> opt = service.findMine(user.getId(), id);
         if (opt.isEmpty()) {
@@ -122,22 +119,8 @@ public class CareReportApiController {
                 .body(pdf);
     }
 
-    private User currentUser(HttpSession session) {
-        Object uid = session.getAttribute(SessionConst.LOGIN_USER_ID);
-        if (uid instanceof Long id) {
-            return userService.findById(id).orElse(null);
-        }
-        return null;
-    }
-
     private ResponseEntity<?> unauthorized() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", "로그인이 필요합니다."));
-    }
-
-    private static String excerpt(String body, int max) {
-        if (body == null || body.isBlank()) return "";
-        String t = body.replace("\n", " ").replaceAll("\\s+", " ").trim();
-        return t.length() <= max ? t : t.substring(0, max) + "…";
     }
 }

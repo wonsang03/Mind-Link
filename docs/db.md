@@ -6,7 +6,7 @@
 
 - **경로**: [sql/ORACLE_SETUP.sql](../sql/ORACLE_SETUP.sql)
 - **역할**: 컬럼 길이·CLOB·`search_keyword` 보정, `users`(role 포함)·`book_reviews` 생성, **관리자·공지·커뮤니티 샘플**(김동주 `data.sql`과 동일), `recommendation_books` 초기 데이터(기본은 전량 재적재). 가벼운 20권 시드는 같은 파일 맨 아래 주석 블록.
-- **선행 조건**: `posts` / `notices` 등이 없으면 [LoginCommunity.md](LoginCommunity.md) §5 DDL을 먼저 실행한 뒤 이 스크립트를 돌리세요.
+- **선행 조건**: 없음. 빈 스키마에서도 `ORACLE_SETUP.sql` 섹션 0이 `posts`·`notices` 등 기본 테이블을 먼저 생성합니다. 전체 실행 순서는 [sql/README.md](../sql/README.md) 참고.
 
 ## `recommendation_books`
 

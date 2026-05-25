@@ -3,7 +3,13 @@ package com.mindlink.controller;
 import com.mindlink.domain.AssessmentQuestion;
 import com.mindlink.domain.AssessmentType;
 import com.mindlink.domain.ScoreRange;
+import com.mindlink.domain.User;
+import com.mindlink.domain.UserAlert;
 import com.mindlink.service.AssessmentService;
+import com.mindlink.service.MonitoringService;
+import com.mindlink.service.UserService;
+import com.mindlink.web.SessionConst;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +24,15 @@ import java.util.Set;
 public class SelfAssessmentController {
 
     private final AssessmentService assessmentService;
+    private final MonitoringService monitoringService;
+    private final UserService userService;
 
-    public SelfAssessmentController(AssessmentService assessmentService) {
-        this.assessmentService = assessmentService;
+    public SelfAssessmentController(AssessmentService assessmentService,
+                                     MonitoringService monitoringService,
+                                     UserService userService) {
+        this.assessmentService  = assessmentService;
+        this.monitoringService  = monitoringService;
+        this.userService        = userService;
     }
 
     @GetMapping
@@ -53,6 +65,7 @@ public class SelfAssessmentController {
     @PostMapping("/{typeKey}/result")
     public String result(@PathVariable String typeKey,
                          @RequestParam Map<String, String> params,
+                         HttpSession session,
                          Model model) {
         AssessmentType assessment = assessmentService.findByTypeKey(typeKey).orElseThrow();
         List<AssessmentQuestion> questions = assessment.getQuestions();
@@ -61,7 +74,7 @@ public class SelfAssessmentController {
                 .max().orElse(0);
 
         if ("burnout".equals(typeKey)) {
-            return burnoutResult(assessment, questions, params, maxChoiceScore, model);
+            return burnoutResult(assessment, questions, params, maxChoiceScore, session, model);
         }
 
         int totalScore = 0;
@@ -73,16 +86,37 @@ public class SelfAssessmentController {
         }
         ScoreRange range = assessmentService.evaluate(assessment, totalScore);
         String level = range.getLevel();
+        boolean highRisk = "고위험군".equals(level) || "중등도-중증".equals(level) || "중증".equals(level) || "높음".equals(level);
+
+        // 로그인 사용자 → 결과 저장 + 악화 감지
+        User loginUser = getLoginUser(session);
+        if (loginUser != null) {
+            UserAlert alert = monitoringService.saveAndMonitor(
+                loginUser, typeKey, totalScore, level, highRisk,
+                null, null, null, null);
+            if (alert != null) model.addAttribute("resultAlert", alert);
+        } else {
+            model.addAttribute("saveResultHint",
+                    "로그인 후 검사하면 결과가 저장되고, 고위험·악화 시 알림(상단 종 아이콘)을 받을 수 있습니다.");
+        }
+
         model.addAttribute("assessment", assessment);
         model.addAttribute("score", totalScore);
         model.addAttribute("level", level);
         model.addAttribute("message", range.getMessage());
-        model.addAttribute("highRisk", "고위험군".equals(level) || "중등도-중증".equals(level) || "중증".equals(level) || "높음".equals(level));
+        model.addAttribute("highRisk", highRisk);
         return "self-assessment/result";
     }
 
+    private User getLoginUser(HttpSession session) {
+        Object id = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (id instanceof Long uid) return userService.findById(uid).orElse(null);
+        return null;
+    }
+
     private String burnoutResult(AssessmentType assessment, List<AssessmentQuestion> questions,
-                                  Map<String, String> params, int maxChoiceScore, Model model) {
+                                  Map<String, String> params, int maxChoiceScore,
+                                  HttpSession session, Model model) {
         int part1Sum = 0, part1Count = 0, part2Sum = 0, part2Count = 0;
         for (AssessmentQuestion q : questions) {
             if (q.getPart() == 1) part1Count++; else part2Count++;
@@ -99,6 +133,20 @@ public class SelfAssessmentController {
         int workScore     = part2Count > 0 ? Math.round((float) part2Sum / part2Count) : 0;
         String personalLevel = burnoutLevel(personalScore);
         String workLevel     = burnoutLevel(workScore);
+        boolean highRisk = "높음".equals(personalLevel) || "높음".equals(workLevel);
+
+        // 로그인 사용자 → 결과 저장 + 악화 감지
+        User loginUser = getLoginUser(session);
+        if (loginUser != null) {
+            UserAlert alert = monitoringService.saveAndMonitor(
+                loginUser, assessment.getTypeKey(), null, null, highRisk,
+                personalScore, personalLevel, workScore, workLevel);
+            if (alert != null) model.addAttribute("resultAlert", alert);
+        } else {
+            model.addAttribute("saveResultHint",
+                    "로그인 후 검사하면 결과가 저장되고, 고위험·악화 시 알림(상단 종 아이콘)을 받을 수 있습니다.");
+        }
+
         model.addAttribute("assessment", assessment);
         model.addAttribute("isBurnout", true);
         model.addAttribute("personalScore", personalScore);
@@ -106,7 +154,7 @@ public class SelfAssessmentController {
         model.addAttribute("personalLevel", personalLevel);
         model.addAttribute("workLevel", workLevel);
         model.addAttribute("message", burnoutMessage(personalLevel, workLevel));
-        model.addAttribute("highRisk", "높음".equals(personalLevel) || "높음".equals(workLevel));
+        model.addAttribute("highRisk", highRisk);
         return "self-assessment/result";
     }
 

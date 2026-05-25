@@ -6,6 +6,7 @@ import com.mindlink.domain.PostComment;
 import com.mindlink.domain.Report;
 import com.mindlink.domain.User;
 import com.mindlink.dto.AttachmentResponse;
+import com.mindlink.service.CommunityCategoryPreferenceService;
 import com.mindlink.service.CommunityService;
 import com.mindlink.service.FileStorageService;
 import com.mindlink.service.UserService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,26 +28,39 @@ import java.util.Optional;
 @RequestMapping("/community")
 public class CommunityController {
 
+    /** 고민 공유 소주제 카테고리 */
     public static final List<String> CATEGORIES =
-            List.of("전체", "스트레스 관리", "경험 공유", "함께 해요", "질문과 답변", "추천 및 후기");
+            List.of("전체", "스트레스", "우울", "불안", "인간관계", "일상·기타");
 
     private final CommunityService communityService;
     private final UserService userService;
     private final FileStorageService fileStorageService;
+    private final CommunityCategoryPreferenceService categoryPreferenceService;
 
     public CommunityController(CommunityService communityService,
                                 UserService userService,
-                                FileStorageService fileStorageService) {
+                                FileStorageService fileStorageService,
+                                CommunityCategoryPreferenceService categoryPreferenceService) {
         this.communityService = communityService;
         this.userService = userService;
         this.fileStorageService = fileStorageService;
+        this.categoryPreferenceService = categoryPreferenceService;
     }
 
     @GetMapping
-    public String list(@RequestParam(defaultValue = "전체") String category,
+    public String list(@RequestParam(required = false) String category,
                        @RequestParam(required = false) String q,
+                       HttpSession session,
                        Model model) {
-        List<Post> posts = communityService.findAll(category);
+        // 로그인 유저 맞춤 카테고리 추론
+        Object userIdAttr = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        Long uid = (userIdAttr instanceof Long l) ? l : null;
+        List<String> preferredCategories = categoryPreferenceService.resolvePreferredCategories(uid);
+        String defaultCategory = preferredCategories.isEmpty() ? "전체" : preferredCategories.get(0);
+
+        String selectedCategory = (category != null && !category.isBlank()) ? category : defaultCategory;
+
+        List<Post> posts = communityService.findAll(selectedCategory);
         if (q != null && !q.isBlank()) {
             String query = q.toLowerCase();
             posts = posts.stream()
@@ -53,10 +68,22 @@ public class CommunityController {
                             || p.getContent().toLowerCase().contains(query))
                     .toList();
         }
+
+        // 맞춤 카테고리가 있고 전체 보기일 때: 해당 카테고리 글을 상단에 정렬
+        if (selectedCategory.equals("전체") && !preferredCategories.isEmpty()) {
+            String preferred = preferredCategories.get(0);
+            List<Post> sorted = new ArrayList<>();
+            posts.stream().filter(p -> preferred.equals(p.getCategory())).forEach(sorted::add);
+            posts.stream().filter(p -> !preferred.equals(p.getCategory())).forEach(sorted::add);
+            posts = sorted;
+        }
+
         model.addAttribute("posts", posts);
         model.addAttribute("categories", CATEGORIES);
-        model.addAttribute("selectedCategory", category);
+        model.addAttribute("selectedCategory", selectedCategory);
         model.addAttribute("query", q);
+        model.addAttribute("preferredCategories", preferredCategories);
+        model.addAttribute("highlightCategory", preferredCategories.isEmpty() ? null : preferredCategories.get(0));
         return "community/list";
     }
 
@@ -173,6 +200,7 @@ public class CommunityController {
     @PostMapping("/{id}/comments")
     public String addComment(@PathVariable Long id,
                              @RequestParam String content,
+                             @RequestParam(value = "parentCommentId", required = false) Long parentCommentId,
                              @RequestParam(value = "files", required = false) MultipartFile[] files,
                              @RequestParam(value = "linkUrls", required = false) String[] linkUrls,
                              HttpSession session,
@@ -184,7 +212,8 @@ public class CommunityController {
         }
         User user = userService.findById(uid).orElseThrow();
         try {
-            communityService.addComment(id, user.getName(), content, files, linkUrls);
+            var saved = communityService.addComment(id, user.getName(), content, parentCommentId, files, linkUrls);
+            return "redirect:/community/" + id + "#comment-" + saved.getId();
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("flash", e.getMessage());
         }

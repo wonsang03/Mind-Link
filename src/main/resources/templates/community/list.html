@@ -6,12 +6,12 @@
 
 <main>
     <div class="page">
-        <div class="flex-between mb-8" style="margin-bottom: 2rem;">
-            <div>
-                <h1 class="mb-2">커뮤니티</h1>
+        <div class="flex-between mb-8" style="margin-bottom: 2rem; align-items: flex-start;">
+            <div class="page-header" style="margin-bottom: 0;">
+                <h1>커뮤니티</h1>
                 <p class="muted">같은 고민을 가진 사람들과 경험을 나누고 서로를 응원해요.</p>
             </div>
-            <a th:href="@{/community/new}" class="btn btn-primary">
+            <a th:href="@{/community/new}" class="btn btn-primary" style="white-space: nowrap; flex-shrink: 0;">
                 <span class="pico pico-sm" aria-hidden="true" style="color: currentColor;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -24,7 +24,7 @@
         <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
 
         <div class="card mb-8" style="margin-bottom: 2rem;">
-            <form th:action="@{/community}" method="get" class="flex gap-4 mb-4" style="margin-bottom: 1rem;">
+            <form th:action="@{/community}" method="get" class="flex gap-4 mb-4" style="margin-bottom: 1rem; flex-wrap: wrap;">
                 <input type="hidden" name="category" th:value="${selectedCategory}"/>
                 <input type="text" name="q" th:value="${query}"
                        class="form-input" placeholder="검색어를 입력하세요..." style="flex: 1; margin: 0;"/>

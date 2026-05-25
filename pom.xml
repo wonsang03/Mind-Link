@@ -81,6 +81,13 @@
 			<version>1.3.34</version>
 		</dependency>
 
+		<!-- 정서 3D 클러스터링 K-Means (서상원) -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>

@@ -13,9 +13,10 @@ public class PageController {
         return "home";
     }
 
+    /** 구 /info → 홈 서비스 소개 섹션 */
     @GetMapping("/info")
     public String info() {
-        return "info";
+        return "redirect:/#service-intro";
     }
 
     /** 구 데모 채팅 → AI 위로 편지 위저드로 연결 */

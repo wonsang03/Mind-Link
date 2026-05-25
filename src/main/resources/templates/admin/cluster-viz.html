@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 정서 클러스터')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+<link rel="stylesheet" th:href="@{/css/cluster-viz.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('cluster')}"></aside>
+
+    <div class="admin-main admin-main-wide">
+        <div class="admin-page-header">
+            <h1>정서 3D 클러스터 맵</h1>
+            <p class="muted">스트레스 · 우울 · 불안 점수로 비슷한 사람들끼리 어떻게 묶이는지 살펴봐요.</p>
+        </div>
+
+        <div class="admin-cluster-meta">
+            <span>K = <strong th:text="${k}">6</strong></span>
+            <span>가중치 S<span th:text="${weightStress}">1.0</span> / D<span th:text="${weightDepression}">1.2</span> / A<span th:text="${weightAnxiety}">1.0</span></span>
+            <span>시드 <span th:text="${personaTypes}">30</span> 종 × <span th:text="${variantsPerPersona}">7</span> 명</span>
+        </div>
+
+        <div class="viz-shell" style="margin-top: 1rem;">
+            <!-- 좌측 3D 무대 -->
+            <section class="viz-stage" aria-label="3D 산점도">
+                <div id="viz-viewport" class="viz-viewport">
+                    <canvas id="viz-canvas" aria-label="3D 정서 클러스터 산점도"></canvas>
+                    <div class="viz-axis-hud" aria-hidden="true">
+                        <span class="viz-hud-y">↑ 우울 (Depression)</span>
+                        <span class="viz-hud-x">스트레스 (Stress) →</span>
+                        <span class="viz-hud-z">불안 (Anxiety) ↗</span>
+                    </div>
+                    <div id="viz-tooltip" class="viz-tooltip" style="display:none;"></div>
+                </div>
+
+                <p class="viz-hint">드래그 회전 · 휠 확대 · <span class="muted">○ 페르소나</span> · <span class="muted">◇ 실사용자</span> (같은 크기) · 검색·클릭 시 흰 테두리 강조</p>
+                <div class="viz-controls">
+                    <label>회전 X
+                        <input type="range" id="rotX" min="-80" max="80" value="-22"/>
+                    </label>
+                    <label>회전 Y
+                        <input type="range" id="rotY" min="-180" max="180" value="32"/>
+                    </label>
+                    <span class="viz-zoom-group" role="group" aria-label="확대/축소">
+                        <button id="btn-zoom-out" type="button" title="축소 (마우스 휠)">−</button>
+                        <span id="zoom-label" class="zoom-label">100%</span>
+                        <button id="btn-zoom-in" type="button" title="확대 (마우스 휠)">+</button>
+                    </span>
+                    <button id="btn-reset-rot" type="button">시점 초기화</button>
+                    <button id="btn-spin" type="button">자동 회전</button>
+                </div>
+            </section>
+
+            <!-- 우측 패널 -->
+            <aside class="viz-panel" aria-label="클러스터 정보">
+                <h3>이 화면은</h3>
+                <p class="viz-panel-meta">
+                    자가진단 3축 점수(스트레스 PSS, 우울 PHQ-9, 불안 GAD-7)를 정규화해 3차원에 배치하고,
+                    <strong>가중 K-Means</strong>로 비슷한 사람끼리 묶었어요. 색이 같으면 같은 집단입니다.
+                </p>
+
+                <h4>표시 옵션</h4>
+                <div class="viz-toggles">
+                    <label><input type="checkbox" id="opt-synthetic" checked/> 페르소나 시드 보기</label>
+                    <label><input type="checkbox" id="opt-real" checked/> 실사용자 보기</label>
+                    <label><input type="checkbox" id="opt-centroid" checked/> 집단 중심점 보기</label>
+                </div>
+
+                <h4>집단 범례 <span class="muted" style="font-weight: normal; font-size: 0.8rem;">(클릭=하이라이트)</span></h4>
+                <div id="legend" class="viz-legend"></div>
+
+                <h4>실사용자 찾기</h4>
+                <div class="viz-search">
+                    <input type="search" id="user-search-input" placeholder="이름 (예: 김민수)" autocomplete="off"/>
+                    <button type="button" id="btn-user-search" class="btn btn-secondary">검색</button>
+                </div>
+                <div id="search-results" class="viz-search-results" aria-live="polite"></div>
+
+                <h4>내 위치</h4>
+                <div id="my-cluster" class="viz-cluster-summary">로그인하면 내 점·집단이 표시돼요.</div>
+
+                <div class="viz-cta">
+                    <button id="btn-refresh" type="button" class="btn btn-secondary">데이터 새로고침</button>
+                    <button id="btn-recompute" type="button" class="btn btn-primary">전체 재계산</button>
+                </div>
+                <div id="viz-error" class="viz-error"></div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module" th:src="@{/js/cluster-viz-three.js}"></script>
+</body>
+</html>

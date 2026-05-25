@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 게시글 관리')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('posts')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header" style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div>
+                <h1>게시글 관리</h1>
+                <p class="muted">모든 커뮤니티 게시글을 조회하고 수정·삭제합니다.</p>
+            </div>
+            <a th:href="@{/admin/posts/new}" class="btn btn-primary btn-sm">새 게시글 작성</a>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <div th:if="${#lists.isEmpty(posts)}" class="muted" style="padding:2rem 0;">등록된 게시글이 없습니다.</div>
+
+        <div th:unless="${#lists.isEmpty(posts)}" class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th class="num">ID</th>
+                    <th>제목</th>
+                    <th>분류</th>
+                    <th>작성자</th>
+                    <th class="num">좋아요</th>
+                    <th>작성일</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${posts}">
+                    <td class="num" th:text="${p.id}">1</td>
+                    <td>
+                        <a th:href="@{/community/{id}(id=${p.id})}" th:text="${p.title}"
+                           style="color:var(--primary); text-decoration:none;">제목</a>
+                    </td>
+                    <td><span class="tag tag-secondary" th:text="${p.category}">고민</span></td>
+                    <td th:text="${p.author}">홍길동</td>
+                    <td class="num" th:text="${p.likes}">0</td>
+                    <td class="muted" style="font-size:0.82rem;"
+                        th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd')}">2026-05-23</td>
+                    <td>
+                        <div style="display:flex; gap:0.4rem;">
+                            <a th:href="@{/admin/posts/{id}/edit(id=${p.id})}" class="btn btn-secondary btn-sm">수정</a>
+                            <form th:action="@{/admin/posts/{id}/delete(id=${p.id})}" method="post"
+                                  onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

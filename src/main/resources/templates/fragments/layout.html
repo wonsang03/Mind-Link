@@ -21,16 +21,12 @@
                 <div class="brand-sub">Mind-Link</div>
             </div>
         </a>
-        <nav class="nav">
-            <a th:href="@{/}"
-               th:classappend="${currentUri == '/'} ? 'active'">
-                <span class="nav-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12 12 3l9 9"/><path d="M5 10v11h14V10"/>
-                    </svg>
-                </span>
-                <span>홈</span>
-            </a>
+        <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mainNav">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+        </button>
+        <nav class="nav" id="mainNav">
             <a th:href="@{/notice}"
                th:classappend="${#strings.startsWith(currentUri, '/notice')} ? 'active'">
                 <span class="nav-ico" aria-hidden="true">
@@ -40,17 +36,6 @@
                     </svg>
                 </span>
                 <span>공지사항</span>
-            </a>
-            <a th:href="@{/info}"
-               th:classappend="${currentUri == '/info'} ? 'active'">
-                <span class="nav-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M12 11v5"/>
-                        <circle cx="12" cy="8" r="0.6" fill="currentColor"/>
-                    </svg>
-                </span>
-                <span>서비스 소개</span>
             </a>
             <a th:href="@{/self-assessment}"
                th:classappend="${#strings.startsWith(currentUri, '/self-assessment')} ? 'active'">
@@ -108,6 +93,18 @@
             </a>
 
             <th:block th:if="${loginUser != null}">
+                <a th:href="@{/alerts}" class="nav-alert-link btn-outline nav-cta"
+                   th:classappend="${#strings.startsWith(currentUri, '/alerts')} ? 'active'"
+                   th:aria-label="${unreadAlertCount > 0} ? |알림, 읽지 않음 ${unreadAlertCount}건| : '알림'"
+                   title="알림">
+                    <span class="nav-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                            <path d="M9 21a3 3 0 0 0 6 0"/>
+                        </svg>
+                    </span>
+                    <span th:if="${unreadAlertCount > 0}" class="alert-badge" th:text="${unreadAlertCount}">0</span>
+                </a>
                 <a th:href="@{/user/me}" class="btn-outline nav-cta"
                    th:classappend="${currentUri == '/user/me'} ? 'active'">
                     <span class="nav-ico" aria-hidden="true">
@@ -166,7 +163,9 @@
                 <ul>
                     <li><a th:href="@{/self-assessment}">자가진단</a></li>
                     <li><a th:href="@{/recommendations}">맞춤 추천</a></li>
+                    <li><a th:href="@{/care-report}">AI 정서 케어</a></li>
                     <li><a th:href="@{/counseling}">상담소 찾기</a></li>
+                    <li th:if="${loginUser != null}"><a th:href="@{/alerts}">알림</a></li>
                 </ul>
             </div>
             <div>
@@ -190,7 +189,24 @@
             © 2026 Mind-Link. 당신의 마음 건강을 응원합니다.
         </div>
     </div>
-</footer>
 
+    <script>
+    (function () {
+        var btn = document.getElementById('navToggle');
+        var nav = document.getElementById('mainNav');
+        if (!btn || !nav) return;
+        btn.addEventListener('click', function () {
+            var open = nav.classList.toggle('open');
+            btn.setAttribute('aria-expanded', String(open));
+        });
+        document.addEventListener('click', function (e) {
+            if (!btn.contains(e.target) && !nav.contains(e.target)) {
+                nav.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    })();
+    </script>
+</footer>
 </body>
 </html>

@@ -1,0 +1,691 @@
+/* =============================================================
+ * 마음이음 관리자 레이아웃 — Mind-Link 토큰 기반
+ * ============================================================= */
+
+/* ─── 전체 레이아웃 ──────────────────────────────────────── */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ─── 사이드바 ───────────────────────────────────────────── */
+
+.admin-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #1a2420;
+    color: #d1ddd3;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.admin-brand {
+    padding: 1.25rem 1rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.admin-brand-link:hover { opacity: 0.85; }
+
+.admin-brand-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(107, 142, 111, 0.25);
+    border-radius: 8px;
+    color: #8fbf93;
+    flex-shrink: 0;
+}
+
+.admin-brand-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.admin-brand-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e8f0e9;
+    line-height: 1.2;
+}
+
+.admin-brand-sub {
+    font-size: 0.7rem;
+    color: #7a9c7e;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* ─── 사이드바 내비게이션 ──────────────────────────────── */
+
+.admin-nav {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    color: #9ab89e;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+
+.admin-nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #d1ddd3;
+}
+
+.admin-nav-item.active {
+    background: rgba(107, 142, 111, 0.22);
+    color: #aed4b2;
+}
+
+.admin-nav-ico {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.admin-nav-ico svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ─── 사이드바 하단 ──────────────────────────────────────── */
+
+.admin-sidebar-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.admin-back-link {
+    font-size: 0.82rem;
+    color: #6a8a6e;
+    text-decoration: none;
+}
+
+.admin-back-link:hover { color: #9ab89e; }
+
+/* ─── 메인 콘텐츠 영역 ───────────────────────────────────── */
+
+.admin-main {
+    flex: 1;
+    min-width: 0;
+    padding: 2rem 2.5rem;
+    background: var(--background, #f7faf7);
+}
+
+.admin-main-wide {
+    padding: 1.5rem 2rem;
+}
+
+.admin-page-header {
+    margin-bottom: 1.75rem;
+}
+
+.admin-page-header h1 {
+    margin: 0 0 0.3rem;
+    font-size: 1.55rem;
+    color: var(--foreground, #1c2620);
+}
+
+.admin-page-header .muted {
+    margin: 0;
+    font-size: 0.92rem;
+}
+
+/* ─── 대시보드 카드 그리드 ──────────────────────────────── */
+
+.admin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.admin-card {
+    display: block;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--foreground, #1c2620);
+    transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.05);
+}
+
+.admin-card:hover {
+    box-shadow: 0 8px 24px rgba(28, 38, 32, 0.10);
+    border-color: var(--primary, #6b8e6f);
+    transform: translateY(-2px);
+}
+
+.admin-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--secondary, #e8f0e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary, #6b8e6f);
+    margin-bottom: 1rem;
+}
+
+.admin-card-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.admin-card h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+}
+
+.admin-card .muted {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* ─── 클러스터 페이지 메타 바 ───────────────────────────── */
+
+.admin-cluster-meta {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: var(--muted-foreground, #5a7a5e);
+    background: var(--secondary, #e8f0e9);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+}
+
+.admin-cluster-meta strong {
+    color: var(--foreground, #1c2620);
+}
+
+/* ─── 통계 카드 ─────────────────────────────────────────── */
+
+.admin-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.admin-stat-card {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+}
+
+.admin-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary, #6b8e6f);
+    line-height: 1.1;
+}
+
+.admin-stat-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--foreground, #1c2620);
+    margin-top: 0.3rem;
+}
+
+.admin-stat-sub {
+    font-size: 0.78rem;
+    color: var(--muted-foreground, #5a7a5e);
+    margin-top: 0.2rem;
+}
+
+/* ─── 공지 목록 행 ───────────────────────────────────────── */
+
+.admin-notice-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+/* ─── 테이블 ─────────────────────────────────────────────── */
+
+.admin-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    background: var(--card, #fff);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border, #d4e0d6);
+    color: var(--muted-foreground, #5a7a5e);
+    font-weight: 600;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    background: var(--secondary, #e8f0e9);
+}
+
+.admin-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border, #d4e0d6);
+    vertical-align: middle;
+    color: var(--foreground, #1c2620);
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tr:hover td {
+    background: var(--secondary, #e8f0e9);
+}
+
+.admin-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-table .muted {
+    color: var(--muted-foreground, #5a7a5e);
+}
+
+/* ─── 역할 뱃지 ──────────────────────────────────────────── */
+
+.admin-role-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--secondary, #e8f0e9);
+    color: var(--muted-foreground, #5a7a5e);
+    margin-top: 0.4rem;
+}
+
+.admin-role-pill.role-ADMIN {
+    background: rgba(107, 142, 111, 0.18);
+    color: #2d6a31;
+}
+
+.admin-role-pill.role-COUNSELOR {
+    background: rgba(99, 102, 241, 0.12);
+    color: #4338ca;
+}
+
+/* ─── SQL 텍스트 에리어 ──────────────────────────────────── */
+
+.admin-sql-area {
+    width: 100%;
+    min-height: 180px;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.88rem;
+    resize: vertical;
+    background: var(--card, #fff);
+    color: var(--foreground, #1c2620);
+    box-sizing: border-box;
+}
+
+.admin-sql-area:focus {
+    outline: none;
+    border-color: var(--primary, #6b8e6f);
+    box-shadow: 0 0 0 3px rgba(107, 142, 111, 0.15);
+}
+
+/* ─── 폼 필드 레이블 ─────────────────────────────────────── */
+
+.admin-field-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted-foreground, #5a7a5e);
+    margin-bottom: 0.4rem;
+}
+
+/* ─── 뒤로가기 버튼 ──────────────────────────────────────── */
+
+.admin-back-btn {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+    color: var(--muted-foreground, #5a7a5e);
+    text-decoration: none;
+}
+
+.admin-back-btn:hover { color: var(--foreground, #1c2620); }
+
+/* ─── 유저 상세 ───────────────────────────────────────────── */
+
+.admin-user-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 1.75rem;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    box-shadow: 0 2px 12px rgba(28, 38, 32, 0.06);
+    margin-bottom: 1.5rem;
+}
+
+.admin-user-avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d8e4d9 0%, #eef3ee 100%);
+    border: 2px solid rgba(107, 142, 111, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary, #6b8e6f);
+    flex-shrink: 0;
+}
+
+.admin-user-hero-body { flex: 1; min-width: 200px; }
+
+.admin-user-hero-name {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground, #1c2620);
+}
+
+.admin-user-hero-email {
+    margin: 0 0 0.65rem;
+    font-size: 0.92rem;
+    color: var(--muted-foreground, #5a7a5e);
+}
+
+.admin-user-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.82rem;
+    color: var(--muted-foreground, #5a7a5e);
+}
+
+.admin-user-hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.admin-user-summary {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.admin-user-summary-item {
+    flex: 1;
+    min-width: 7rem;
+    text-align: center;
+    padding: 1rem 1.25rem;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(28, 38, 32, 0.04);
+}
+
+.admin-user-summary-item strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary, #6b8e6f);
+    line-height: 1.2;
+}
+
+.admin-user-summary-item span {
+    font-size: 0.8rem;
+    color: var(--muted-foreground, #5a7a5e);
+    font-weight: 500;
+}
+
+.admin-user-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .admin-user-grid { grid-template-columns: 1fr; }
+}
+
+.admin-user-info-card {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+}
+
+.admin-user-info-card h3 {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--foreground, #1c2620);
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--border, #d4e0d6);
+}
+
+.admin-user-dl {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.65rem 1rem;
+    margin: 0;
+    font-size: 0.88rem;
+}
+
+.admin-user-dl dt {
+    margin: 0;
+    color: var(--muted-foreground, #5a7a5e);
+    font-weight: 500;
+}
+
+.admin-user-dl dd {
+    margin: 0;
+    color: var(--foreground, #1c2620);
+    word-break: break-word;
+}
+
+.admin-user-dl dd.empty {
+    color: var(--muted-foreground, #5a7a5e);
+    font-style: italic;
+}
+
+.admin-user-side-card {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+}
+
+.admin-user-side-card + .admin-user-side-card {
+    margin-top: 1rem;
+}
+
+.admin-user-side-card h3 {
+    margin: 0 0 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.admin-role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.admin-role-form select {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: var(--card, #fff);
+}
+
+.admin-hint-box {
+    font-size: 0.82rem;
+    color: var(--muted-foreground, #5a7a5e);
+    background: var(--secondary, #e8f0e9);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.admin-panel {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d4e0d6);
+    border-radius: var(--radius, 12px);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+    margin-bottom: 1.25rem;
+}
+
+.admin-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--secondary, #e8f0e9);
+    border-bottom: 1px solid var(--border, #d4e0d6);
+}
+
+.admin-panel-head h2 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--foreground, #1c2620);
+}
+
+.admin-panel-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(107, 142, 111, 0.15);
+    color: var(--primary, #6b8e6f);
+}
+
+.admin-panel-body {
+    padding: 0;
+}
+
+.admin-panel-body .admin-table-wrap {
+    border: none;
+    border-radius: 0;
+}
+
+.admin-empty-state {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    color: var(--muted-foreground, #5a7a5e);
+    font-size: 0.9rem;
+}
+
+.admin-empty-state svg {
+    display: block;
+    margin: 0 auto 0.75rem;
+    opacity: 0.35;
+    color: var(--primary, #6b8e6f);
+}
+
+.admin-danger-zone {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(193, 68, 68, 0.25);
+    border-radius: var(--radius, 12px);
+    background: rgba(193, 68, 68, 0.04);
+}
+
+.admin-danger-zone h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.9rem;
+    color: var(--destructive, #c14444);
+}
+
+.admin-danger-zone p {
+    margin: 0 0 0.85rem;
+    font-size: 0.82rem;
+    color: var(--muted-foreground, #5a7a5e);
+}
+
+/* ─── 반응형 ─────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 64px;
+    }
+
+    .admin-brand-name,
+    .admin-brand-sub,
+    .admin-nav-item span:not(.admin-nav-ico),
+    .admin-back-link {
+        display: none;
+    }
+
+    .admin-nav-item {
+        justify-content: center;
+        padding: 0.65rem;
+    }
+
+    .admin-main {
+        padding: 1.25rem;
+    }
+}

@@ -12,6 +12,11 @@ public class UserResponse {
     private String email;
     private UserRole role;
     private LocalDateTime createdAt;
+    private String nickname;
+    private String region;
+    private Boolean notificationEnabled;
+    private String phone;
+    private String profileImageUrl;
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -19,6 +24,11 @@ public class UserResponse {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
+        this.nickname = user.getNickname();
+        this.region = user.getRegion();
+        this.notificationEnabled = user.getNotificationEnabled();
+        this.phone = user.getPhone();
+        this.profileImageUrl = user.getProfileImageUrl();
     }
 
     public Long getId() { return id; }
@@ -26,4 +36,9 @@ public class UserResponse {
     public String getEmail() { return email; }
     public UserRole getRole() { return role; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getNickname() { return nickname; }
+    public String getRegion() { return region; }
+    public Boolean getNotificationEnabled() { return notificationEnabled; }
+    public String getPhone() { return phone; }
+    public String getProfileImageUrl() { return profileImageUrl; }
 }

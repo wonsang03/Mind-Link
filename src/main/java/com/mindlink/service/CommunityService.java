@@ -22,15 +22,18 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final ReportRepository reportRepository;
     private final FileStorageService fileStorageService;
+    private final UserNotificationService notificationService;
 
     public CommunityService(PostRepository postRepository,
                              CommentRepository commentRepository,
                              ReportRepository reportRepository,
-                             FileStorageService fileStorageService) {
+                             FileStorageService fileStorageService,
+                             UserNotificationService notificationService) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.reportRepository = reportRepository;
         this.fileStorageService = fileStorageService;
+        this.notificationService = notificationService;
     }
 
     public List<Post> findAll(String category) {
@@ -80,13 +83,25 @@ public class CommunityService {
 
     @Transactional
     public PostComment addComment(Long postId, String author, String content,
+                                   Long parentCommentId,
                                    MultipartFile[] files, String[] linkUrls) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        PostComment comment = new PostComment(post, author, content);
+        PostComment parent = null;
+        if (parentCommentId != null) {
+            parent = commentRepository.findById(parentCommentId)
+                    .orElseThrow(() -> new IllegalArgumentException("원 댓글을 찾을 수 없습니다."));
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new IllegalArgumentException("같은 게시글의 댓글에만 답글을 달 수 있습니다.");
+            }
+        }
+        PostComment comment = parent == null
+                ? new PostComment(post, author, content)
+                : new PostComment(post, parent, author, content);
         PostComment saved = commentRepository.save(comment);
         fileStorageService.saveFiles(files, Attachment.TargetType.COMMENT, saved.getId());
         fileStorageService.saveLinks(linkUrls, Attachment.TargetType.COMMENT, saved.getId());
+        notificationService.onPostComment(post, saved, author);
         return saved;
     }
 
@@ -129,5 +144,25 @@ public class CommunityService {
     public Report report(User reporter, Report.TargetType targetType, Long targetId, String reason) {
         Report report = new Report(reporter, targetType, targetId, reason);
         return reportRepository.save(report);
+    }
+
+    @Transactional
+    public void adminUpdatePost(Long postId, String title, String content, String category) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        post.setTitle(title);
+        post.setContent(content);
+        post.setCategory(category);
+    }
+
+    @Transactional
+    public void adminDeletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        for (PostComment c : post.getComments()) {
+            fileStorageService.deleteByTarget(Attachment.TargetType.COMMENT, c.getId());
+        }
+        fileStorageService.deleteByTarget(Attachment.TargetType.POST, postId);
+        postRepository.delete(post);
     }
 }

@@ -47,7 +47,7 @@
                         <img th:if="${a.fileType.name() == 'IMAGE'}"
                              th:src="${a.fileUrl}"
                              th:alt="${a.originalFileName}"
-                             style="max-width:300px; max-height:300px; border-radius:8px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
+                             style="max-width:min(300px,100%); max-height:300px; border-radius:8px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
                              onclick="openLightbox(this.src)"/>
                         <video th:if="${a.fileType.name() == 'VIDEO'}"
                                controls
@@ -56,10 +56,11 @@
                             브라우저가 video 태그를 지원하지 않습니다.
                         </video>
                         <div th:if="${a.fileType.name() == 'LINK'}" style="width:100%;">
-                            <iframe th:if="${a.youTube}"
-                                    th:src="${a.youTubeEmbedUrl}"
-                                    style="width:100%; max-width:560px; height:315px; border-radius:8px; border:none; display:block;"
-                                    allowfullscreen></iframe>
+                            <div th:if="${a.youTube}" class="video-wrapper">
+                                <iframe th:src="${a.youTubeEmbedUrl}"
+                                        allowfullscreen
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
                             <a th:unless="${a.youTube}"
                                th:href="${a.fileUrl}"
                                target="_blank"
@@ -89,7 +90,11 @@
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
                 <div th:each="c : ${post.comments}"
-                     style="background: var(--secondary); border-radius: 0.5rem; padding: 1rem;">
+                     th:id="|comment-${c.id}|"
+                     th:style="${c.parentComment != null} ? 'background: var(--muted); border-radius: 0.5rem; padding: 1rem; margin-left: 1.25rem; border-left: 3px solid var(--primary);' : 'background: var(--secondary); border-radius: 0.5rem; padding: 1rem;'">
+                    <div th:if="${c.parentComment != null}" class="muted" style="font-size:0.8rem; margin-bottom:0.35rem;">
+                        ↳ <span th:text="${c.parentComment.author}">원글</span>님께 답글
+                    </div>
                     <div class="flex-between mb-2">
                         <span th:text="${c.author}">댓글 작성자</span>
                         <div class="flex gap-3" style="align-items: center;">
@@ -105,6 +110,10 @@
                                     삭제
                                 </button>
                             </form>
+                            <button th:if="${loginUser != null}" type="button" class="btn btn-outline"
+                                    style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                                    th:attr="data-parent-id=${c.id}"
+                                    onclick="setReplyTarget(this)">답글</button>
                         </div>
                     </div>
                     <p class="muted comment-content" th:text="${c.content}">댓글 내용</p>
@@ -116,7 +125,7 @@
                             <img th:if="${a.fileType.name() == 'IMAGE'}"
                                  th:src="${a.fileUrl}"
                                  th:alt="${a.originalFileName}"
-                                 style="max-width:200px; max-height:200px; border-radius:6px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
+                                 style="max-width:min(200px,100%); max-height:200px; border-radius:6px; object-fit:contain; border:1px solid var(--border); cursor:pointer;"
                                  onclick="openLightbox(this.src)"/>
                             <video th:if="${a.fileType.name() == 'VIDEO'}"
                                    controls
@@ -124,10 +133,11 @@
                                 <source th:src="${a.fileUrl}"/>
                             </video>
                             <div th:if="${a.fileType.name() == 'LINK'}">
-                                <iframe th:if="${a.youTube}"
-                                        th:src="${a.youTubeEmbedUrl}"
-                                        style="width:100%; max-width:400px; height:225px; border-radius:6px; border:none; display:block;"
-                                        allowfullscreen></iframe>
+                                <div th:if="${a.youTube}" class="video-wrapper">
+                                    <iframe th:src="${a.youTubeEmbedUrl}"
+                                            allowfullscreen
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                </div>
                                 <a th:unless="${a.youTube}"
                                    th:href="${a.fileUrl}"
                                    target="_blank"
@@ -142,11 +152,13 @@
             </div>
 
             <!-- 댓글 작성 폼 -->
-            <form th:if="${loginUser != null}"
+            <form th:if="${loginUser != null}" id="commentForm"
                   th:action="@{/community/{id}/comments(id=${post.id})}" method="post"
                   enctype="multipart/form-data"
                   style="margin-top: 1.5rem;">
-                <textarea name="content" rows="3" class="form-textarea"
+                <input type="hidden" name="parentCommentId" id="parentCommentId" value=""/>
+                <p id="replyHint" class="muted" style="display:none; font-size:0.85rem; margin-bottom:0.5rem;"></p>
+                <textarea name="content" id="commentContent" rows="3" class="form-textarea"
                           placeholder="댓글을 입력하세요..." required></textarea>
                 <div style="margin-top:0.75rem;">
                     <label style="font-size:0.875rem; color:var(--text-muted);">파일 첨부
@@ -158,7 +170,10 @@
                            onchange="previewComment(this)"/>
                     <div id="commentPreview" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-4">댓글 작성</button>
+                <div class="flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">댓글 작성</button>
+                    <button type="button" id="cancelReplyBtn" class="btn btn-outline" style="display:none;" onclick="clearReplyTarget()">답글 취소</button>
+                </div>
             </form>
             <p th:if="${loginUser == null}" class="muted center mt-6">
                 <a th:href="@{/login}" style="color: var(--primary); text-decoration: underline;">로그인</a> 후 댓글을 작성할 수 있습니다.
@@ -213,12 +228,14 @@ function renderYoutubeInContent(elem) {
             span.textContent = trimmed;
             elem.appendChild(span);
         } else {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'video-wrapper';
             var iframe = document.createElement('iframe');
             iframe.src = 'https://www.youtube.com/embed/' + part.videoId;
-            iframe.style.cssText = 'width:100%; max-width:560px; height:315px; border-radius:8px; border:none; display:block; margin:0.75rem 0;';
             iframe.setAttribute('allowfullscreen', '');
             iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-            elem.appendChild(iframe);
+            wrapper.appendChild(iframe);
+            elem.appendChild(wrapper);
         }
     });
 }
@@ -228,6 +245,20 @@ function renderYoutubeInContent(elem) {
     if (postContent) renderYoutubeInContent(postContent);
     document.querySelectorAll('.comment-content').forEach(renderYoutubeInContent);
 })();
+
+function setReplyTarget(btn) {
+    var id = btn.getAttribute('data-parent-id');
+    document.getElementById('parentCommentId').value = id;
+    document.getElementById('replyHint').style.display = 'block';
+    document.getElementById('replyHint').textContent = '선택한 댓글에 답글을 남깁니다.';
+    document.getElementById('cancelReplyBtn').style.display = 'inline-flex';
+    document.getElementById('commentContent').focus();
+}
+function clearReplyTarget() {
+    document.getElementById('parentCommentId').value = '';
+    document.getElementById('replyHint').style.display = 'none';
+    document.getElementById('cancelReplyBtn').style.display = 'none';
+}
 
 function previewComment(input) {
     var preview = document.getElementById('commentPreview');

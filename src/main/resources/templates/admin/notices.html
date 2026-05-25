@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 공지 관리')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('notice')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header" style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div>
+                <h1>공지 관리</h1>
+                <p class="muted">공지사항을 작성·수정·삭제합니다.</p>
+            </div>
+            <a th:href="@{/notice/new}" class="btn btn-primary btn-sm">공지 작성</a>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <div th:if="${#lists.isEmpty(notices)}" class="muted" style="padding:2rem 0;">등록된 공지사항이 없습니다.</div>
+
+        <div th:unless="${#lists.isEmpty(notices)}" class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th class="num">ID</th>
+                    <th>카테고리</th>
+                    <th>제목</th>
+                    <th>요약</th>
+                    <th>등록일</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="n : ${notices}">
+                    <td class="num" th:text="${n.id}">1</td>
+                    <td><span class="tag tag-secondary" th:text="${n.category}">중요</span></td>
+                    <td>
+                        <a th:href="@{/notice/{id}(id=${n.id})}" th:text="${n.title}"
+                           style="color:var(--primary); text-decoration:none;">공지 제목</a>
+                    </td>
+                    <td class="muted" style="font-size:0.82rem; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                        th:text="${n.summary}">요약</td>
+                    <td class="muted" style="font-size:0.82rem;"
+                        th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd')}">2026-05-23</td>
+                    <td>
+                        <div style="display:flex; gap:0.4rem;">
+                            <a th:href="@{/notice/{id}/edit(id=${n.id})}" class="btn btn-secondary btn-sm">수정</a>
+                            <form th:action="@{/notice/{id}/delete(id=${n.id})}" method="post"
+                                  onsubmit="return confirm('이 공지를 삭제하시겠습니까?');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

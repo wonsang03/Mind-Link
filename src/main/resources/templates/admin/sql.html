@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - SQL 콘솔')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('sql')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <h1>SQL 콘솔</h1>
+            <p class="muted">DB를 직접 조회·수정합니다.</p>
+        </div>
+
+        <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:0.85rem 1rem; margin-bottom:1.5rem; font-size:0.88rem;">
+            <strong>⚠ 주의</strong> — 입력한 SQL이 운영 DB에 그대로 실행됩니다.
+            UPDATE/DELETE/DROP 은 되돌릴 수 없습니다. 한 번에 하나의 문장만 실행됩니다. SELECT 결과는 최대 500행까지 표시됩니다.
+        </div>
+
+        <form th:action="@{/admin/sql}" method="post" style="margin-bottom:1.5rem;">
+            <textarea class="admin-sql-area" name="sql" th:text="${sql}"
+                      placeholder="SELECT * FROM USERS ORDER BY USER_ID"></textarea>
+            <div style="margin-top:0.75rem;">
+                <button type="submit" class="btn btn-primary"
+                        onclick="return confirm('입력한 SQL을 실행하시겠습니까?');">실행</button>
+            </div>
+        </form>
+
+        <!-- 실행 결과 -->
+        <section th:if="${result != null}">
+            <h2 style="font-size:1.05rem; margin-bottom:0.75rem;">실행 결과</h2>
+
+            <div th:if="${result.error != null}"
+                 style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:0.85rem 1rem; font-size:0.88rem;">
+                <strong>오류</strong>
+                <p style="margin:0.35rem 0 0; white-space:pre-wrap; color:#991b1b;" th:text="${result.error}">에러</p>
+            </div>
+
+            <div th:if="${result.error == null and !result.query}"
+                 class="alert alert-info">
+                <span th:text="|실행 완료 — 영향받은 행: ${result.updateCount}|">실행 완료 — 영향받은 행: 0</span>
+            </div>
+
+            <div th:if="${result.error == null and result.query}">
+                <p class="muted" style="font-size:0.85rem; margin-bottom:0.5rem;">
+                    <span th:text="|${#lists.size(result.rows)}행|">0행</span>
+                    <span th:if="${result.truncated}"> (500행까지만 표시)</span>
+                </p>
+                <div th:if="${#lists.isEmpty(result.rows)}" class="muted" style="font-size:0.88rem;">조회된 행이 없습니다.</div>
+                <div th:unless="${#lists.isEmpty(result.rows)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th th:each="col : ${result.columns}" th:text="${col}">컬럼</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="row : ${result.rows}">
+                            <td th:each="cell : ${row}"
+                                th:text="${cell} ?: 'NULL'"
+                                th:classappend="${cell == null} ? 'muted'">값</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+</body>
+</html>

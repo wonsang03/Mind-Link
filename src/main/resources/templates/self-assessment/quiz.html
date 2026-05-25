@@ -5,76 +5,337 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 
 <main>
-    <div class="page-narrow" style="max-width: 48rem;">
-        <div class="mb-8">
-            <a th:href="@{/self-assessment}" class="muted" style="display: inline-block; margin-bottom: 1rem;">
-                ← 검사 목록으로
-            </a>
-            <h2 class="mb-4" th:text="${assessment.name}">검사 제목</h2>
-            <p class="muted" th:text="${assessment.description}">설명</p>
-        </div>
+<div class="quiz-wrapper">
 
-        <form th:action="@{/self-assessment/{key}/result(key=${assessment.typeKey})}" method="post">
-            <div class="card">
-                <h3 th:if="${assessment.typeKey == 'depression' or assessment.typeKey == 'anxiety'}" class="mb-6">지난 2주 동안, 다음과 같은 문제로 얼마나 자주 방해를 받았습니까?</h3>
-                <h3 th:if="${assessment.typeKey == 'stress'}" class="mb-6">지난 한 달 동안, 다음과 같은 상황을 얼마나 자주 경험하셨습니까?</h3>
-
-                <th:block th:each="question, stat : ${assessment.questions}">
-                    <!-- 번아웃 파트 헤더 -->
-                    <div th:if="${assessment.typeKey == 'burnout' and partStartIndices.contains(stat.index)}"
-                         th:classappend="${!stat.first} ? 'mt-8'"
-                         style="margin-bottom: 1.25rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary);">
-                        <h4 style="color: var(--primary);"
-                            th:text="${question.part == 1 ? 'Part 1. 개인 번아웃' : 'Part 2. 업무 번아웃'}">파트</h4>
-                    </div>
-
-                    <div style="padding-bottom: 1.5rem; margin-bottom: 1.5rem;"
-                         th:classappend="${!stat.last} ? 'border-bottom'">
-                        <p class="mb-4" style="font-size: 1.125rem;">
-                            <span style="color: var(--primary); margin-right: 0.5rem;" th:text="${stat.count} + '.'">1.</span>
-                            <span th:text="${question.content}">질문</span>
-                        </p>
-                        <div class="grid" th:style="'grid-template-columns: repeat(' + ${#lists.size(assessment.choices)} + ', 1fr); gap: 0.5rem;'">
-                            <label th:each="choice : ${assessment.choices}" class="option-btn"
-                                   style="margin: 0; text-align: center; padding: 0.75rem;">
-                                <input type="radio"
-                                       th:name="'q' + ${stat.index}"
-                                       th:value="${choice.score}"
-                                       required
-                                       style="margin-right: 0.25rem;"/>
-                                <span th:text="${choice.label}">선택지</span>
-                            </label>
-                        </div>
-                    </div>
-                </th:block>
-
-                <button type="submit" class="btn btn-primary btn-block mt-6">결과 확인하기</button>
-            </div>
-        </form>
-
-        <p th:if="${assessment.typeKey == 'depression'}"
-           style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
-            PHQ-9는 Pfizer Inc.의 저작물입니다. Spitzer, Williams, Kroenke 외 연구진이 Pfizer Inc.의 교육 지원을 받아 개발하였습니다.
-            복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
-        </p>
-        <p th:if="${assessment.typeKey == 'anxiety'}"
-           style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
-            GAD-7은 Pfizer Inc.의 교육 지원을 받아 Spitzer, Williams, Kroenke 외 연구진이 개발하였습니다.
-            복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
-        </p>
-        <p th:if="${assessment.typeKey == 'stress'}"
-           style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
-            Cohen, S., Kamarck, T., &amp; Mermelstein, R. (1983). A global measure of perceived stress.
-            Journal of Health and Social Behavior, 24(4), 385–396.
-        </p>
-        <p th:if="${assessment.typeKey == 'burnout'}"
-           style="margin-top: 1.5rem; font-size: 0.7rem; color: #b0b0b0; text-align: center; line-height: 1.6;">
-            Kristensen, T. S., Borritz, M., Villadsen, E., &amp; Christensen, K. B. (2005).
-            The Copenhagen Burnout Inventory: A new tool for the assessment of burnout.
-            Work &amp; Stress, 19(3), 192–207.
-        </p>
+  <!-- 헤더 -->
+  <div class="quiz-header-bar">
+    <a th:href="@{/self-assessment}" class="btn-quiz-back">← 검사 목록</a>
+    <div class="quiz-title-area">
+      <h2 th:text="${assessment.name}">검사 제목</h2>
+      <p class="muted" th:text="${assessment.description}">설명</p>
     </div>
+  </div>
+
+  <!-- 진행률 바 -->
+  <div class="quiz-progress-section">
+    <div class="quiz-progress-meta">
+      <span id="progressStep" class="quiz-progress-step"></span>
+    </div>
+    <div class="quiz-progress-track">
+      <div id="progressFill" class="quiz-progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- form 안에 슬라이드 + 모든 input -->
+  <form th:action="@{/self-assessment/{key}/result(key=${assessment.typeKey})}"
+        method="post" id="quizForm">
+    <div id="slideArea">
+
+      <!-- 번아웃 파트 1 인트로 -->
+      <div th:if="${assessment.typeKey == 'burnout'}"
+           id="part1Intro" class="quiz-slide">
+        <div class="part-intro-slide">
+          <div class="part-intro-badge">Part 1</div>
+          <h3 class="part-intro-h">개인 번아웃</h3>
+          <p class="part-intro-p">
+            개인적인 일상과 삶 전반에서 느끼는<br>
+            피로와 소진에 관한 문항입니다.
+          </p>
+          <span class="part-intro-hint">지난 한 달 동안의 경험을 기준으로 답해주세요.</span>
+        </div>
+      </div>
+
+      <!-- 번아웃 파트 2 인트로 -->
+      <div th:if="${assessment.typeKey == 'burnout'}"
+           id="part2Intro" class="quiz-slide">
+        <div class="part-intro-slide part2">
+          <div class="part-intro-badge part2">Part 2</div>
+          <h3 class="part-intro-h">업무 번아웃</h3>
+          <p class="part-intro-p">
+            업무나 학업과 관련하여 느끼는<br>
+            소진 정도를 측정하는 문항입니다.
+          </p>
+          <span class="part-intro-hint part2">지난 한 달 동안의 업무 경험을 기준으로 답해주세요.</span>
+        </div>
+      </div>
+
+      <!-- 원본 문항 데이터 (JS가 읽어 슬라이드를 동적 생성, 화면에 안 보임) -->
+      <div id="rawQData" aria-hidden="true" style="display:none">
+        <div th:each="question, stat : ${assessment.questions}"
+             class="qd"
+             th:attr="data-i=${stat.index}, data-part=${question.part}, data-cnt=${stat.count}">
+          <span class="qd-text" th:text="${question.content}"></span>
+          <span th:each="choice : ${assessment.choices}"
+                class="cd"
+                th:attr="data-score=${choice.score}"
+                th:text="${choice.label}"></span>
+        </div>
+      </div>
+
+    </div><!-- /slideArea -->
+  </form>
+
+  <!-- 네비게이션 -->
+  <div class="quiz-nav">
+    <button type="button" class="btn btn-outline" id="prevBtn" onclick="quizPrev()">← 이전</button>
+    <div class="quiz-page-dot-wrap" id="dotWrap"></div>
+    <button type="button" class="btn btn-primary" id="nextBtn" onclick="quizNext()">다음 →</button>
+  </div>
+
+  <!-- 저작권 안내 -->
+  <p th:if="${assessment.typeKey == 'depression'}"
+     style="margin-top:1.5rem;font-size:0.7rem;color:#b0b0b0;text-align:center;line-height:1.6;">
+    PHQ-9는 Pfizer Inc.의 저작물입니다. Spitzer, Williams, Kroenke 외 연구진이 Pfizer Inc.의 교육 지원을 받아 개발하였습니다.
+    복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
+  </p>
+  <p th:if="${assessment.typeKey == 'anxiety'}"
+     style="margin-top:1.5rem;font-size:0.7rem;color:#b0b0b0;text-align:center;line-height:1.6;">
+    GAD-7은 Pfizer Inc.의 교육 지원을 받아 Spitzer, Williams, Kroenke 외 연구진이 개발하였습니다.
+    복제·번역·배포·표시에 별도의 허가가 필요하지 않습니다.
+  </p>
+  <p th:if="${assessment.typeKey == 'stress'}"
+     style="margin-top:1.5rem;font-size:0.7rem;color:#b0b0b0;text-align:center;line-height:1.6;">
+    Cohen, S., Kamarck, T., &amp; Mermelstein, R. (1983). A global measure of perceived stress.
+    Journal of Health and Social Behavior, 24(4), 385–396.
+  </p>
+  <p th:if="${assessment.typeKey == 'burnout'}"
+     style="margin-top:1.5rem;font-size:0.7rem;color:#b0b0b0;text-align:center;line-height:1.6;">
+    Kristensen, T. S., Borritz, M., Villadsen, E., &amp; Christensen, K. B. (2005).
+    The Copenhagen Burnout Inventory: A new tool for the assessment of burnout.
+    Work &amp; Stress, 19(3), 192–207.
+  </p>
+
+</div>
 </main>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function () {
+  'use strict';
+
+  const typeKey   = /*[[${assessment.typeKey}]]*/ '';
+  const isBurnout = typeKey === 'burnout';
+  const PAGE_SIZE = 5;
+
+  /* 지시문 */
+  const INSTRUCTION =
+    (typeKey === 'depression' || typeKey === 'anxiety')
+      ? '지난 2주 동안, 다음과 같은 문제로 얼마나 자주 방해를 받았습니까?'
+      : typeKey === 'stress'
+      ? '지난 한 달 동안, 다음과 같은 상황을 얼마나 자주 경험하셨습니까?'
+      : '';
+
+  /* HTML 이스케이프 */
+  function esc(s) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(s)));
+    return d.innerHTML;
+  }
+
+  /* 원본 데이터 파싱 */
+  const questions = Array.from(document.querySelectorAll('.qd')).map(el => ({
+    index  : parseInt(el.dataset.i),
+    part   : parseInt(el.dataset.part) || 0,
+    count  : parseInt(el.dataset.cnt),
+    text   : el.querySelector('.qd-text').textContent.trim(),
+    choices: Array.from(el.querySelectorAll('.cd')).map(c => ({
+      score: c.dataset.score,
+      label: c.textContent.trim()
+    }))
+  }));
+
+  /* pages 배열 구성 */
+  const pages = [];
+
+  if (isBurnout) {
+    const p1idx = questions.filter(q => q.part === 1).map(q => q.index);
+    const p2idx = questions.filter(q => q.part === 2).map(q => q.index);
+
+    pages.push({ type: 'intro', id: 'part1Intro' });
+    for (let i = 0; i < p1idx.length; i += PAGE_SIZE)
+      pages.push({ type: 'questions', indices: p1idx.slice(i, i + PAGE_SIZE) });
+
+    pages.push({ type: 'intro', id: 'part2Intro' });
+    for (let i = 0; i < p2idx.length; i += PAGE_SIZE)
+      pages.push({ type: 'questions', indices: p2idx.slice(i, i + PAGE_SIZE) });
+  } else {
+    const allIdx = questions.map(q => q.index);
+    for (let i = 0; i < allIdx.length; i += PAGE_SIZE)
+      pages.push({ type: 'questions', indices: allIdx.slice(i, i + PAGE_SIZE) });
+  }
+
+  /* 문항 슬라이드 HTML 빌드 */
+  const slideArea = document.getElementById('slideArea');
+  const rawQData  = document.getElementById('rawQData');
+  const slideEls  = [];
+  let firstQPage  = true;
+
+  pages.forEach((page, pi) => {
+    if (page.type === 'intro') {
+      slideEls.push(document.getElementById(page.id));
+      return;
+    }
+
+    const slide = document.createElement('div');
+    slide.className = 'quiz-slide';
+
+    let html = '<div class="quiz-card">';
+    if (firstQPage && INSTRUCTION) {
+      html += `<div class="quiz-card-header"><p>${esc(INSTRUCTION)}</p></div>`;
+      firstQPage = false;
+    }
+
+    page.indices.forEach(idx => {
+      const q = questions.find(q => q.index === idx);
+      html += `<div class="question-block" id="qblock-${idx}">`;
+      html += `<div class="q-num-badge">${q.count}</div>`;
+      html += `<p class="q-text">${esc(q.text)}</p>`;
+      html += `<div class="choices-wrap">`;
+      q.choices.forEach(c => {
+        html += `
+          <button type="button" class="choice-btn"
+                  data-qi="${idx}" data-score="${esc(c.score)}"
+                  onclick="selectChoice(this)">
+            <span class="choice-radio-dot"></span>
+            <span>${esc(c.label)}</span>
+          </button>
+          <input type="radio" name="q${idx}" value="${esc(c.score)}" style="display:none"/>`;
+      });
+      html += `</div></div>`;
+    });
+
+    html += '</div>';
+    slide.innerHTML = html;
+    slideArea.insertBefore(slide, rawQData);
+    slideEls.push(slide);
+  });
+
+  /* 상태 */
+  let current = 0;
+
+  /* UI 업데이트 */
+  function updateUI() {
+    const total = pages.length;
+    const pct   = Math.round((current + 1) / total * 100);
+
+    document.getElementById('progressStep').textContent =
+      (current + 1) + ' / ' + total + ' 페이지';
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    const prevBtn = document.getElementById('prevBtn');
+    prevBtn.disabled      = current === 0;
+    prevBtn.style.opacity = current === 0 ? '0.35' : '';
+
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.textContent = current === total - 1 ? '결과 확인하기 →' : '다음 →';
+
+    /* 도트 인디케이터 */
+    const dotWrap = document.getElementById('dotWrap');
+    dotWrap.innerHTML = '';
+    if (total <= 10) {
+      pages.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'quiz-page-dot' +
+          (i === current ? ' active' : i < current ? ' done' : '');
+        dotWrap.appendChild(dot);
+      });
+    } else {
+      dotWrap.className  = 'quiz-nav-text';
+      dotWrap.textContent = (current + 1) + ' / ' + total;
+    }
+  }
+
+  /* 슬라이드 표시 */
+  function showPage(index, dir) {
+    slideEls[current].classList.remove('active', 'from-left');
+    current = index;
+    const el = slideEls[current];
+    el.classList.remove('from-left');
+    if (dir === 'left') el.classList.add('from-left');
+    el.classList.add('active');
+    updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* 현재 페이지 검증 */
+  function validatePage() {
+    const page = pages[current];
+    if (page.type !== 'questions') return true;
+
+    let ok = true;
+    page.indices.forEach(idx => {
+      const block   = document.getElementById('qblock-' + idx);
+      const checked = block.querySelector('input[type=radio]:checked');
+      if (!checked) {
+        ok = false;
+        block.classList.add('unanswered');
+        if (!block.querySelector('.unanswered-hint')) {
+          const hint = document.createElement('p');
+          hint.className   = 'unanswered-hint';
+          hint.textContent = '응답해주세요.';
+          block.appendChild(hint);
+        }
+      } else {
+        block.classList.remove('unanswered');
+        const h = block.querySelector('.unanswered-hint');
+        if (h) h.remove();
+      }
+    });
+
+    if (!ok) {
+      const first = slideEls[current].querySelector('.unanswered');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return ok;
+  }
+
+  /* 선택지 클릭 */
+  window.selectChoice = function (btn) {
+    const qi    = btn.dataset.qi;
+    const block = document.getElementById('qblock-' + qi);
+    block.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    block.querySelectorAll('input[type=radio]').forEach(r => {
+      r.checked = r.value === btn.dataset.score;
+    });
+    block.classList.remove('unanswered');
+    const h = block.querySelector('.unanswered-hint');
+    if (h) h.remove();
+
+    /* 다음 문항으로 자동 스크롤 */
+    const nextBlock = block.nextElementSibling;
+    if (nextBlock && nextBlock.classList.contains('question-block')) {
+      setTimeout(function () {
+        nextBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 180);
+    }
+  };
+
+  /* 이전 */
+  window.quizPrev = function () {
+    if (current === 0) return;
+    showPage(current - 1, 'left');
+  };
+
+  /* 다음 / 제출 */
+  window.quizNext = function () {
+    if (!validatePage()) return;
+    if (current === pages.length - 1) {
+      document.getElementById('quizForm').submit();
+      return;
+    }
+    showPage(current + 1, 'right');
+  };
+
+  /* 초기화 */
+  if (slideEls.length > 0) {
+    slideEls[0].classList.add('active');
+  }
+  updateUI();
+
+})();
+/*]]>*/
+</script>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 유저 상세')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('users')}"></aside>
+
+    <div class="admin-main">
+        <a th:href="@{/admin/users}" class="admin-back-btn">← 유저 목록</a>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- 프로필 헤더 -->
+        <div class="admin-user-hero">
+            <div class="admin-user-avatar" th:text="${#strings.substring(user.name, 0, 1)}">김</div>
+            <div class="admin-user-hero-body">
+                <h1 class="admin-user-hero-name" th:text="${user.name}">홍길동</h1>
+                <p class="admin-user-hero-email" th:text="${user.email}">user@example.com</p>
+                <div class="admin-user-hero-meta">
+                    <span>
+                        <span class="admin-role-pill" th:classappend="'role-' + ${user.role.name()}" th:text="${user.role}">USER</span>
+                    </span>
+                    <span>ID <strong th:text="${user.id}" style="color:var(--foreground);">1</strong></span>
+                    <span th:text="|가입 ${#temporals.format(user.createdAt, 'yyyy.MM.dd')}|">가입일</span>
+                    <span th:text="${user.notificationEnabled} ? '알림 수신 ON' : '알림 수신 OFF'">알림</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 활동 요약 -->
+        <div class="admin-user-summary">
+            <div class="admin-user-summary-item">
+                <strong th:text="${#lists.size(posts)}">0</strong>
+                <span>게시글</span>
+            </div>
+            <div class="admin-user-summary-item">
+                <strong th:text="${#lists.size(comments)}">0</strong>
+                <span>댓글</span>
+            </div>
+            <div class="admin-user-summary-item">
+                <strong th:text="${#lists.size(bookings)}">0</strong>
+                <span>상담 예약</span>
+            </div>
+        </div>
+
+        <p class="admin-hint-box">
+            커뮤니티 작성자명은 가입 시 <strong th:text="${user.name}">이름</strong>과 연결됩니다.
+            닉네임만 변경한 경우 게시글·댓글 목록이 비어 보일 수 있습니다.
+        </p>
+
+        <div class="admin-user-grid">
+            <!-- 기본 정보 -->
+            <div class="admin-user-info-card">
+                <h3>회원 정보</h3>
+                <dl class="admin-user-dl">
+                    <dt>이름</dt>
+                    <dd th:text="${user.name}">—</dd>
+                    <dt>이메일</dt>
+                    <dd th:text="${user.email}">—</dd>
+                    <dt>닉네임</dt>
+                    <dd th:classappend="${user.nickname == null or #strings.isEmpty(user.nickname)} ? 'empty' : ''"
+                        th:text="${user.nickname != null and !#strings.isEmpty(user.nickname) ? user.nickname : '미입력'}">—</dd>
+                    <dt>지역</dt>
+                    <dd th:classappend="${user.region == null or #strings.isEmpty(user.region)} ? 'empty' : ''"
+                        th:text="${user.region != null and !#strings.isEmpty(user.region) ? user.region : '미입력'}">—</dd>
+                    <dt>연락처</dt>
+                    <dd th:classappend="${user.phone == null or #strings.isEmpty(user.phone)} ? 'empty' : ''"
+                        th:text="${user.phone != null and !#strings.isEmpty(user.phone) ? user.phone : '미입력'}">—</dd>
+                    <dt>가입일</dt>
+                    <dd th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">—</dd>
+                </dl>
+            </div>
+
+            <!-- 사이드: 등급 · 위험 작업 -->
+            <div>
+                <div class="admin-user-side-card">
+                    <h3>등급 변경</h3>
+                    <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="admin-role-form">
+                        <select name="role">
+                            <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+                                    th:selected="${r == user.role}">USER</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">등급 저장</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 작성 게시물 -->
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <h2>작성 게시물</h2>
+                <span class="admin-panel-count" th:text="|${#lists.size(posts)}건|">0건</span>
+            </div>
+            <div class="admin-panel-body">
+                <div th:if="${#lists.isEmpty(posts)}" class="admin-empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" aria-hidden="true">
+                        <path d="M4 4h16v12H5.17L4 17.17z"/>
+                        <line x1="8" y1="9" x2="16" y2="9"/>
+                        <line x1="8" y1="13" x2="13" y2="13"/>
+                    </svg>
+                    작성한 게시물이 없습니다.
+                </div>
+                <div th:unless="${#lists.isEmpty(posts)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>제목</th><th>분류</th><th>작성일</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="p : ${posts}">
+                            <td th:text="${p.title}">제목</td>
+                            <td><span class="tag tag-secondary" th:text="${p.category}">고민</span></td>
+                            <td class="muted" th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm')}">—</td>
+                            <td><a th:href="@{/community/{id}(id=${p.id})}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">보기</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 작성 댓글 -->
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <h2>작성 댓글</h2>
+                <span class="admin-panel-count" th:text="|${#lists.size(comments)}건|">0건</span>
+            </div>
+            <div class="admin-panel-body">
+                <div th:if="${#lists.isEmpty(comments)}" class="admin-empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    작성한 댓글이 없습니다.
+                </div>
+                <div th:unless="${#lists.isEmpty(comments)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>게시글</th><th>댓글</th><th>작성일</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="c : ${comments}">
+                            <td th:text="${c.post.title}">게시글</td>
+                            <td style="max-width:240px;" th:text="${#strings.abbreviate(c.content, 50)}">내용</td>
+                            <td class="muted" th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">—</td>
+                            <td><a th:href="@{/community/{id}(id=${c.post.id})}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">보기</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 상담 예약 -->
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <h2>상담 예약 이력</h2>
+                <span class="admin-panel-count" th:text="|${#lists.size(bookings)}건|">0건</span>
+            </div>
+            <div class="admin-panel-body">
+                <div th:if="${#lists.isEmpty(bookings)}" class="admin-empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    상담 예약 이력이 없습니다.
+                </div>
+                <div th:unless="${#lists.isEmpty(bookings)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>상담소</th><th>예약자</th><th>일시</th><th>유형</th><th>상태</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="b : ${bookings}">
+                            <td th:text="${b.centerName}">센터</td>
+                            <td th:text="${b.name}">이름</td>
+                            <td class="muted" th:text="|${b.date} ${b.time}|">일시</td>
+                            <td th:text="${b.type != null ? b.type : '-'}">—</td>
+                            <td>
+                                <span class="tag tag-secondary" th:text="${b.status}">REQUESTED</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="admin-danger-zone">
+            <h3>계정 삭제</h3>
+            <p>삭제 후에는 복구할 수 없습니다. 예약·게시글 등 연관 데이터도 함께 정리됩니다.</p>
+            <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
+                  onsubmit="return confirm('이 계정을 정말 삭제하시겠습니까?');">
+                <button type="submit" class="btn btn-danger btn-sm">계정 삭제</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

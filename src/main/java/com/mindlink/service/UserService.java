@@ -2,6 +2,7 @@ package com.mindlink.service;
 
 import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
+import com.mindlink.dto.UserUpdateRequest;
 import com.mindlink.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,8 @@ public class UserService {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
         User user = new User(name, email, passwordEncoder.encode(rawPassword));
-        user.setRole(UserRole.USER); // 가입 시 기본 등급은 USER
+        user.setRole(UserRole.USER);
+        user.setNotificationEnabled(false);
         return userRepository.save(user);
     }
 
@@ -52,14 +54,21 @@ public class UserService {
     }
 
     @Transactional
-    public User updateProfile(Long userId, String name, String email) {
+    public User updateProfile(Long userId, UserUpdateRequest req, String newProfileImageUrl) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+        if (!user.getEmail().equals(req.getEmail()) && userRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        user.setName(name);
-        user.setEmail(email);
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setNickname(req.getNickname());
+        user.setRegion(req.getRegion());
+        user.setNotificationEnabled(req.getNotificationEnabled());
+        user.setPhone(req.getPhone());
+        if (newProfileImageUrl != null) {
+            user.setProfileImageUrl(newProfileImageUrl);
+        }
         return user;
     }
 }

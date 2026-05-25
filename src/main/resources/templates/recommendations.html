@@ -15,11 +15,13 @@
                 </span>
                 <span>개인 맞춤 추천</span>
             </div>
-            <h1 class="mb-4">당신을 위한 추천</h1>
-            <p class="muted" style="max-width: 48rem;">
-                자가진단 결과와 선호도를 바탕으로 맞춤형 콘텐츠를 추천해드립니다.<br/>
-                도서, 활동, 커뮤니티에서 자신에게 맞는 것을 선택해보세요.
-            </p>
+            <div class="page-header" style="margin-bottom: 0;">
+                <h1>당신을 위한 추천</h1>
+                <p class="muted" style="max-width: 48rem;">
+                    자가진단 결과와 선호도를 바탕으로 맞춤형 콘텐츠를 추천해드립니다.<br/>
+                    도서, 활동, 커뮤니티에서 자신에게 맞는 것을 선택해보세요.
+                </p>
+            </div>
         </div>
 
         <!-- ================= AI 맞춤 추천 ================= -->
@@ -36,7 +38,7 @@
                 <span>AI 맞춤 추천</span>
             </div>
             <p style="margin:0 0 1.1rem;color:var(--muted-foreground);">
-                지금 어떤 감정이신가요? 짧게 적어주시면 AI가 딱 맞는 도서 3권을 골라드립니다.
+                지금 기분을 짧게 말씀해 주시면 마음이음이 선별해 둔 도서 목록에서 맞는 책을 골라드려요.
             </p>
             <!-- 입력 영역 -->
             <div id="ai-input-wrap">
@@ -126,7 +128,7 @@
                 <span class="tag tag-secondary" style="align-self: flex-start;">기록 활동</span>
                 <h3>감사 일기 쓰기</h3>
                 <p class="muted">5분 · 쉬움</p>
-                <p class="muted">오늘 감사한 일 세 가지를 기록하며 긍정적 마인드를 키웁니다.</p>
+                <p class="muted">오늘 감사했던 일 세 가지를 적으며 하루를 부드럽게 돌아봅니다.</p>
                 <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="gratitude">지금 해보기</button>
             </article>
             <article class="activity-card" data-category="신체 활동" data-keywords="호흡 운동 신체 이완 들숨 날숨">
@@ -142,38 +144,40 @@
                 <span class="tag tag-secondary" style="align-self: flex-start;">신체 활동</span>
                 <h3>호흡 운동</h3>
                 <p class="muted">3분 · 쉬움</p>
-                <p class="muted">들숨과 날숨을 리듬에 맞춰 반복하며 긴장과 스트레스를 해소합니다.</p>
+                <p class="muted">들숨과 날숨을 천천히 반복하며 몸과 마음의 긴장을 풀어줍니다.</p>
                 <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="breathing">지금 해보기</button>
             </article>
-            <article class="activity-card" data-category="명상" data-keywords="4-7-8 호흡법 명상 불안 이완">
+            <article class="activity-card" data-category="호흡" data-keywords="느린 호흡 불안 스트레스 긴장 이완 호흡">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
                         </svg>
                     </span>
                 </div>
-                <span class="tag tag-secondary" style="align-self: flex-start;">명상</span>
-                <h3>4-7-8 호흡법</h3>
+                <span class="tag tag-secondary" style="align-self: flex-start;">호흡</span>
+                <h3>느린 호흡</h3>
                 <p class="muted">3분 · 쉬움</p>
-                <p class="muted">들숨 4초, 멈춤 7초, 날숨 8초로 불안을 가라앉히는 호흡 명상입니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="478">지금 해보기</button>
+                <p class="muted">천천히 내쉬는 리듬으로 긴장을 낮춥니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="slow_breathing">지금 해보기</button>
             </article>
-            <article class="activity-card" data-category="인지 활동" data-keywords="5-4-3-2-1 그라운딩 불안 감각 현재 오감">
+            <article class="activity-card" data-category="신체 이완" data-keywords="PMR 미니 근육 이완 스트레스 긴장 신체">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            <path d="M6 5c-1 1-2 2-2 4s1 3 2 4 2 3 2 4"/><path d="M18 5c1 1 2 2 2 4s-1 3-2 4-2 3-2 4"/><line x1="12" y1="2" x2="12" y2="22"/>
                         </svg>
                     </span>
                 </div>
-                <span class="tag tag-secondary" style="align-self: flex-start;">인지 활동</span>
-                <h3>5-4-3-2-1 그라운딩</h3>
-                <p class="muted">5분 · 보통</p>
-                <p class="muted">오감을 활용해 현재 순간에 집중하며 불안과 공황을 가라앉힙니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="grounding">지금 해보기</button>
+                <span class="tag tag-secondary" style="align-self: flex-start;">신체 이완</span>
+                <h3>PMR 미니</h3>
+                <p class="muted">5분 · 쉬움</p>
+                <p class="muted">짧게 긴장했다 푸는 방식으로 몸의 긴장을 낮춥니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="pmr_mini">지금 해보기</button>
             </article>
-            <article class="activity-card" data-category="인지 활동" data-keywords="긍정 확언 자기 사랑 자존감 동기 affirmation">
+            <article class="activity-card" data-category="인지" data-keywords="자기자비 자기비난 우울 회복 위로">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -181,11 +185,11 @@
                         </svg>
                     </span>
                 </div>
-                <span class="tag tag-secondary" style="align-self: flex-start;">인지 활동</span>
-                <h3>긍정 확언 카드</h3>
+                <span class="tag tag-secondary" style="align-self: flex-start;">인지</span>
+                <h3>자기자비 문장</h3>
                 <p class="muted">5분 · 쉬움</p>
-                <p class="muted">긍정적 자기 확언 카드를 넘기며 자존감과 회복력을 키웁니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="affirmation">지금 해보기</button>
+                <p class="muted">스스로에게 덜 가혹하게 말하는 연습입니다.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="self_compassion_script">지금 해보기</button>
             </article>
             <article class="activity-card" data-category="자기 인식" data-keywords="감정 체크인 기분 일기 자기 이해 감정 인식">
                 <div class="activity-thumb">
@@ -198,7 +202,7 @@
                 <span class="tag tag-secondary" style="align-self: flex-start;">자기 인식</span>
                 <h3>감정 체크인</h3>
                 <p class="muted">2분 · 쉬움</p>
-                <p class="muted">지금 내 감정을 확인하고 짧은 위로 메시지를 받아보세요.</p>
+                <p class="muted">지금 내 마음 상태를 가만히 살피고 짧은 위로를 받아봅니다.</p>
                 <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="checkin">지금 해보기</button>
             </article>
             <article class="activity-card" data-category="신체 활동" data-keywords="점진적 근육 이완 PMR 긴장 스트레스 신체 이완">
@@ -212,7 +216,7 @@
                 <span class="tag tag-secondary" style="align-self: flex-start;">신체 활동</span>
                 <h3>점진적 근육 이완</h3>
                 <p class="muted">10분 · 보통</p>
-                <p class="muted">신체 각 부위를 긴장·이완하며 깊은 신체 휴식을 유도합니다.</p>
+                <p class="muted">몸 곳곳을 긴장했다 천천히 풀며 깊게 이완해봅니다.</p>
                 <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="pmr">지금 해보기</button>
             </article>
             <article class="activity-card" data-category="명상" data-keywords="바디스캔 명상 신체 마음챙김 이완 마인드풀니스">
@@ -224,9 +228,9 @@
                     </span>
                 </div>
                 <span class="tag tag-secondary" style="align-self: flex-start;">명상</span>
-                <h3>바디스캔 명상</h3>
+                <h3>짧은 바디스캔</h3>
                 <p class="muted">10분 · 보통</p>
-                <p class="muted">발끝부터 머리까지 신체 감각을 천천히 탐색하는 마음챙김 명상입니다.</p>
+                <p class="muted">발끝부터 천천히 몸 감각을 살피며 지금 상태를 알아차립니다.</p>
                 <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="bodyscan">지금 해보기</button>
             </article>
         </div>
@@ -247,6 +251,7 @@
                     <p class="muted">활동 후 느낀 점을 기록하면 자신의 변화를 확인할 수 있습니다.</p>
                 </div>
             </div>
+            <p class="muted" style="margin-top: 1.5rem; font-size: 0.88rem;">활동 중 불편하면 언제든 멈춰도 괜찮아요. 힘이 들면 가까운 전문가의 도움을 받아보세요.</p>
         </div>
     </div>
 </main>
@@ -416,43 +421,49 @@
 .act-guide { color: var(--muted-foreground); font-size: 0.9rem; margin: 0.75rem 0 1.25rem; }
 .act-btns  { display: flex; gap: 0.75rem; justify-content: center; }
 
-/* ── Breathing circle ─────────────────────────── */
-.breath-scene { display: flex; justify-content: center; margin-bottom: 0.5rem; }
+/* ── Breathing circle (scale은 .breath-stage 안에서만) ── */
+.breath-scene {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+.breath-stage {
+    width: 11.5rem;
+    height: 11.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
 .breath-ring {
-    width: 160px; height: 160px; border-radius: 50%;
+    width: 8.75rem;
+    height: 8.75rem;
+    box-sizing: border-box;
+    border-radius: 50%;
     background: radial-gradient(circle, rgba(107,142,111,0.2) 0%, rgba(107,142,111,0.05) 70%);
     border: 3px solid rgba(107,142,111,0.28);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    transform: scale(1);
+    transform-origin: center center;
     transition: transform 0.9s ease-in-out, background 0.9s, border-color 0.9s;
 }
 .breath-ring.inhale {
-    transform: scale(1.28);
+    transform: scale(1.1);
     background: radial-gradient(circle, rgba(107,142,111,0.36) 0%, rgba(107,142,111,0.1) 70%);
     border-color: rgba(107,142,111,0.6);
 }
 .breath-ring.exhale {
-    transform: scale(0.82);
+    transform: scale(0.92);
     background: radial-gradient(circle, rgba(107,142,111,0.08) 0%, rgba(107,142,111,0.02) 70%);
     border-color: rgba(107,142,111,0.16);
 }
-.breath-phase { font-weight: 600; color: var(--primary); font-size: 1rem; margin: 0; }
-.breath-num   { font-size: 2.2rem; font-weight: 700; color: var(--primary); margin: 0; line-height: 1.1; }
-
-/* ── 4-7-8 ring ───────────────────────────────── */
-.ring478-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 0.5rem; }
-.ring478-svg  { width: 160px; height: 160px; transform: rotate(-90deg); }
-.ring478-bg   { fill: none; stroke: var(--secondary); stroke-width: 10; }
-.ring478-fg   {
-    fill: none; stroke: var(--primary); stroke-width: 10; stroke-linecap: round;
-    transition: stroke-dashoffset 0.95s linear;
-}
-.ring478-inner {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.ring478-phase { font-weight: 600; color: var(--primary); font-size: 0.95rem; margin: 0; }
-.ring478-num   { font-size: 2.4rem; font-weight: 700; color: var(--foreground); margin: 0; line-height: 1; }
+.breath-phase { font-weight: 600; color: var(--primary); font-size: 0.95rem; margin: 0; }
+.breath-num   { font-size: 1.85rem; font-weight: 700; color: var(--primary); margin: 0; line-height: 1.1; }
 
 /* ── Gratitude journal ────────────────────────── */
 .grat-card {
@@ -470,27 +481,13 @@
     font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
 }
 
-/* ── 5-4-3-2-1 그라운딩 ──────────────────────── */
-.grd-wrap { padding: 0.25rem 0; }
-.grd-progress { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem; }
-.grd-dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--border); transition: background 0.3s; }
-.grd-dot.active { background: var(--primary); }
-.grd-dot.done   { background: var(--primary); opacity: 0.4; }
-.grd-step-num { font-size: 3rem; font-weight: 800; color: var(--primary); text-align: center; line-height: 1; margin-bottom: 0.5rem; }
-.grd-question { text-align: center; margin-bottom: 1rem; }
-.grd-inp { margin-bottom: 0.5rem !important; }
-.grd-done-msg { text-align: center; color: var(--primary); font-size: 1.05rem; margin-bottom: 1.25rem; line-height: 1.7; }
-.grd-ans-group { margin-bottom: 0.75rem; }
-.grd-ans-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.35rem; }
-.grd-ans-chip  { display: inline-block; background: var(--secondary); border-radius: 1rem; padding: 0.2rem 0.7rem; font-size: 0.88rem; margin: 0.15rem 0.2rem; }
-
-/* ── 긍정 확언 ───────────────────────────────── */
-.aff-wrap { padding: 0.25rem 0; text-align: center; }
-.aff-card { background: linear-gradient(135deg,rgba(107,142,111,.12),rgba(107,142,111,.04)); border: 1px solid rgba(107,142,111,.3); border-radius: 1rem; padding: 2rem 1.5rem; min-height: 7rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
-.aff-text { font-size: 1.1rem; line-height: 1.85; color: var(--text); margin: 0; }
-.aff-counter { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
-.aff-hint    { font-size: 0.82rem; margin-bottom: 1rem; }
-.aff-nav { display: flex; gap: 0.75rem; justify-content: center; }
+/* ── 자기자비 문장 (카드 넘기기) ─────────────── */
+.scs-wrap { padding: 0.25rem 0; text-align: center; }
+.scs-card { background: linear-gradient(135deg,rgba(107,142,111,.12),rgba(107,142,111,.04)); border: 1px solid rgba(107,142,111,.3); border-radius: 1rem; padding: 2rem 1.5rem; min-height: 7rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+.scs-text { font-size: 1.1rem; line-height: 1.85; color: var(--foreground); margin: 0; }
+.scs-counter { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
+.scs-hint    { font-size: 0.82rem; margin-bottom: 1rem; }
+.scs-nav { display: flex; gap: 0.75rem; justify-content: center; }
 
 /* ── 감정 체크인 ──────────────────────────────── */
 .chk-wrap { padding: 0.25rem 0; }
@@ -535,8 +532,7 @@
 @media (prefers-reduced-motion: reduce) {
     .act-modal-overlay, .act-modal-box { transition: none; }
     .breath-ring { transition: none; }
-    .ring478-fg  { transition: none; }
-    .grd-dot, .pmr-circle, .pmr-progress-fill, .bds-fill { transition: none; }
+    .pmr-circle, .pmr-progress-fill, .bds-fill { transition: none; }
 }
 </style>
 <script>
@@ -1087,11 +1083,11 @@
         bodyEl.innerHTML =
             '<div style="text-align:center;padding:2.5rem 1rem;">'
             + '<div class="ai-spinner" style="margin:0 auto;"></div>'
-            + '<p class="muted" style="margin-top:0.75rem;font-size:0.9rem;">AI가 맞춤 도서를 찾고 있어요…</p>'
+            + '<p class="muted" style="margin-top:0.75rem;font-size:0.9rem;">선별 도서 목록에서 맞는 책을 찾고 있어요…</p>'
             + '</div>';
         openModal();
 
-        fetch('/api/recommendations/ai', {
+        fetch('/api/recommendations/personalize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: msg })
@@ -1099,10 +1095,22 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
             var label = EMOTION_KO[data.emotion] || '';
+            var multiLabel = (data.emotions && data.emotions.length > 1)
+                ? data.emotions.map(function(e) { return EMOTION_KO[e] || e; }).join('·')
+                : label;
+            var sourceBadge = data.source === 'DB+AI'
+                ? '<span class="tag tag-secondary" style="font-size:0.72rem;margin-left:0.5rem;">DB+AI</span>'
+                : '<span class="tag tag-secondary" style="font-size:0.72rem;margin-left:0.5rem;">마음이음 선별</span>';
+            var emotionLine = multiLabel
+                ? '<p style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--muted-foreground);">'
+                  + esc(multiLabel) + '에 맞춰 골랐어요</p>'
+                : '';
             bodyEl.innerHTML =
-                '<div class="ai-rec-badge" style="margin-bottom:1rem;">'
-                + '<span aria-hidden="true" style="font-size:0.85rem;">✦</span> AI 맞춤 추천 결과'
+                '<div class="ai-rec-badge" style="margin-bottom:0.6rem;">'
+                + '<span aria-hidden="true" style="font-size:0.85rem;">✦</span> 마음이음 선별 추천 결과'
+                + sourceBadge
                 + '</div>'
+                + emotionLine
                 + '<p id="ml-ai-title" style="margin:0 0 1.25rem;line-height:1.75;">'
                 + esc(data.reason || '') + '</p>'
                 + '<div id="ml-ai-books" class="grid grid-3"></div>';
@@ -1182,10 +1190,11 @@
             render: function (el) {
                 el.innerHTML =
                     '<div class="act-wrap">' +
-                    '<div class="breath-scene"><div class="breath-ring" id="bRing">' +
+                    '<div class="breath-scene"><div class="breath-stage">' +
+                    '<div class="breath-ring" id="bRing">' +
                     '<p id="bPhase" class="breath-phase">준비</p>' +
                     '<p id="bNum"   class="breath-num">-</p>' +
-                    '</div></div>' +
+                    '</div></div></div>' +
                     '<p id="bGuide" class="act-guide">시작 버튼을 눌러 호흡을 시작하세요</p>' +
                     '<div class="act-btns">' +
                     '<button id="bStart" class="btn btn-primary">시작</button>' +
@@ -1234,64 +1243,47 @@
             }
         },
 
-        /* 2. 4-7-8 호흡법 */
-        '478': {
-            title: '4-7-8 호흡법',
-            meta : '약 3분 · 명상',
+        /* 2. 느린 호흡 */
+        slow_breathing: {
+            title: '느린 호흡',
+            meta : '약 3분 · 호흡',
             render: function (el) {
-                var C = 2 * Math.PI * 52;
                 el.innerHTML =
                     '<div class="act-wrap">' +
-                    '<div class="ring478-wrap">' +
-                    '<svg class="ring478-svg" viewBox="0 0 120 120" aria-hidden="true">' +
-                    '<circle cx="60" cy="60" r="52" class="ring478-bg"/>' +
-                    '<circle cx="60" cy="60" r="52" class="ring478-fg" id="r478Fg"/>' +
-                    '</svg>' +
-                    '<div class="ring478-inner">' +
-                    '<p id="r478Phase" class="ring478-phase">준비</p>' +
-                    '<p id="r478Num"   class="ring478-num">-</p>' +
-                    '</div></div>' +
-                    '<p class="act-guide">들숨 <b>4초</b> → 멈춤 <b>7초</b> → 날숨 <b>8초</b></p>' +
+                    '<div class="breath-scene"><div class="breath-stage">' +
+                    '<div class="breath-ring" id="sbRing">' +
+                    '<p id="sbPhase" class="breath-phase">준비</p>' +
+                    '<p id="sbNum"   class="breath-num">-</p>' +
+                    '</div></div></div>' +
+                    '<p id="sbGuide" class="act-guide">날숨을 들숨보다 길게 — 천천히 내쉬는 데 집중해요</p>' +
                     '<div class="act-btns">' +
-                    '<button id="r478Start" class="btn btn-primary">시작</button>' +
-                    '<button id="r478Reset" class="btn btn-outline">처음으로</button>' +
+                    '<button id="sbStart" class="btn btn-primary">시작</button>' +
+                    '<button id="sbReset" class="btn btn-outline">처음으로</button>' +
                     '</div></div>';
 
-                var fg     = document.getElementById('r478Fg');
-                var phEl   = document.getElementById('r478Phase');
-                var numEl  = document.getElementById('r478Num');
-                var startB = document.getElementById('r478Start');
-                var resetB = document.getElementById('r478Reset');
-                fg.style.strokeDasharray  = C;
-                fg.style.strokeDashoffset = C;
-
+                var ring   = document.getElementById('sbRing');
+                var phEl   = document.getElementById('sbPhase');
+                var numEl  = document.getElementById('sbNum');
+                var guide  = document.getElementById('sbGuide');
+                var startB = document.getElementById('sbStart');
+                var resetB = document.getElementById('sbReset');
                 var PHASES = [
-                    { name: '들숨', dur: 4 },
-                    { name: '멈춤', dur: 7 },
-                    { name: '날숨', dur: 8 }
+                    { name: '들숨', dur: 4, cls: 'inhale', txt: '코로 천천히 들이마셔요' },
+                    { name: '날숨', dur: 7, cls: 'exhale', txt: '입으로 더 천천히 내쉬어요' }
                 ];
                 var pi = 0, sLeft = 0, timer = null, running = false;
 
-                function setRing(elapsed, p) {
-                    var prog = p.name === '들숨' ? elapsed / p.dur
-                             : p.name === '멈춤' ? 1
-                             : (p.dur - elapsed) / p.dur;
-                    fg.style.strokeDashoffset = C * (1 - prog);
-                }
                 function startPhase(idx) {
                     pi = idx; sLeft = PHASES[idx].dur;
+                    ring.className    = 'breath-ring ' + PHASES[idx].cls;
                     phEl.textContent  = PHASES[idx].name;
+                    guide.textContent = PHASES[idx].txt;
                     numEl.textContent = sLeft;
-                    setRing(0, PHASES[idx]);
                 }
                 function tick() {
                     sLeft--;
-                    if (sLeft <= 0) {
-                        startPhase((pi + 1) % PHASES.length);
-                    } else {
-                        numEl.textContent = sLeft;
-                        setRing(PHASES[pi].dur - sLeft, PHASES[pi]);
-                    }
+                    if (sLeft <= 0) { startPhase((pi + 1) % PHASES.length); }
+                    else            { numEl.textContent = sLeft; }
                 }
                 function doStart() {
                     if (running) return;
@@ -1300,8 +1292,9 @@
                 }
                 function doReset() {
                     clearInterval(timer); running = false;
+                    ring.className = 'breath-ring';
                     phEl.textContent = '준비'; numEl.textContent = '-';
-                    fg.style.strokeDashoffset = C;
+                    guide.textContent = '날숨을 들숨보다 길게 — 천천히 내쉬는 데 집중해요';
                     startB.disabled = false; startB.textContent = '시작';
                 }
                 startB.addEventListener('click', doStart);
@@ -1360,109 +1353,107 @@
             }
         },
 
-        /* 4. 5-4-3-2-1 그라운딩 */
-        grounding: {
-            title: '5-4-3-2-1 그라운딩',
-            meta : '약 5분 · 인지 활동',
+        /* 4. PMR 미니 (짧은 점진적 근육 이완) */
+        pmr_mini: {
+            title: 'PMR 미니',
+            meta : '약 5분 · 신체 이완',
             render: function (el) {
                 var STEPS = [
-                    { n: 5, sense: '볼 수 있는',    ph: '예: 창문, 책상, 식물, 컵, 시계' },
-                    { n: 4, sense: '만질 수 있는',   ph: '예: 옷 질감, 의자, 바닥, 책상' },
-                    { n: 3, sense: '들을 수 있는',   ph: '예: 바람 소리, 시계 소리, 숨소리' },
-                    { n: 2, sense: '맡을 수 있는',   ph: '예: 커피 향, 공기 냄새' },
-                    { n: 1, sense: '맛볼 수 있는',   ph: '예: 입안의 맛' }
+                    { name: '양손·팔', tense: 5, relax: 8, tip: '두 손을 주먹 쥐고 팔에 힘을 줬다 풀어요' },
+                    { name: '어깨·목', tense: 5, relax: 8, tip: '어깨를 귀 쪽으로 올렸다 툭 내려놓아요' },
+                    { name: '얼굴',    tense: 5, relax: 8, tip: '눈과 얼굴을 살짝 찡그렸다 부드럽게 펴요' },
+                    { name: '다리·발', tense: 5, relax: 8, tip: '다리와 발에 힘을 줬다 천천히 풀어요' }
                 ];
-                var cur = 0, answers = [];
+                var si = 0, phase = 'idle', sLeft = 0, timer = null;
 
-                function renderStep(idx) {
-                    var s = STEPS[idx];
-                    var dots = STEPS.map(function (_, i) {
-                        return '<div class="grd-dot' + (i < idx ? ' done' : i === idx ? ' active' : '') + '"></div>';
-                    }).join('');
-                    var inputs = '';
-                    for (var i = 0; i < s.n; i++) {
-                        inputs += '<input class="form-input grd-inp" placeholder="' + (i === 0 ? esc(s.ph) : '') + '" data-i="' + i + '">';
+                function renderView() {
+                    var s = STEPS[si];
+                    var pct = Math.round((si / STEPS.length) * 100);
+                    var isIdle = phase === 'idle';
+                    var phLabel = phase === 'tense' ? '긴장' : phase === 'relax' ? '이완' : '';
+                    var phCls   = phase === 'tense' ? 'pmr-tense' : phase === 'relax' ? 'pmr-relax' : '';
+                    el.innerHTML =
+                        '<div class="pmr-wrap">' +
+                        '<div class="pmr-progress-bar"><div class="pmr-progress-fill" style="width:' + pct + '%"></div></div>' +
+                        '<p class="pmr-step-count muted">' + (si + 1) + ' / ' + STEPS.length + ' &mdash; ' + esc(s.name) + '</p>' +
+                        '<div class="pmr-circle-wrap"><div class="pmr-circle ' + phCls + '">' +
+                        (isIdle
+                            ? '<span class="pmr-circle-label">준비</span>'
+                            : '<span class="pmr-circle-label">' + phLabel + '</span><span class="pmr-circle-num" id="pmrNum">' + sLeft + '</span>') +
+                        '</div></div>' +
+                        '<p class="act-guide pmr-tip">' + esc(s.tip) + '</p>' +
+                        (isIdle ? '<button id="pmrGo" class="btn btn-primary btn-block">시작</button>' : '') +
+                        '</div>';
+
+                    if (isIdle) {
+                        document.getElementById('pmrGo').addEventListener('click', startTense);
                     }
+                }
+
+                function startTense() {
+                    phase = 'tense'; sLeft = STEPS[si].tense;
+                    renderView();
+                    timer = setInterval(tick, 1000);
+                }
+
+                function tick() {
+                    sLeft--;
+                    var numEl = document.getElementById('pmrNum');
+                    if (sLeft > 0) { if (numEl) numEl.textContent = sLeft; return; }
+                    clearInterval(timer);
+                    if (phase === 'tense') {
+                        phase = 'relax'; sLeft = STEPS[si].relax;
+                        renderView();
+                        timer = setInterval(tick, 1000);
+                    } else {
+                        si++;
+                        if (si >= STEPS.length) { renderDone(); }
+                        else { phase = 'idle'; renderView(); }
+                    }
+                }
+
+                function renderDone() {
                     el.innerHTML =
-                        '<div class="grd-wrap">' +
-                        '<div class="grd-progress">' + dots + '</div>' +
-                        '<div class="grd-step-num">' + s.n + '</div>' +
-                        '<p class="grd-question">지금 <b>' + s.sense + '</b> 것 ' + s.n + '가지를 적어보세요</p>' +
-                        '<div id="grdInputs">' + inputs + '</div>' +
-                        '<button id="grdNext" class="btn btn-primary btn-block" style="margin-top:1rem;">' +
-                        (idx === STEPS.length - 1 ? '완료' : '다음') + '</button></div>';
-
-                    var inps = el.querySelectorAll('.grd-inp');
-                    if (inps.length) inps[0].focus();
-                    inps.forEach(function (inp, i) {
-                        inp.addEventListener('keydown', function (e) {
-                            if (e.key === 'Enter') {
-                                if (i < inps.length - 1) inps[i + 1].focus();
-                                else document.getElementById('grdNext').click();
-                            }
-                        });
-                    });
-
-                    document.getElementById('grdNext').addEventListener('click', function () {
-                        answers[idx] = Array.from(el.querySelectorAll('.grd-inp'))
-                            .map(function (i) { return i.value.trim(); }).filter(Boolean);
-                        if (idx === STEPS.length - 1) renderResult();
-                        else renderStep(++cur);
+                        '<div class="pmr-done">' +
+                        '<p style="font-size:2rem;">🌿</p>' +
+                        '<p style="line-height:1.75;margin:0.5rem 0;">짧게 몸을 풀어봤어요.<br>한결 가벼워졌기를 바라요.</p>' +
+                        '<button id="pmrAgain" class="btn btn-outline btn-block" style="margin-top:1rem;">처음부터 다시</button></div>';
+                    document.getElementById('pmrAgain').addEventListener('click', function () {
+                        si = 0; phase = 'idle'; renderView();
                     });
                 }
 
-                function renderResult() {
-                    var groups = STEPS.map(function (s, i) {
-                        var items = answers[i] || [];
-                        if (!items.length) return '';
-                        return '<div class="grd-ans-group"><span class="grd-ans-label">' + s.n + ' ' + s.sense + ' 것</span>' +
-                            items.map(function (t) { return '<span class="grd-ans-chip">' + esc(t) + '</span>'; }).join('') + '</div>';
-                    }).join('');
-                    el.innerHTML =
-                        '<div class="grd-result">' +
-                        '<p class="grd-done-msg">지금 이 순간, 여기에 있습니다.<br>잘 하셨어요 🌿</p>' +
-                        groups +
-                        '<button id="grdAgain" class="btn btn-outline btn-block" style="margin-top:1.25rem;">다시 해보기</button></div>';
-                    document.getElementById('grdAgain').addEventListener('click', function () {
-                        cur = 0; answers = []; renderStep(0);
-                    });
-                }
-
-                renderStep(0);
+                renderView();
+                return function () { clearInterval(timer); };
             }
         },
 
-        /* 5. 긍정 확언 카드 */
-        affirmation: {
-            title: '긍정 확언 카드',
-            meta : '약 5분 · 인지 활동',
+        /* 5. 자기자비 문장 */
+        self_compassion_script: {
+            title: '자기자비 문장',
+            meta : '약 5분 · 인지',
             render: function (el) {
                 var CARDS = [
-                    '나는 충분히 가치 있는 사람입니다.',
-                    '나는 매일 조금씩 성장하고 있습니다.',
-                    '지금 이 순간, 나는 충분합니다.',
-                    '나는 나 자신을 있는 그대로 받아들입니다.',
-                    '힘든 감정도 지나갑니다. 나는 괜찮아질 것입니다.',
-                    '나는 사랑받을 자격이 있습니다.',
-                    '내 감정은 유효하고 중요합니다.',
-                    '나는 어떤 어려움도 헤쳐 나갈 수 있습니다.',
-                    '오늘 하루를 버텨낸 나를 칭찬합니다.',
-                    '나는 나 자신의 가장 친한 친구입니다.'
+                    '지금 힘든 것도 괜찮아요.',
+                    '누구나 가끔은 버거울 수 있어요.',
+                    '오늘은 여기까지 해도 충분해요.',
+                    '나에게 조금만 관대해져도 돼요.',
+                    '이 감정은 지나갈 수 있어요.'
                 ];
                 var idx = 0;
 
                 function render() {
                     el.innerHTML =
-                        '<div class="aff-wrap">' +
-                        '<div class="aff-card"><p class="aff-text">&ldquo;' + esc(CARDS[idx]) + '&rdquo;</p></div>' +
-                        '<span class="aff-counter muted">' + (idx + 1) + ' / ' + CARDS.length + '</span>' +
-                        '<p class="aff-hint muted">천천히 소리 내어 읽어보세요.</p>' +
-                        '<div class="aff-nav">' +
-                        '<button id="affPrev" class="btn btn-outline btn-sm"' + (idx === 0 ? ' disabled' : '') + '>◀ 이전</button>' +
-                        '<button id="affNext" class="btn btn-primary btn-sm"' + (idx === CARDS.length - 1 ? ' disabled' : '') + '>다음 ▶</button>' +
+                        '<div class="scs-wrap">' +
+                        '<div class="scs-card"><p class="scs-text">&ldquo;' + esc(CARDS[idx]) + '&rdquo;</p></div>' +
+                        '<span class="scs-counter muted">' + (idx + 1) + ' / ' + CARDS.length + '</span>' +
+                        '<p class="scs-hint muted">천천히, 나에게 건네듯 읽어보세요.</p>' +
+                        '<div class="scs-nav">' +
+                        '<button id="scsPrev" class="btn btn-outline btn-sm"' + (idx === 0 ? ' disabled' : '') + '>◀ 이전</button>' +
+                        '<button id="scsNext" class="btn btn-primary btn-sm"' + (idx === CARDS.length - 1 ? ' disabled' : '') + '>다음 ▶</button>' +
                         '</div></div>';
-                    var prev = document.getElementById('affPrev');
-                    var next = document.getElementById('affNext');
+                    var prev = document.getElementById('scsPrev');
+                    var next = document.getElementById('scsNext');
                     prev.addEventListener('click', function () { if (idx > 0) { idx--; render(); } });
                     next.addEventListener('click', function () { if (idx < CARDS.length - 1) { idx++; render(); } });
                 }
@@ -1588,9 +1579,9 @@
             }
         },
 
-        /* 8. 바디스캔 명상 */
+        /* 8. 짧은 바디스캔 */
         bodyscan: {
-            title: '바디스캔 명상',
+            title: '짧은 바디스캔',
             meta : '약 10분 · 명상',
             render: function (el) {
                 var STEPS = [

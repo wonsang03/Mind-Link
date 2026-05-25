@@ -1,7 +1,6 @@
 package com.mindlink.controller;
 
 import com.mindlink.domain.Notice;
-import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
 import com.mindlink.dto.NoticeRequest;
 import com.mindlink.service.NoticeService;
@@ -52,12 +51,13 @@ public class NoticeController {
         }
         model.addAttribute("noticeForm", new NoticeRequest());
         model.addAttribute("isEdit", false);
-        return "notice-form";
+        return "admin/notice-form";
     }
 
     @PostMapping
     public String create(@Valid @ModelAttribute("noticeForm") NoticeRequest form,
                          BindingResult bindingResult,
+                         @RequestParam(value = "sendPushAlert", defaultValue = "false") boolean sendPushAlert,
                          HttpSession session,
                          Model model,
                          RedirectAttributes ra) {
@@ -67,11 +67,15 @@ public class NoticeController {
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", false);
-            return "notice-form";
+            return "admin/notice-form";
         }
-        Notice notice = noticeService.create(form);
-        ra.addFlashAttribute("flash", "공지가 등록되었습니다.");
-        return "redirect:/notice/" + notice.getId();
+        noticeService.create(form, sendPushAlert);
+        String msg = "공지가 등록되었습니다.";
+        if (sendPushAlert) {
+            msg += " 회원 알림함에도 발송했습니다. (공지 게시판과 별도)";
+        }
+        ra.addFlashAttribute("flash", msg);
+        return "redirect:/admin/notices";
     }
 
     @GetMapping("/{id}/edit")
@@ -94,7 +98,7 @@ public class NoticeController {
         model.addAttribute("noticeForm", form);
         model.addAttribute("noticeId", id);
         model.addAttribute("isEdit", true);
-        return "notice-form";
+        return "admin/notice-form";
     }
 
     @PostMapping("/{id}/edit")
@@ -111,11 +115,11 @@ public class NoticeController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("noticeId", id);
             model.addAttribute("isEdit", true);
-            return "notice-form";
+            return "admin/notice-form";
         }
         noticeService.update(id, form);
         ra.addFlashAttribute("flash", "공지가 수정되었습니다.");
-        return "redirect:/notice/" + id;
+        return "redirect:/admin/notices";
     }
 
     @PostMapping("/{id}/delete")
@@ -126,7 +130,7 @@ public class NoticeController {
         }
         noticeService.delete(id);
         ra.addFlashAttribute("flash", "공지가 삭제되었습니다.");
-        return "redirect:/notice";
+        return "redirect:/admin/notices";
     }
 
     private boolean isAdmin(HttpSession session) {

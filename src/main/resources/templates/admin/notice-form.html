@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 공지 작성')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('notice')}"></aside>
+
+    <div class="admin-main">
+        <a th:href="@{/admin}" class="admin-back-btn">← 대시보드</a>
+        <h1 style="margin:0.5rem 0 1.5rem; font-size:1.35rem;"
+            th:text="${isEdit} ? '공지 수정' : '공지 작성'">공지 작성</h1>
+
+        <form th:action="${isEdit} ? @{/notice/{id}/edit(id=${noticeId})} : @{/notice}"
+              method="post"
+              th:object="${noticeForm}"
+              style="max-width:52rem; display:flex; flex-direction:column; gap:1.1rem;">
+
+            <!-- 공지 카테고리 (태그) -->
+            <div>
+                <label class="admin-field-label">공지 카테고리 <span class="muted" style="font-weight:normal;">(태그)</span></label>
+                <input type="text" th:field="*{category}"
+                       class="form-input"
+                       placeholder="예: 중요, 서비스 안내, 점검"/>
+                <p th:if="${#fields.hasErrors('category')}" th:errors="*{category}"
+                   style="margin:0.25rem 0 0; font-size:0.82rem; color:var(--destructive);"></p>
+            </div>
+
+            <!-- 제목 -->
+            <div>
+                <label class="admin-field-label">제목</label>
+                <input type="text" th:field="*{title}"
+                       class="form-input"
+                       placeholder="공지 제목을 입력하세요"/>
+                <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
+                   style="margin:0.25rem 0 0; font-size:0.82rem; color:var(--destructive);"></p>
+            </div>
+
+            <!-- 요약 -->
+            <div>
+                <label class="admin-field-label">요약 <span class="muted" style="font-weight:normal;">(목록 미리보기)</span></label>
+                <input type="text" th:field="*{summary}"
+                       class="form-input"
+                       placeholder="공지의 핵심 내용을 한 줄로 요약해주세요"/>
+                <p th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}"
+                   style="margin:0.25rem 0 0; font-size:0.82rem; color:var(--destructive);"></p>
+            </div>
+
+            <!-- 내용 -->
+            <div>
+                <label class="admin-field-label">내용</label>
+                <textarea th:field="*{content}" rows="14"
+                          class="form-textarea"
+                          style="resize:vertical;"
+                          placeholder="공지 내용을 입력하세요"></textarea>
+                <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}"
+                   style="margin:0.25rem 0 0; font-size:0.82rem; color:var(--destructive);"></p>
+            </div>
+
+            <div th:if="${!isEdit}" style="padding:0.75rem 1rem; background:var(--secondary); border-radius:8px; border:1px solid var(--border);">
+                <label style="display:flex; align-items:flex-start; gap:0.5rem; font-size:0.9rem; cursor:pointer;">
+                    <input type="checkbox" name="sendPushAlert" value="true" style="margin-top:0.2rem;"/>
+                    <span>회원 <strong>알림함</strong>에도 발송 (공지 게시판 등록과 별도)</span>
+                </label>
+            </div>
+
+            <div style="display:flex; gap:0.65rem; margin-top:0.5rem;">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${isEdit} ? '수정 완료' : '등록'">등록</button>
+                <a th:href="@{/admin}" class="btn btn-outline">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 대시보드')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('dashboard')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <h1>관리자 대시보드</h1>
+            <p class="muted">마음이음 서비스를 관리합니다.</p>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- 통계 카드 -->
+        <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+                <div class="admin-stat-value" th:text="${stats.totalUsers}">0</div>
+                <div class="admin-stat-label">전체 회원</div>
+                <div class="admin-stat-sub"
+                     th:text="|관리자 ${stats.adminCount} · 상담사 ${stats.counselorCount} · 유저 ${stats.userCount}|">
+                </div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-value" th:text="${stats.postCount}">0</div>
+                <div class="admin-stat-label">게시글</div>
+                <div class="admin-stat-sub" th:text="|댓글 ${stats.commentCount}개|"></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-value" th:text="${stats.reportCount}">0</div>
+                <div class="admin-stat-label">신고</div>
+                <div class="admin-stat-sub" th:text="|예약 ${stats.bookingCount}건|"></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-value" th:text="${stats.noticeCount}">0</div>
+                <div class="admin-stat-label">공지사항</div>
+                <div class="admin-stat-sub">등록된 공지</div>
+            </div>
+        </div>
+
+        <!-- 빠른 메뉴 -->
+        <div class="admin-cards" style="margin-top: 1.75rem;">
+            <a th:href="@{/admin/cluster}" class="admin-card">
+                <div class="admin-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="6" cy="6" r="2"/><circle cx="18" cy="7" r="2"/>
+                        <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+                        <circle cx="12" cy="12" r="2"/>
+                        <path d="M8 7l3 4M16 8l-4 4M9 16l3-4M15 16l-3-4"/>
+                    </svg>
+                </div>
+                <h3>정서 클러스터 맵</h3>
+                <p class="muted">3D K-Means 군집화 시각화 및 재계산</p>
+            </a>
+            <a th:href="@{/admin/users}" class="admin-card">
+                <div class="admin-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <h3>유저 관리</h3>
+                <p class="muted">회원 조회·등급 변경·삭제</p>
+            </a>
+            <a th:href="@{/admin/posts}" class="admin-card">
+                <div class="admin-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16v12H5.17L4 17.17z"/>
+                        <line x1="8" y1="9" x2="16" y2="9"/>
+                        <line x1="8" y1="13" x2="13" y2="13"/>
+                    </svg>
+                </div>
+                <h3>게시글 관리</h3>
+                <p class="muted">커뮤니티 게시글 수정·삭제</p>
+            </a>
+            <a th:href="@{/admin/notices}" class="admin-card">
+                <div class="admin-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/>
+                        <path d="M9 21a3 3 0 0 0 6 0"/>
+                    </svg>
+                </div>
+                <h3>공지사항 관리</h3>
+                <p class="muted">공지 작성·수정·삭제</p>
+            </a>
+            <a th:href="@{/admin/sql}" class="admin-card">
+                <div class="admin-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"/>
+                        <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                </div>
+                <h3>SQL 콘솔</h3>
+                <p class="muted">DB 직접 조회·수정</p>
+            </a>
+        </div>
+
+        <!-- 최근 공지 -->
+        <div style="margin-top: 2rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                <h2 style="margin:0; font-size:1.1rem;">최근 공지사항</h2>
+                <a th:href="@{/admin/notices}" class="btn btn-primary btn-sm">공지 관리</a>
+            </div>
+            <div th:if="${#lists.isEmpty(notices)}" class="muted" style="padding:1rem 0; font-size:0.9rem;">등록된 공지사항이 없습니다.</div>
+            <div th:unless="${#lists.isEmpty(notices)}" style="display:flex; flex-direction:column; gap:0.6rem;">
+                <div th:each="n : ${notices}" class="admin-notice-row">
+                    <div style="flex:1; min-width:0;">
+                        <span class="tag tag-secondary" th:text="${n.category}" style="margin-right:0.5rem;">중요</span>
+                        <span th:text="${n.title}" style="font-size:0.92rem;">공지 제목</span>
+                    </div>
+                    <div style="display:flex; gap:0.4rem; align-items:center; flex-shrink:0;">
+                        <span class="muted" style="font-size:0.8rem;"
+                              th:text="${#temporals.format(n.createdAt, 'MM-dd')}">05-23</span>
+                        <a th:href="@{/notice/{id}/edit(id=${n.id})}" class="btn btn-secondary btn-sm">수정</a>
+                        <form th:action="@{/notice/{id}/delete(id=${n.id})}" method="post"
+                              onsubmit="return confirm('삭제하시겠습니까?');" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
