@@ -22,6 +22,7 @@ public interface UserAssessmentProfileRepository extends JpaRepository<UserAsses
     @Query("""
             SELECT p FROM UserAssessmentProfile p
             WHERE p.userId IS NOT NULL
+              AND p.isSynthetic = 0
               AND (
                    LOWER(p.personaLabel) LIKE :pattern
                 OR p.userId IN (

@@ -5,6 +5,7 @@ import com.mindlink.domain.AssessmentType;
 import com.mindlink.domain.ScoreRange;
 import com.mindlink.domain.User;
 import com.mindlink.domain.UserAlert;
+import com.mindlink.chatcluster.ClusterProfileService;
 import com.mindlink.service.AssessmentService;
 import com.mindlink.service.MonitoringService;
 import com.mindlink.service.UserService;
@@ -25,13 +26,16 @@ public class SelfAssessmentController {
 
     private final AssessmentService assessmentService;
     private final MonitoringService monitoringService;
+    private final ClusterProfileService clusterProfileService;
     private final UserService userService;
 
     public SelfAssessmentController(AssessmentService assessmentService,
                                      MonitoringService monitoringService,
+                                     ClusterProfileService clusterProfileService,
                                      UserService userService) {
         this.assessmentService  = assessmentService;
         this.monitoringService  = monitoringService;
+        this.clusterProfileService = clusterProfileService;
         this.userService        = userService;
     }
 
@@ -94,6 +98,8 @@ public class SelfAssessmentController {
             UserAlert alert = monitoringService.saveAndMonitor(
                 loginUser, typeKey, totalScore, level, highRisk,
                 null, null, null, null);
+            clusterProfileService.mergeAssessmentScore(
+                    loginUser.getId(), loginUser.getName(), typeKey, totalScore);
             if (alert != null) model.addAttribute("resultAlert", alert);
         } else {
             model.addAttribute("saveResultHint",

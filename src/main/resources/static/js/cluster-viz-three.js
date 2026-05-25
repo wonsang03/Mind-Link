@@ -696,7 +696,7 @@ async function loadVisualization() {
         const rc = DATA.stats?.realCount ?? 0;
         const sc = DATA.stats?.syntheticCount ?? 0;
         if (OPT_REAL.checked && rc === 0) {
-            ERR.textContent = '실사용자 프로필이 0건이에요. sql/CHAT_CLUSTER_REAL_USER_SEED.sql 실행 후 「데이터 새로고침」을 눌러 주세요.';
+            ERR.textContent = '실사용자 프로필이 0건이에요. 로그인 후 스트레스·우울·불안 자가진단을 완료하거나, 관리자로 「데이터 새로고침」(재계산)을 눌러 주세요.';
         } else if (OPT_REAL.checked && !OPT_SYN.checked) {
             ERR.textContent = '실사용자 ' + rc + '명만 표시 중 (페르소나 시드 ' + sc + '명은 숨김)';
         } else {

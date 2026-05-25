@@ -1,6 +1,8 @@
 package com.mindlink.chatcluster;
 
+import com.mindlink.domain.AssessmentResult;
 import com.mindlink.domain.User;
+import com.mindlink.repository.AssessmentResultRepository;
 import com.mindlink.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import static com.mindlink.chatcluster.ClusterVisualizationService.AXIS_S_MAX;
 public class ClusterProfileService {
 
     private final UserAssessmentProfileRepository repository;
+    private final AssessmentResultRepository assessmentResultRepository;
     private final UserRepository userRepository;
     private final ClusterVisualizationService visualizationService;
 
@@ -42,9 +45,11 @@ public class ClusterProfileService {
     private double weightAnxiety;
 
     public ClusterProfileService(UserAssessmentProfileRepository repository,
+                                  AssessmentResultRepository assessmentResultRepository,
                                   UserRepository userRepository,
                                   ClusterVisualizationService visualizationService) {
         this.repository = repository;
+        this.assessmentResultRepository = assessmentResultRepository;
         this.userRepository = userRepository;
         this.visualizationService = visualizationService;
     }
@@ -57,8 +62,90 @@ public class ClusterProfileService {
         clampOrThrow(anxiety, AXIS_A_MAX, "anxiety");
 
         UserAssessmentProfile profile = repository.findByUserId(userId).orElseGet(UserAssessmentProfile::new);
+        applyScores(profile, userId, displayName, stress, depression, anxiety);
+        return persistWithClusterAssign(profile);
+    }
+
+    /**
+     * 자가진단 1건 완료 시 해당 축만 갱신 (stress / depression / anxiety).
+     * 번아웃(CBI)은 3축 스케일과 달라 클러스터 좌표에 반영하지 않는다.
+     */
+    @Transactional
+    public void mergeAssessmentScore(Long userId, String displayName, String typeKey, int score) {
+        if (userId == null || typeKey == null) return;
+        String axis = axisForTypeKey(typeKey);
+        if (axis == null) return;
+
+        double value = score;
+        clampOrThrow(value, maxForAxis(axis), axis);
+
+        UserAssessmentProfile profile = repository.findByUserId(userId).orElseGet(UserAssessmentProfile::new);
+        double stress = profile.getStressScore() != null ? profile.getStressScore() : 0;
+        double depression = profile.getDepressionScore() != null ? profile.getDepressionScore() : 0;
+        double anxiety = profile.getAnxietyScore() != null ? profile.getAnxietyScore() : 0;
+        switch (axis) {
+            case "stress" -> stress = value;
+            case "depression" -> depression = value;
+            case "anxiety" -> anxiety = value;
+            default -> { return; }
+        }
+        applyScores(profile, userId, displayName, stress, depression, anxiety);
+        persistWithClusterAssign(profile);
+    }
+
+    /** assessment_results 최신 점수로 실사용자 프로필 일괄 동기화 (관리자 recompute 직전 호출). */
+    @Transactional
+    public int backfillAllFromAssessmentResults() {
+        List<User> users = assessmentResultRepository.findDistinctUsersWithAxisAssessments();
+        int count = 0;
+        for (User user : users) {
+            if (syncFromLatestAssessments(user)) count++;
+        }
+        if (count > 0) {
+            visualizationService.invalidateCache();
+        }
+        return count;
+    }
+
+    /** 최신 stress/depression/anxiety 검사 결과가 있으면 프로필 갱신. */
+    @Transactional
+    public boolean syncFromLatestAssessments(User user) {
+        if (user == null || user.getId() == null) return false;
+
+        Optional<Double> stress = latestAxisScore(user, "stress");
+        Optional<Double> depression = latestAxisScore(user, "depression");
+        Optional<Double> anxiety = latestAxisScore(user, "anxiety");
+        if (stress.isEmpty() && depression.isEmpty() && anxiety.isEmpty()) {
+            return false;
+        }
+
+        UserAssessmentProfile profile = repository.findByUserId(user.getId()).orElseGet(UserAssessmentProfile::new);
+        double s = stress.orElse(profile.getStressScore() != null ? profile.getStressScore() : 0);
+        double d = depression.orElse(profile.getDepressionScore() != null ? profile.getDepressionScore() : 0);
+        double a = anxiety.orElse(profile.getAnxietyScore() != null ? profile.getAnxietyScore() : 0);
+        String name = user.getName() != null && !user.getName().isBlank() ? user.getName() : "사용자";
+        applyScores(profile, user.getId(), name, s, d, a);
+        persistWithClusterAssign(profile);
+        return true;
+    }
+
+    private UserAssessmentProfile persistWithClusterAssign(UserAssessmentProfile profile) {
+        UserAssessmentProfile saved = repository.save(profile);
+        Integer cid = nearestClusterId(saved);
+        if (cid != null) {
+            saved.setClusterId(cid);
+            saved = repository.save(saved);
+        }
+        visualizationService.invalidateCache();
+        return saved;
+    }
+
+    private void applyScores(UserAssessmentProfile profile, Long userId, String displayName,
+                             double stress, double depression, double anxiety) {
         profile.setUserId(userId);
-        profile.setPersonaKey("real_user_" + userId);
+        if (profile.getPersonaKey() == null || profile.getPersonaKey().isBlank()) {
+            profile.setPersonaKey("real_user_" + userId);
+        }
         profile.setPersonaLabel(displayName != null && !displayName.isBlank() ? displayName : "나");
         profile.setPersonaStory("내 자가진단 결과로 만든 프로필이에요.");
         profile.setStressScore(stress);
@@ -68,16 +155,31 @@ public class ClusterProfileService {
         profile.setDepressionNorm(round4(depression / AXIS_D_MAX));
         profile.setAnxietyNorm(round4(anxiety / AXIS_A_MAX));
         profile.setIsSynthetic(0);
-        UserAssessmentProfile saved = repository.save(profile);
+    }
 
-        // 신규 점 추가 시 가장 가까운 centroid 로 assign (전체 recompute 호출 비용 회피)
-        Integer cid = nearestClusterId(saved);
-        if (cid != null) {
-            saved.setClusterId(cid);
-            repository.save(saved);
-        }
-        visualizationService.invalidateCache();
-        return saved;
+    private Optional<Double> latestAxisScore(User user, String typeKey) {
+        return assessmentResultRepository.findTopByUserAndTypeKeyOrderByCompletedAtDesc(user, typeKey)
+                .map(AssessmentResult::getScore)
+                .filter(s -> s != null)
+                .map(Integer::doubleValue);
+    }
+
+    private static String axisForTypeKey(String typeKey) {
+        return switch (typeKey) {
+            case "stress" -> "stress";
+            case "depression" -> "depression";
+            case "anxiety" -> "anxiety";
+            default -> null;
+        };
+    }
+
+    private static double maxForAxis(String axis) {
+        return switch (axis) {
+            case "stress" -> AXIS_S_MAX;
+            case "depression" -> AXIS_D_MAX;
+            case "anxiety" -> AXIS_A_MAX;
+            default -> throw new IllegalArgumentException("unknown axis: " + axis);
+        };
     }
 
     public Optional<UserAssessmentProfile> findByUserId(Long userId) {

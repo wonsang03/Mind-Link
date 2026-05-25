@@ -29,6 +29,7 @@ public class ClusterKMeansEngine {
     private static final Logger log = LoggerFactory.getLogger(ClusterKMeansEngine.class);
 
     private final UserAssessmentProfileRepository repository;
+    private final ClusterProfileService profileService;
     private final ClusterVisualizationService visualizationService;
 
     @Value("${chat.cluster.k:6}")
@@ -50,8 +51,10 @@ public class ClusterKMeansEngine {
     private int restarts;
 
     public ClusterKMeansEngine(UserAssessmentProfileRepository repository,
+                                ClusterProfileService profileService,
                                 ClusterVisualizationService visualizationService) {
         this.repository = repository;
+        this.profileService = profileService;
         this.visualizationService = visualizationService;
     }
 
@@ -59,6 +62,10 @@ public class ClusterKMeansEngine {
     @Transactional
     public ClusterDtos.RecomputeResponse recompute() {
         long t0 = System.currentTimeMillis();
+        int backfilled = profileService.backfillAllFromAssessmentResults();
+        if (backfilled > 0) {
+            log.info("Cluster backfill from assessment_results: {} users", backfilled);
+        }
         List<UserAssessmentProfile> all = repository.findAll();
         if (all.size() < k) {
             log.warn("Cluster recompute skipped — points={} < k={}", all.size(), k);
