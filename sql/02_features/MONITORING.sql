@@ -56,7 +56,8 @@ DECLARE
     END IF;
   END;
 BEGIN
-  IF (SELECT COUNT(*) FROM user_tables WHERE table_name = 'ASSESSMENT_RESULTS') = 0 THEN
+  SELECT COUNT(*) INTO n FROM user_tables WHERE table_name = 'ASSESSMENT_RESULTS';
+  IF n = 0 THEN
     RETURN;
   END IF;
 
@@ -165,6 +166,7 @@ END;
 
 -- ── 2b. user_alerts 링크·연관 ID 컬럼 보강 (기존 테이블 대상, 멱등) ───────────
 DECLARE
+  v_cnt NUMBER;
   PROCEDURE add_ua_col(p_col VARCHAR2, p_ddl VARCHAR2) IS
     c NUMBER;
   BEGIN
@@ -175,7 +177,8 @@ DECLARE
     END IF;
   END;
 BEGIN
-  IF (SELECT COUNT(*) FROM user_tables WHERE table_name = 'USER_ALERTS') = 0 THEN
+  SELECT COUNT(*) INTO v_cnt FROM user_tables WHERE table_name = 'USER_ALERTS';
+  IF v_cnt = 0 THEN
     RETURN;
   END IF;
   add_ua_col('LINK_URL',           'link_url VARCHAR2(500 CHAR)');
@@ -190,7 +193,8 @@ END;
 DECLARE
   c NUMBER;
 BEGIN
-  IF (SELECT COUNT(*) FROM user_tables WHERE table_name = 'USER_ALERTS') = 0 THEN
+  SELECT COUNT(*) INTO c FROM user_tables WHERE table_name = 'USER_ALERTS';
+  IF c = 0 THEN
     RETURN;
   END IF;
   SELECT COUNT(*) INTO c FROM user_constraints

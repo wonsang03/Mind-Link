@@ -2,6 +2,7 @@ package com.mindlink.controller;
 
 import com.mindlink.domain.Booking;
 import com.mindlink.domain.User;
+import com.mindlink.domain.UserRole;
 import com.mindlink.dto.BookingRequest;
 import com.mindlink.dto.BookingResponse;
 import com.mindlink.dto.CenterResponse;
@@ -58,9 +59,19 @@ public class CounselingApiController {
     }
 
     @GetMapping("/bookings/{id}")
-    public ResponseEntity<BookingResponse> getBooking(@PathVariable Long id) {
+    public ResponseEntity<?> getBooking(@PathVariable Long id, HttpSession session) {
+        User user = currentUser(session);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+        }
         return counselingService.findBooking(id)
-                .map(b -> ResponseEntity.ok(new BookingResponse(b)))
+                .<ResponseEntity<?>>map(b -> {
+                    boolean isOwner = b.getUser() != null && b.getUser().getId().equals(user.getId());
+                    if (!isOwner && user.getRole() != UserRole.ADMIN) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "접근 권한이 없습니다."));
+                    }
+                    return ResponseEntity.ok(new BookingResponse(b));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

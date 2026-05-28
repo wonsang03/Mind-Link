@@ -10,9 +10,9 @@
 --   인간관계      → 인간관계  (그대로)
 --   전체 / 스트레스 / 일상·기타 → 이미 새 값이므로 skip
 
-UPDATE POST SET CATEGORY = '스트레스' WHERE CATEGORY = '스트레스 관리';
+UPDATE POSTS SET CATEGORY = '스트레스' WHERE CATEGORY = '스트레스 관리';
 
-UPDATE POST SET CATEGORY = '일상·기타'
+UPDATE POSTS SET CATEGORY = '일상·기타'
 WHERE CATEGORY IN ('경험 공유', '함께 해요', '질문과 답변', '추천 및 후기');
 
 COMMIT;
