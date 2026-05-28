@@ -668,6 +668,17 @@
 
 /* ─── 반응형 ─────────────────────────────────────────────── */
 
+/* 태블릿 (1024px 이하): 사이드바 폭 축소 + 메인 패딩 축소 */
+@media (max-width: 1024px) {
+    .admin-sidebar { width: 180px; }
+    .admin-main { padding: 1.5rem 1.5rem; }
+    .admin-main-wide { padding: 1.25rem 1.25rem; }
+
+    .admin-user-grid { grid-template-columns: 1fr; }
+    .admin-cards { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+/* 모바일 (768px 이하): 아이콘 사이드바 + 본문 컴팩트 */
 @media (max-width: 768px) {
     .admin-sidebar {
         width: 64px;
@@ -688,4 +699,43 @@
     .admin-main {
         padding: 1.25rem;
     }
+
+    .admin-page-header h1 { font-size: 1.3rem; }
+    .admin-cards { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .admin-card { padding: 1.1rem; }
+    .admin-stat-grid { grid-template-columns: 1fr 1fr; }
+    .admin-stat-value { font-size: 1.65rem; }
+
+    /* 유저 상세 헤더 세로 배치 */
+    .admin-user-hero { padding: 1.25rem; gap: 1rem; }
+    .admin-user-hero-name { font-size: 1.25rem; }
+    .admin-user-summary-item { min-width: calc(50% - 0.5rem); padding: 0.85rem 1rem; }
+    .admin-user-summary-item strong { font-size: 1.25rem; }
+
+    /* dl 한 줄 배치 */
+    .admin-user-dl { grid-template-columns: 5.5rem 1fr; gap: 0.5rem 0.75rem; }
+
+    /* 패널 헤더/콘텐츠 패딩 축소 */
+    .admin-panel-head { padding: 0.75rem 1rem; }
+    .admin-notice-row { flex-wrap: wrap; padding: 0.65rem 0.85rem; }
+
+    /* 테이블은 가로 스크롤 유지 */
+    .admin-table th, .admin-table td { padding: 0.6rem 0.75rem; }
+}
+
+/* 소형 모바일 (480px 이하): 아주 좁은 화면 */
+@media (max-width: 480px) {
+    .admin-sidebar { width: 56px; }
+    .admin-main { padding: 1rem 0.875rem; }
+    .admin-main-wide { padding: 0.875rem 0.875rem; }
+
+    .admin-cards { grid-template-columns: 1fr; }
+    .admin-stat-grid { grid-template-columns: 1fr; }
+
+    .admin-user-summary-item { min-width: 100%; }
+    .admin-user-dl { grid-template-columns: 1fr; gap: 0.25rem 0; }
+    .admin-user-dl dt { font-size: 0.78rem; margin-top: 0.4rem; }
+
+    .admin-page-header h1 { font-size: 1.2rem; }
+    .admin-panel-head h2  { font-size: 0.9rem; }
 }

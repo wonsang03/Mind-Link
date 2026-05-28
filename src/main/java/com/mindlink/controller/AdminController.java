@@ -5,6 +5,7 @@ import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
 import com.mindlink.service.AdminService;
 import com.mindlink.service.CommunityService;
+import com.mindlink.service.LogViewerService;
 import com.mindlink.service.NoticeService;
 import com.mindlink.service.SqlConsoleService;
 import com.mindlink.service.UserNotificationService;
@@ -27,6 +28,7 @@ public class AdminController {
     private final UserService userService;
     private final SqlConsoleService sqlConsoleService;
     private final UserNotificationService notificationService;
+    private final LogViewerService logViewerService;
 
     @Value("${chat.cluster.k:6}")
     private int k;
@@ -46,13 +48,15 @@ public class AdminController {
                            NoticeService noticeService,
                            UserService userService,
                            SqlConsoleService sqlConsoleService,
-                           UserNotificationService notificationService) {
+                           UserNotificationService notificationService,
+                           LogViewerService logViewerService) {
         this.adminService = adminService;
         this.communityService = communityService;
         this.noticeService = noticeService;
         this.userService = userService;
         this.sqlConsoleService = sqlConsoleService;
         this.notificationService = notificationService;
+        this.logViewerService = logViewerService;
     }
 
     // ===== 대시보드 =====
@@ -239,6 +243,34 @@ public class AdminController {
         if (!isAdmin(session)) return denied(ra);
         model.addAttribute("notices", noticeService.findAll());
         return "admin/notices";
+    }
+
+    // ===== 로그 조회 =====
+
+    @GetMapping("/logs")
+    public String logs(@RequestParam(required = false, defaultValue = "access.log") String file,
+                       @RequestParam(required = false, defaultValue = "300") int lines,
+                       @RequestParam(required = false) String q,
+                       HttpSession session, Model model, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        var files = logViewerService.listFiles();
+        model.addAttribute("files", files);
+        model.addAttribute("selected", file);
+        model.addAttribute("lines", lines);
+        model.addAttribute("q", q);
+        model.addAttribute("maxLines", logViewerService.maxLines());
+        model.addAttribute("content", logViewerService.tail(file, lines, q));
+        return "admin/logs";
+    }
+
+    @GetMapping(value = "/logs/raw", produces = "text/plain; charset=UTF-8")
+    @ResponseBody
+    public String logsRaw(@RequestParam(required = false, defaultValue = "access.log") String file,
+                          @RequestParam(required = false, defaultValue = "300") int lines,
+                          @RequestParam(required = false) String q,
+                          HttpSession session) {
+        if (!isAdmin(session)) return "(권한 없음)";
+        return logViewerService.tail(file, lines, q);
     }
 
     // ===== SQL 콘솔 =====

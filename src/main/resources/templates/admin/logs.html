@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: head('마음이음 관리자 - 로그 조회')}"></head>
+<body>
+
+<style>
+    .log-toolbar {
+        display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: flex-end;
+        background: var(--card, #fff);
+        border: 1px solid var(--border, #d4e0d6);
+        border-radius: var(--radius, 12px);
+        padding: 0.85rem 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+    }
+    .log-toolbar .field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .log-toolbar label { font-size: 0.78rem; color: var(--muted-foreground, #5a7a5e); font-weight: 600; }
+    .log-toolbar select,
+    .log-toolbar input[type=number],
+    .log-toolbar input[type=text] {
+        padding: 0.45rem 0.65rem;
+        border: 1px solid var(--border, #d4e0d6);
+        border-radius: 6px;
+        font-size: 0.88rem;
+        font-family: inherit;
+        background: #fff;
+    }
+    .log-toolbar input[type=text]   { min-width: 14rem; }
+    .log-toolbar input[type=number] { width: 6rem; }
+    .log-toolbar .grow { flex: 1; }
+    .log-toolbar .checkbox {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        font-size: 0.85rem; color: var(--foreground);
+    }
+
+    .log-meta {
+        font-size: 0.82rem;
+        color: var(--muted-foreground);
+        margin-bottom: 0.5rem;
+        display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .log-meta-right { display: inline-flex; gap: 0.75rem; align-items: center; }
+    .log-meta .dot-live {
+        display: inline-block; width: 0.55rem; height: 0.55rem;
+        border-radius: 50%; background: #16a34a;
+        animation: livePulse 1.4s ease-in-out infinite;
+        margin-right: 0.3rem;
+    }
+    @keyframes livePulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.35; }
+    }
+
+    .log-viewer {
+        background: #0f1715;
+        color: #d6e2d8;
+        border: 1px solid #1f2a26;
+        border-radius: 8px;
+        padding: 1rem 1.1rem;
+        font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        max-height: 70vh;
+        min-height: 24rem;
+        overflow: auto;
+        white-space: pre;
+        tab-size: 4;
+    }
+    .log-viewer:empty::before {
+        content: '(비어 있음)';
+        color: #5e7068;
+    }
+
+    .log-files {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 0.65rem;
+        margin-top: 1.25rem;
+    }
+    .log-file-card {
+        border: 1px solid var(--border, #d4e0d6);
+        border-radius: 8px;
+        padding: 0.7rem 0.85rem;
+        background: var(--card, #fff);
+        font-size: 0.82rem;
+        text-decoration: none;
+        color: var(--foreground);
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .log-file-card:hover { border-color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .log-file-card.active { border-color: var(--primary); background: rgba(107, 142, 111, 0.07); }
+    .log-file-card-name { font-weight: 600; word-break: break-all; }
+    .log-file-card-meta { color: var(--muted-foreground); font-size: 0.74rem; margin-top: 0.25rem; }
+
+    .log-hint {
+        background: var(--secondary, #e8f0e9);
+        border: 1px solid var(--border, #d4e0d6);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+        color: var(--muted-foreground);
+        margin-bottom: 1rem;
+        line-height: 1.55;
+    }
+</style>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('logs')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <h1>로그 조회</h1>
+            <p class="muted">서버 액세스 로그·애플리케이션 로그·에러 로그를 확인합니다.</p>
+        </div>
+
+        <div class="log-hint">
+            <strong>개인정보 보호 정책</strong> — 액세스 로그는 요청 본문·세션ID·이메일을 기록하지 않으며,
+            <code>password</code>, <code>token</code>, <code>email</code> 등 민감 쿼리 파라미터는 자동으로 <code>***</code> 로 마스킹됩니다.
+            IP는 마지막 옥텟이 가려집니다.
+        </div>
+
+        <!-- 툴바 -->
+        <form id="logForm" th:action="@{/admin/logs}" method="get" class="log-toolbar">
+            <div class="field">
+                <label for="logFile">파일</label>
+                <select id="logFile" name="file">
+                    <option th:each="f : ${files}"
+                            th:value="${f.name}"
+                            th:text="${f.name} + ' (' + ${f.sizeReadable} + ')'"
+                            th:selected="${f.name == selected}">access.log</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="logLines">줄 수</label>
+                <input id="logLines" type="number" name="lines" min="1"
+                       th:max="${maxLines}" th:value="${lines}"/>
+            </div>
+            <div class="field grow">
+                <label for="logQuery">검색어 (라인 필터)</label>
+                <input id="logQuery" type="text" name="q" th:value="${q}"
+                       placeholder="예: 500, /login, ERROR"/>
+            </div>
+            <div class="field">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary btn-sm">조회</button>
+            </div>
+            <div class="field">
+                <label>&nbsp;</label>
+                <label class="checkbox">
+                    <input type="checkbox" id="autoRefresh"/>
+                    자동 새로고침 (3초)
+                </label>
+            </div>
+        </form>
+
+        <div class="log-meta">
+            <span>
+                <strong th:text="${selected}">access.log</strong>
+                <span th:if="${q != null and !q.isEmpty()}"
+                      th:text="| · 필터: '${q}'|"> · 필터: 'foo'</span>
+                <span th:text="| · 마지막 ${lines}줄|"> · 마지막 300줄</span>
+            </span>
+            <span class="log-meta-right">
+                <span id="liveBadge" style="display:none;">
+                    <span class="dot-live"></span>실시간
+                </span>
+                <span id="lastUpdated"></span>
+            </span>
+        </div>
+
+        <pre id="logContent" class="log-viewer" th:text="${content}">(로딩 중)</pre>
+
+        <!-- 파일 목록 카드 (빠른 전환) -->
+        <h3 style="font-size: 1rem; margin: 1.5rem 0 0.5rem;">로그 파일 목록</h3>
+        <p class="muted" style="font-size: 0.82rem; margin-bottom: 0.5rem;">
+            <code>.log</code>는 현재 활성 파일, <code>.log.gz</code>는 회전된 과거 로그입니다.
+        </p>
+        <div class="log-files">
+            <a th:each="f : ${files}"
+               th:href="@{/admin/logs(file=${f.name},lines=${lines})}"
+               th:classappend="${f.name == selected} ? 'log-file-card active' : 'log-file-card'"
+               class="log-file-card">
+                <div class="log-file-card-name" th:text="${f.name}">파일명</div>
+                <div class="log-file-card-meta"
+                     th:text="${f.sizeReadable}">크기</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const form     = document.getElementById('logForm');
+        const fileSel  = document.getElementById('logFile');
+        const linesInp = document.getElementById('logLines');
+        const queryInp = document.getElementById('logQuery');
+        const content  = document.getElementById('logContent');
+        const auto     = document.getElementById('autoRefresh');
+        const liveBadge = document.getElementById('liveBadge');
+        const lastUpd  = document.getElementById('lastUpdated');
+
+        let timer = null;
+
+        function fmtTime() {
+            const d = new Date();
+            const p = (n) => String(n).padStart(2, '0');
+            return `갱신: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        }
+
+        async function refresh() {
+            const params = new URLSearchParams({
+                file:  fileSel.value,
+                lines: linesInp.value,
+                q:     queryInp.value || ''
+            });
+            try {
+                const res = await fetch('/admin/logs/raw?' + params.toString(), {
+                    headers: { 'Accept': 'text/plain' }
+                });
+                if (!res.ok) return;
+                const text = await res.text();
+                content.textContent = text;
+                // 맨 아래로 스크롤
+                content.scrollTop = content.scrollHeight;
+                lastUpd.textContent = fmtTime();
+            } catch (e) {
+                console.warn('log refresh failed', e);
+            }
+        }
+
+        function start() {
+            if (timer) return;
+            liveBadge.style.display = '';
+            refresh();
+            timer = setInterval(refresh, 3000);
+        }
+        function stop() {
+            if (!timer) return;
+            clearInterval(timer);
+            timer = null;
+            liveBadge.style.display = 'none';
+        }
+
+        auto.addEventListener('change', () => auto.checked ? start() : stop());
+
+        // 첫 로딩 시 viewer를 맨 아래로 보내기
+        content.scrollTop = content.scrollHeight;
+
+        // 페이지 떠나면 타이머 정리
+        window.addEventListener('beforeunload', stop);
+    })();
+</script>
+
+</body>
+</html>
