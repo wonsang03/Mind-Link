@@ -718,3 +718,78 @@
         padding: 1.25rem;
     }
 }
+
+/* ===== 서버 로그 뷰어 ===== */
+.log-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    margin-bottom: 0.75rem;
+}
+.log-toolbar-left, .log-toolbar-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+}
+.log-status {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+.log-status-connecting { background: #fef3c7; color: #92400e; }
+.log-status-live       { background: #dcfce7; color: #166534; }
+.log-status-error      { background: #fee2e2; color: #991b1b; }
+.log-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: #334155;
+    cursor: pointer;
+    user-select: none;
+}
+.log-filter, .log-filter-select {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fff;
+}
+.log-filter { min-width: 200px; }
+.log-meta {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    word-break: break-all;
+}
+.log-view {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin: 0;
+    height: calc(100vh - 280px);
+    min-height: 360px;
+    overflow: auto;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.log-view.log-nowrap { white-space: pre; word-break: normal; }
+.log-line { display: block; padding: 0 0.1rem; }
+.log-line.log-error { color: #fca5a5; background: rgba(239, 68, 68, 0.08); }
+.log-line.log-warn  { color: #fcd34d; }
+.log-line.log-info  { color: #93c5fd; }
+.log-line.log-debug { color: #94a3b8; }
+.log-line.log-trace { color: #64748b; }

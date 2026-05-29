@@ -258,6 +258,14 @@ public class AdminController {
         return "admin/sql";
     }
 
+    // ===== 서버 로그 뷰어 =====
+
+    @GetMapping("/logs")
+    public String logsView(HttpSession session, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        return "admin/logs";
+    }
+
     // ===== 공통 =====
 
     private String denied(RedirectAttributes ra) {
