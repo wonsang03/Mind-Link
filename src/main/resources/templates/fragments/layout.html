@@ -93,6 +93,20 @@
             </a>
 
             <th:block th:if="${loginUser != null}">
+                <!-- 상담사·관리자 전용 패널 링크 -->
+                <a th:if="${loginUser.role.name() == 'COUNSELOR'}"
+                   th:href="@{/counselor}"
+                   class="btn-outline nav-cta"
+                   th:classappend="${#strings.startsWith(currentUri, '/counselor')} ? 'active'"
+                   title="상담사 패널">
+                    <span class="nav-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </span>
+                    <span>상담사 패널</span>
+                </a>
                 <a th:href="@{/alerts}" class="nav-alert-link btn-outline nav-cta"
                    th:classappend="${#strings.startsWith(currentUri, '/alerts')} ? 'active'"
                    th:aria-label="${unreadAlertCount > 0} ? |알림, 읽지 않음 ${unreadAlertCount}건| : '알림'"

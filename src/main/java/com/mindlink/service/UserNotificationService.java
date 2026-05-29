@@ -124,7 +124,7 @@ public class UserNotificationService {
         }
         int count = 0;
         for (User u : userRepository.findAll()) {
-            if (u.getRole() == UserRole.ADMIN) continue;
+            if (u.getRole() == UserRole.ADMIN || u.getRole() == UserRole.COUNSELOR) continue;
             createAlert(u, "ADMIN_MESSAGE", body, titleVal, link, null, null, null);
             count++;
         }

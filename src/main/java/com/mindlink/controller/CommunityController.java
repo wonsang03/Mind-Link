@@ -9,6 +9,7 @@ import com.mindlink.dto.AttachmentResponse;
 import com.mindlink.service.CommunityCategoryPreferenceService;
 import com.mindlink.service.CommunityService;
 import com.mindlink.service.FileStorageService;
+import com.mindlink.service.ProverbService;
 import com.mindlink.service.UserService;
 import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
@@ -36,15 +37,18 @@ public class CommunityController {
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final CommunityCategoryPreferenceService categoryPreferenceService;
+    private final ProverbService proverbService;
 
     public CommunityController(CommunityService communityService,
                                 UserService userService,
                                 FileStorageService fileStorageService,
-                                CommunityCategoryPreferenceService categoryPreferenceService) {
+                                CommunityCategoryPreferenceService categoryPreferenceService,
+                                ProverbService proverbService) {
         this.communityService = communityService;
         this.userService = userService;
         this.fileStorageService = fileStorageService;
         this.categoryPreferenceService = categoryPreferenceService;
+        this.proverbService = proverbService;
     }
 
     @GetMapping
@@ -84,6 +88,7 @@ public class CommunityController {
         model.addAttribute("query", q);
         model.addAttribute("preferredCategories", preferredCategories);
         model.addAttribute("highlightCategory", preferredCategories.isEmpty() ? null : preferredCategories.get(0));
+        model.addAttribute("proverb", proverbService.getRandom("COMMUNITY"));
         return "community/list";
     }
 

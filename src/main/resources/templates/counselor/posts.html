@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/counselor-layout :: head('마음이음 상담사 - 게시글 관리')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/counselor-layout :: sidebar('posts')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>게시글 관리</h1>
+                <p class="muted">커뮤니티 게시글을 조회하고 부적절한 게시글을 삭제합니다.</p>
+            </div>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- 검색/필터 영역 -->
+        <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="postSearch" class="form-input"
+                   placeholder="제목 또는 작성자 검색..."
+                   style="max-width:260px;"
+                   oninput="filterPosts()"/>
+            <select id="categoryFilter" class="form-input" style="max-width:160px;" onchange="filterPosts()">
+                <option value="">전체 분류</option>
+                <option value="스트레스">스트레스</option>
+                <option value="우울">우울</option>
+                <option value="불안">불안</option>
+                <option value="인간관계">인간관계</option>
+                <option value="일상·기타">일상·기타</option>
+            </select>
+            <span id="postCount" class="muted" style="font-size:0.85rem;"></span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(posts)}" class="muted" style="padding:2rem 0;">
+            등록된 게시글이 없습니다.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(posts)}" class="admin-table-wrap">
+            <table class="admin-table" id="postsTable">
+                <thead>
+                <tr>
+                    <th class="num">ID</th>
+                    <th>제목</th>
+                    <th>분류</th>
+                    <th>작성자</th>
+                    <th class="num">좋아요</th>
+                    <th>작성일</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${posts}"
+                    th:attr="data-title=${p.title}, data-author=${p.author}, data-category=${p.category}">
+                    <td class="num" th:text="${p.id}">1</td>
+                    <td>
+                        <a th:href="@{/community/{id}(id=${p.id})}" th:text="${p.title}"
+                           style="color:var(--primary); text-decoration:none;" target="_blank">제목</a>
+                    </td>
+                    <td>
+                        <span class="tag tag-secondary" th:text="${p.category}">분류</span>
+                    </td>
+                    <td th:text="${p.author}">홍길동</td>
+                    <td class="num" th:text="${p.likes}">0</td>
+                    <td class="muted" style="font-size:0.82rem;"
+                        th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd')}">2026-05-23</td>
+                    <td>
+                        <form th:action="@{/counselor/posts/{id}/delete(id=${p.id})}" method="post"
+                              onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');">
+                            <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var rows = document.querySelectorAll('#postsTable tbody tr');
+    var countEl = document.getElementById('postCount');
+    if (countEl && rows.length > 0) {
+        countEl.textContent = '총 ' + rows.length + '건';
+    }
+})();
+
+function filterPosts() {
+    var keyword = (document.getElementById('postSearch').value || '').toLowerCase();
+    var category = document.getElementById('categoryFilter').value;
+    var rows = document.querySelectorAll('#postsTable tbody tr');
+    var visible = 0;
+    rows.forEach(function (row) {
+        var title = (row.getAttribute('data-title') || '').toLowerCase();
+        var author = (row.getAttribute('data-author') || '').toLowerCase();
+        var cat = row.getAttribute('data-category') || '';
+        var matchKey = !keyword || title.includes(keyword) || author.includes(keyword);
+        var matchCat = !category || cat === category;
+        var show = matchKey && matchCat;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    var countEl = document.getElementById('postCount');
+    if (countEl) countEl.textContent = '총 ' + visible + '건';
+}
+</script>
+</body>
+</html>

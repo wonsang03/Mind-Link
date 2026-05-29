@@ -397,6 +397,35 @@
     text-decoration: none;
 }
 
+/* ─── 상담사 사이드바 커스터마이징 ───────────────────────── */
+
+.counselor-sidebar {
+    background: #1a2028;
+}
+
+.counselor-brand-icon {
+    background: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+}
+
+.counselor-brand-sub {
+    color: #6366f1;
+}
+
+.counselor-nav-danger {
+    color: #c4a0a0;
+}
+
+.counselor-nav-danger:hover {
+    background: rgba(193, 68, 68, 0.12);
+    color: #f8b4b4;
+}
+
+.counselor-nav-danger.active {
+    background: rgba(193, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
 .admin-back-btn:hover { color: var(--foreground, #1c2620); }
 
 /* ─── 유저 상세 ───────────────────────────────────────────── */

@@ -21,4 +21,10 @@ public interface AssessmentResultRepository extends JpaRepository<AssessmentResu
               AND r.typeKey IN ('stress', 'depression', 'anxiety')
             """)
     List<User> findDistinctUsersWithAxisAssessments();
+
+    long countByHighRiskTrue();
+
+    List<AssessmentResult> findByHighRiskTrueOrderByCompletedAtDesc();
+
+    List<AssessmentResult> findTop5ByHighRiskTrueOrderByCompletedAtDesc();
 }

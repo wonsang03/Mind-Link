@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/counselor-layout :: head('마음이음 상담사 - 고위험도 관리')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/counselor-layout :: sidebar('high-risk')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <h1>고위험도 관리</h1>
+            <p class="muted">자가진단 결과 고위험도로 판정된 회원을 조회하고 알림을 발송합니다.</p>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- 고위험 없음 -->
+        <div th:if="${#lists.isEmpty(results)}"
+             style="padding:3rem 0; text-align:center;">
+            <div style="font-size:2.5rem; margin-bottom:0.75rem;">✅</div>
+            <p style="font-size:1rem; font-weight:600; margin:0 0 0.4rem;">고위험도 판정 결과가 없습니다.</p>
+            <p class="muted" style="font-size:0.9rem; margin:0;">현재 고위험으로 판정된 자가진단 결과가 없습니다.</p>
+        </div>
+
+        <!-- 고위험 목록 -->
+        <div th:unless="${#lists.isEmpty(results)}">
+            <!-- 요약 배너 -->
+            <div style="display:flex; align-items:center; gap:0.75rem; padding:0.9rem 1.1rem;
+                        background:rgba(193,68,68,0.07); border:1px solid rgba(193,68,68,0.25);
+                        border-left:4px solid var(--destructive); border-radius:0.6rem;
+                        margin-bottom:1.25rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--destructive)" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" style="width:1.2rem;height:1.2rem;flex-shrink:0;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style="font-size:0.9rem; color:var(--destructive); font-weight:600;">
+                    고위험도 판정 결과
+                    <span th:text="${results.size()}">0</span>건이 확인됩니다.
+                    알림 발송이 필요한 회원을 확인해 주세요.
+                </span>
+            </div>
+
+            <!-- 검색 -->
+            <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="riskSearch" class="form-input"
+                       placeholder="회원 이름 또는 검사 유형 검색..."
+                       style="max-width:280px;"
+                       oninput="filterRisk()"/>
+                <select id="typeFilter" class="form-input" style="max-width:180px;" onchange="filterRisk()">
+                    <option value="">전체 검사 유형</option>
+                    <option value="depression">우울증 (PHQ-9)</option>
+                    <option value="anxiety">불안장애 (GAD-7)</option>
+                    <option value="stress">스트레스 (PSS-10)</option>
+                    <option value="burnout">번아웃 (CBI)</option>
+                </select>
+                <span id="riskCount" class="muted" style="font-size:0.85rem;"></span>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="riskTable">
+                    <thead>
+                    <tr>
+                        <th>회원 이름</th>
+                        <th>이메일</th>
+                        <th>검사 유형</th>
+                        <th class="num">점수</th>
+                        <th>등급</th>
+                        <th>검사일</th>
+                        <th>조치</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${results}"
+                        th:attr="data-name=${r.user.name}, data-typekey=${r.typeKey}, data-typename=${r.typeName}">
+                        <td style="font-weight:600;" th:text="${r.user.name}">홍길동</td>
+                        <td class="muted" style="font-size:0.83rem;" th:text="${r.user.email}">user@example.com</td>
+                        <td>
+                            <span class="tag tag-secondary" th:text="${r.typeName}">검사</span>
+                        </td>
+                        <td class="num" style="font-weight:600; color:var(--destructive);"
+                            th:text="${r.score != null ? r.score : '-'}">0</td>
+                        <td>
+                            <span class="tag"
+                                  style="background:rgba(193,68,68,0.12); color:var(--destructive); font-weight:600;"
+                                  th:text="${r.level}">고위험</span>
+                        </td>
+                        <td class="muted" style="font-size:0.82rem; white-space:nowrap;"
+                            th:text="${#temporals.format(r.completedAt, 'yyyy-MM-dd HH:mm')}">2026-05-23</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm"
+                                    th:attr="data-uid=${r.user.id},
+                                             data-uname=${r.user.name},
+                                             data-utype=${r.typeName},
+                                             data-ulevel=${r.level}"
+                                    onclick="openAlertModal(this)"
+                                    type="button">
+                                알림 보내기
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 알림 발송 모달 ===== -->
+<div id="alertModalOverlay" class="modal-overlay" style="display:none;"
+     onclick="if(event.target===this) closeAlertModal()">
+    <div class="modal-box" style="max-width:34rem; text-align:left; padding:2rem 2rem 1.75rem;">
+        <button class="modal-close" onclick="closeAlertModal()" aria-label="닫기">✕</button>
+
+        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" style="width:1.15rem;height:1.15rem;">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <h2 style="margin:0; font-size:1.1rem; font-weight:700;">알림 발송</h2>
+        </div>
+
+        <div id="alertModalInfo"
+             style="font-size:0.85rem; color:var(--muted-foreground); margin-bottom:1.5rem;
+                    background:var(--secondary); padding:0.6rem 0.9rem; border-radius:0.5rem;"></div>
+
+        <form th:action="@{/counselor/high-risk/alert}" method="post"
+              style="display:flex; flex-direction:column; gap:1rem;">
+            <input type="hidden" name="userId" id="alertUserId"/>
+
+            <div>
+                <label class="admin-field-label">제목 <span class="muted" style="font-weight:400;">(선택)</span></label>
+                <input type="text" name="title" id="alertTitle" class="form-input" maxlength="200"
+                       placeholder="알림함에 표시할 제목"/>
+            </div>
+            <div>
+                <label class="admin-field-label">알림 내용</label>
+                <textarea name="message" id="alertMessage" rows="4" class="form-textarea" required
+                          placeholder="회원에게 보여질 본문 내용을 입력하세요."></textarea>
+            </div>
+
+            <div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:0.25rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeAlertModal()">취소</button>
+                <button type="submit" class="btn btn-primary">알림 보내기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var rows = document.querySelectorAll('#riskTable tbody tr');
+    var countEl = document.getElementById('riskCount');
+    if (countEl && rows.length > 0) {
+        countEl.textContent = '총 ' + rows.length + '건';
+    }
+})();
+
+function filterRisk() {
+    var keyword = (document.getElementById('riskSearch').value || '').toLowerCase();
+    var typeKey = document.getElementById('typeFilter').value;
+    var rows = document.querySelectorAll('#riskTable tbody tr');
+    var visible = 0;
+    rows.forEach(function (row) {
+        var name = (row.getAttribute('data-name') || '').toLowerCase();
+        var rowTypeKey = row.getAttribute('data-typekey') || '';
+        var typeName = (row.getAttribute('data-typename') || '').toLowerCase();
+        var matchKey = !keyword || name.includes(keyword) || typeName.includes(keyword);
+        var matchType = !typeKey || rowTypeKey === typeKey;
+        var show = matchKey && matchType;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    var countEl = document.getElementById('riskCount');
+    if (countEl) countEl.textContent = '총 ' + visible + '건';
+}
+
+function openAlertModal(btn) {
+    var uid = btn.getAttribute('data-uid');
+    var uname = btn.getAttribute('data-uname');
+    var utype = btn.getAttribute('data-utype');
+    var ulevel = btn.getAttribute('data-ulevel');
+
+    document.getElementById('alertUserId').value = uid;
+    document.getElementById('alertModalInfo').innerHTML =
+        '<strong>' + uname + '</strong> 회원 &nbsp;·&nbsp; ' + utype + ' &nbsp;·&nbsp; ' +
+        '<span style="color:var(--destructive); font-weight:600;">' + ulevel + '</span>';
+    document.getElementById('alertTitle').value = '';
+    document.getElementById('alertMessage').value = '';
+
+    document.getElementById('alertModalOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () {
+        document.getElementById('alertTitle').focus();
+    }, 80);
+}
+
+function closeAlertModal() {
+    document.getElementById('alertModalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeAlertModal();
+});
+</script>
+</body>
+</html>
