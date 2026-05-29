@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('마음이음 - 페이지를 찾을 수 없음')}"></head>
+<head th:replace="~{fragments/layout :: head('마음이음 - 허용되지 않은 요청')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 
@@ -10,13 +10,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                  stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
-                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
             </svg>
         </div>
-        <p class="error-code">404</p>
-        <h1 class="error-title">페이지를 찾을 수 없습니다</h1>
-        <p class="error-desc">요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.<br/>
-            주소를 다시 확인해 주세요.</p>
+        <p class="error-code">405</p>
+        <h1 class="error-title">허용되지 않은 요청 방식입니다</h1>
+        <p class="error-desc">이 페이지는 해당 방식의 요청을 지원하지 않습니다.<br/>
+            정상적인 경로를 통해 다시 시도해 주세요.</p>
         <div class="error-actions">
             <a th:href="@{/}" class="btn btn-primary">홈으로 돌아가기</a>
             <a href="javascript:history.back()" class="btn btn-outline">이전 페이지로</a>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 오류')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <div class="error-page">
+        <div class="error-badge" th:classappend="${status != null and status >= 500} ? ' is-danger'"
+             aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <p class="error-code" th:classappend="${status != null and status >= 500} ? ' is-danger'"
+           th:text="${status} ?: '오류'">오류</p>
+        <h1 class="error-title" th:text="${error} ?: '요청을 처리할 수 없습니다'">요청을 처리할 수 없습니다</h1>
+        <p class="error-desc">예상치 못한 오류로 요청을 완료하지 못했습니다.<br/>
+            잠시 후 다시 시도하거나 홈으로 돌아가 주세요.</p>
+        <span th:if="${path != null}" class="error-path" th:text="${path}"></span>
+        <div class="error-actions">
+            <a th:href="@{/}" class="btn btn-primary">홈으로 돌아가기</a>
+            <a href="javascript:history.back()" class="btn btn-outline">이전 페이지로</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
