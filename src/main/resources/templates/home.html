@@ -25,61 +25,6 @@
         </div>
     </section>
 
-    <!-- Quick-access tab (home only) -->
-    <section class="quick-bar" aria-label="빠른 접근">
-        <div class="quick-bar-inner">
-            <div class="quick-bar-title">
-                <span class="pico pico-sm" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
-                        <path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </span>
-                <span>지금 바로 시작해보세요</span>
-            </div>
-            <div class="quick-bar-actions">
-                <a th:href="@{/ai-care}" class="quick-btn quick-btn-primary">
-                    <span class="pico pico-sm" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-3 3 3 3 0 0 0 2 2.83V16a3 3 0 0 0 3 3h1"/>
-                            <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3 3 3 0 0 1-2 2.83V16a3 3 0 0 1-3 3h-1"/>
-                            <path d="M12 4v15"/>
-                        </svg>
-                    </span>
-                    <span>AI 정서 케어</span>
-                </a>
-                <a th:href="@{/self-assessment}" class="quick-btn">
-                    <span class="pico pico-sm" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="8" y="3" width="8" height="4" rx="1"/>
-                            <path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-                            <polyline points="9 14 11 16 15 12"/>
-                        </svg>
-                    </span>
-                    <span>자가진단</span>
-                </a>
-                <a th:href="@{/recommendations}" class="quick-btn">
-                    <span class="pico pico-sm" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z"/>
-                        </svg>
-                    </span>
-                    <span>맞춤 추천</span>
-                </a>
-                <a th:href="@{/counseling}" class="quick-btn">
-                    <span class="pico pico-sm" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                    </span>
-                    <span>상담소 찾기</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <div class="page">
         <!-- Highlighted Features -->
         <section class="grid grid-2" style="margin-bottom: 3rem;">
