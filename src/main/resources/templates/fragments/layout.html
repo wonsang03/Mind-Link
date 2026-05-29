@@ -172,7 +172,7 @@
                 <h4 class="mb-4">지원</h4>
                 <ul>
                     <li><a th:href="@{/notice}">공지사항</a></li>
-                    <li><a href="#">이용 가이드</a></li>
+                    <li><a href="javascript:void(0);" onclick="openUserGuide()">이용 가이드</a></li>
                     <li><a href="#">문의하기</a></li>
                 </ul>
             </div>
@@ -187,6 +187,25 @@
         </div>
         <div class="footer-bottom">
             © 2026 Mind-Link. 당신의 마음 건강을 응원합니다.
+        </div>
+    </div>
+
+    <!-- 이용 가이드 모달 -->
+    <div id="userGuideOverlay" class="guide-overlay" onclick="handleGuideOverlayClick(event)">
+        <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
+            <div class="guide-modal-head">
+                <button class="guide-back" id="guideBackBtn" onclick="showGuideList()" style="display:none;" aria-label="목록으로">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <h2 id="guideModalTitle">이용 가이드</h2>
+                <button class="guide-close" onclick="closeUserGuide()" aria-label="닫기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="guide-body" id="guideBody">
+                <ul class="guide-list" id="guideListPanel"></ul>
+                <div class="guide-detail" id="guideDetailPanel" style="display:none;"></div>
+            </div>
         </div>
     </div>
 
@@ -206,6 +225,189 @@
             }
         });
     })();
+
+    // ============== 이용 가이드 ==============
+    var guideData = [
+        {
+            title: '자가진단',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 12"/></svg>',
+            summary: '나의 감정 상태를 과학적 심리 검사로 확인해보세요.',
+            desc: '자가진단은 신뢰할 수 있는 심리 검사 도구를 활용해 현재 감정 상태와 정서적 건강을 스스로 점검하는 기능입니다.',
+            steps: [
+                '상단 메뉴에서 <strong>자가진단</strong>을 클릭합니다.',
+                '검사 항목을 읽고, 본인의 상태에 해당하는 답변을 선택합니다.',
+                '모든 문항에 답변한 후 <strong>결과 확인</strong>을 누릅니다.',
+                '결과에 따른 맞춤 서비스를 이용해 보세요.'
+            ],
+            tips: [
+                '솔직하게 답할수록 더 정확한 결과를 얻을 수 있어요.',
+                '검사는 진단이 아닌 자가 점검 도구이며, 전문가 상담을 대체하지 않습니다.',
+                '정기적으로 검사하여 나의 감정 변화를 추적해보세요.'
+            ]
+        },
+        {
+            title: '맞춤 추천',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg>',
+            summary: '현재 감정에 맞는 도서·활동을 AI가 추천해드립니다.',
+            desc: '맞춤 추천은 나의 기분과 상태를 입력하면 AI가 그에 맞는 도서, 활동, 커뮤니티를 맞춤 추천해주는 기능입니다.',
+            steps: [
+                '상단 메뉴에서 <strong>맞춤 추천</strong>을 클릭합니다.',
+                '현재 기분이나 상태를 자유롭게 입력한 후 <strong>추천받기</strong>를 누릅니다.',
+                'AI가 분석한 맞춤 도서와 활동 목록이 표시됩니다.',
+                '관심 있는 항목을 클릭하면 상세 정보를 확인할 수 있습니다.',
+                '감정 필터 칩으로 원하는 유형의 추천을 골라볼 수 있습니다.'
+            ],
+            tips: [
+                '구체적인 감정(예: "회사 때문에 무기력해요")을 입력할수록 더 정확한 추천을 받을 수 있어요.',
+                '도서에 별점 평가를 남기면 추천 품질이 향상됩니다.',
+                '추천 활동은 실제로 따라 해보면 큰 도움이 됩니다.'
+            ]
+        },
+        {
+            title: 'AI 정서 케어',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>',
+            summary: 'AI와 대화하며 나만의 정서 케어 리포트를 받아보세요.',
+            desc: 'AI 정서 케어는 현재 느끼는 감정 키워드를 기반으로 AI가 분석하고, 맞춤형 케어 방법과 리포트를 제공하는 기능입니다.',
+            steps: [
+                '상단 메뉴에서 <strong>AI 정서 케어</strong>를 클릭합니다.',
+                '단계별 안내에 따라 현재 감정과 상황을 입력합니다.',
+                'AI가 입력 내용을 분석하여 케어 리포트를 생성합니다.',
+                '리포트를 통해 정서 케어 방법과 조언을 확인합니다.',
+                '필요하다면 <strong>상담소 찾기</strong>로 전문가 연결을 이용해 보세요.'
+            ],
+            tips: [
+                '최대한 자세히 현재 상황을 입력할수록 더 정밀한 리포트를 받을 수 있어요.',
+                'AI 케어는 전문 상담을 대체하지 않습니다. 위기 상황이라면 전문가에게 연락하세요.',
+                '케어 리포트는 저장해두고 반복해서 참고해보세요.'
+            ]
+        },
+        {
+            title: '커뮤니티',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+            summary: '비슷한 감정을 나누고 서로 공감하는 공간입니다.',
+            desc: '커뮤니티는 감정과 경험을 자유롭게 나누고, 비슷한 상황의 다른 회원들과 공감하며 소통할 수 있는 공간입니다.',
+            steps: [
+                '상단 메뉴에서 <strong>커뮤니티</strong>를 클릭합니다.',
+                '다른 회원들의 게시글을 읽고 공감 버튼을 누르거나 댓글을 남겨보세요.',
+                '글쓰기 버튼을 눌러 나의 이야기를 공유할 수 있습니다.',
+                '카테고리 필터로 원하는 주제의 글을 찾아보세요.'
+            ],
+            tips: [
+                '서로를 존중하는 따뜻한 언어를 사용해 주세요.',
+                '타인의 글에 진심 어린 공감 댓글은 큰 힘이 됩니다.',
+                '자신의 경험을 솔직하게 나누면 비슷한 고민을 가진 분들에게 도움이 돼요.'
+            ]
+        },
+        {
+            title: '상담소 찾기',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+            summary: '가까운 전문 상담소를 찾아 연결해드립니다.',
+            desc: '상담소 찾기는 나의 위치를 기반으로 근처 정신건강 상담소, 심리센터 등 전문 상담 기관을 검색하고 연결하는 기능입니다.',
+            steps: [
+                '상단 메뉴에서 <strong>상담소 찾기</strong>를 클릭합니다.',
+                '지역 또는 키워드로 원하는 상담소를 검색합니다.',
+                '검색 결과에서 상담소 이름, 주소, 연락처를 확인합니다.',
+                '원하는 상담소를 클릭하면 상세 정보를 확인할 수 있습니다.'
+            ],
+            tips: [
+                '위치 권한을 허용하면 현재 위치에서 가장 가까운 상담소를 찾을 수 있어요.',
+                '전화 예약이 가능한 경우 미리 예약하고 방문하면 대기 시간을 줄일 수 있어요.',
+                '긴급한 경우 페이지 하단의 긴급 연락처(1393, 1577-0199)를 이용해 주세요.'
+            ]
+        },
+        {
+            title: '공지사항',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/><path d="M9 21a3 3 0 0 0 6 0"/></svg>',
+            summary: '서비스 업데이트와 중요 안내를 확인하세요.',
+            desc: '공지사항에서는 마음이음 서비스의 새로운 기능 업데이트, 이벤트, 서비스 점검 일정 등 중요한 안내를 확인할 수 있습니다.',
+            steps: [
+                '상단 메뉴에서 <strong>공지사항</strong>을 클릭합니다.',
+                '공지사항 목록에서 원하는 공지를 클릭합니다.',
+                '공지 상세 내용을 확인합니다.'
+            ],
+            tips: [
+                '중요 공지사항은 목록 상단에 고정됩니다.',
+                '서비스 점검 일정을 미리 확인하여 이용에 불편함이 없도록 해보세요.'
+            ]
+        }
+    ];
+
+    function openUserGuide() {
+        var overlay = document.getElementById('userGuideOverlay');
+        renderGuideList();
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', handleGuideEsc);
+    }
+
+    function closeUserGuide() {
+        var overlay = document.getElementById('userGuideOverlay');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleGuideEsc);
+    }
+
+    function handleGuideEsc(e) {
+        if (e.key === 'Escape') closeUserGuide();
+    }
+
+    function handleGuideOverlayClick(e) {
+        if (e.target === document.getElementById('userGuideOverlay')) closeUserGuide();
+    }
+
+    function renderGuideList() {
+        var list = document.getElementById('guideListPanel');
+        var detail = document.getElementById('guideDetailPanel');
+        var backBtn = document.getElementById('guideBackBtn');
+        var title = document.getElementById('guideModalTitle');
+
+        list.style.display = '';
+        detail.style.display = 'none';
+        backBtn.style.display = 'none';
+        title.textContent = '이용 가이드';
+
+        list.innerHTML = guideData.map(function(item, i) {
+            return '<li class="guide-list-item" onclick="showGuideDetail(' + i + ')" tabindex="0" onkeydown="if(event.key===\'Enter\')showGuideDetail(' + i + ')">' +
+                '<span class="guide-list-icon">' + item.icon + '</span>' +
+                '<span class="guide-list-text"><strong>' + item.title + '</strong><span>' + item.summary + '</span></span>' +
+                '<span class="guide-list-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+                '</li>';
+        }).join('');
+    }
+
+    function showGuideDetail(index) {
+        var item = guideData[index];
+        var list = document.getElementById('guideListPanel');
+        var detail = document.getElementById('guideDetailPanel');
+        var backBtn = document.getElementById('guideBackBtn');
+        var title = document.getElementById('guideModalTitle');
+
+        list.style.display = 'none';
+        detail.style.display = '';
+        backBtn.style.display = '';
+        title.textContent = item.title;
+
+        var stepsHtml = item.steps.map(function(step, i) {
+            return '<li><span class="guide-step-num">' + (i + 1) + '</span><span>' + step + '</span></li>';
+        }).join('');
+
+        var tipsHtml = item.tips.map(function(tip) {
+            return '<li>' + tip + '</li>';
+        }).join('');
+
+        detail.innerHTML =
+            '<p class="guide-detail-desc">' + item.desc + '</p>' +
+            '<h3>이용 방법</h3>' +
+            '<ul class="guide-steps">' + stepsHtml + '</ul>' +
+            '<div class="guide-tips"><h3>이용 팁</h3><ul>' + tipsHtml + '</ul></div>';
+
+        document.getElementById('guideBody').scrollTop = 0;
+    }
+
+    function showGuideList() {
+        renderGuideList();
+        document.getElementById('guideBody').scrollTop = 0;
+    }
     </script>
 </footer>
 </body>
