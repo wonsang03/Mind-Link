@@ -14,8 +14,10 @@
 .admin-sidebar {
     width: 220px;
     flex-shrink: 0;
-    background: #1a2420;
-    color: #d1ddd3;
+    background: #fff;
+    color: var(--foreground, #1c2620);
+    border-right: 1px solid var(--border, #e3e8e3);
+    box-shadow: 1px 0 3px rgba(28, 38, 32, 0.03);
     display: flex;
     flex-direction: column;
     position: sticky;
@@ -26,7 +28,7 @@
 
 .admin-brand {
     padding: 1.25rem 1rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border, #e3e8e3);
 }
 
 .admin-brand-link {
@@ -45,9 +47,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(107, 142, 111, 0.25);
+    background: var(--secondary, #eef3ee);
     border-radius: 8px;
-    color: #8fbf93;
+    color: var(--primary, #6b8e6f);
     flex-shrink: 0;
 }
 
@@ -59,13 +61,13 @@
 .admin-brand-name {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #e8f0e9;
+    color: var(--foreground, #1c2620);
     line-height: 1.2;
 }
 
 .admin-brand-sub {
     font-size: 0.7rem;
-    color: #7a9c7e;
+    color: var(--muted-foreground, #6b7a6e);
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -82,12 +84,13 @@
 }
 
 .admin-nav-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.6rem;
     padding: 0.6rem 0.75rem;
     border-radius: 8px;
-    color: #9ab89e;
+    color: var(--muted-foreground, #6b7a6e);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
@@ -95,13 +98,26 @@
 }
 
 .admin-nav-item:hover {
-    background: rgba(255, 255, 255, 0.07);
-    color: #d1ddd3;
+    background: var(--secondary, #eef3ee);
+    color: var(--foreground, #1c2620);
 }
 
 .admin-nav-item.active {
-    background: rgba(107, 142, 111, 0.22);
-    color: #aed4b2;
+    background: var(--secondary, #eef3ee);
+    color: var(--primary, #6b8e6f);
+    font-weight: 600;
+}
+
+.admin-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--primary, #6b8e6f);
+    border-radius: 0 3px 3px 0;
 }
 
 .admin-nav-ico {
@@ -123,16 +139,16 @@
 
 .admin-sidebar-footer {
     padding: 0.75rem 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid var(--border, #e3e8e3);
 }
 
 .admin-back-link {
     font-size: 0.82rem;
-    color: #6a8a6e;
+    color: var(--muted-foreground, #6b7a6e);
     text-decoration: none;
 }
 
-.admin-back-link:hover { color: #9ab89e; }
+.admin-back-link:hover { color: var(--primary, #6b8e6f); }
 
 /* ─── 메인 콘텐츠 영역 ───────────────────────────────────── */
 
@@ -237,16 +253,23 @@
 
 .admin-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem;
 }
 
 .admin-stat-card {
     background: var(--card, #fff);
     border: 1px solid var(--border, #d4e0d6);
+    border-left: 3px solid var(--primary, #6b8e6f);
     border-radius: var(--radius, 12px);
-    padding: 1.25rem;
-    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.04);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(28, 38, 32, 0.05);
+    transition: box-shadow 0.18s, transform 0.15s;
+}
+
+.admin-stat-card:hover {
+    box-shadow: 0 8px 24px rgba(28, 38, 32, 0.10);
+    transform: translateY(-2px);
 }
 
 .admin-stat-value {
@@ -278,8 +301,15 @@
     gap: 1rem;
     background: var(--card, #fff);
     border: 1px solid var(--border, #d4e0d6);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
+    border-radius: var(--radius, 12px);
+    padding: 0.85rem 1.1rem;
+    box-shadow: 0 1px 4px rgba(28, 38, 32, 0.04);
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.admin-notice-row:hover {
+    box-shadow: 0 4px 14px rgba(28, 38, 32, 0.07);
+    border-color: var(--primary, #6b8e6f);
 }
 
 /* ─── 테이블 ─────────────────────────────────────────────── */
@@ -397,33 +427,35 @@
     text-decoration: none;
 }
 
-/* ─── 상담사 사이드바 커스터마이징 ───────────────────────── */
-
-.counselor-sidebar {
-    background: #1a2028;
-}
+/* ─── 상담사 사이드바 — 화이트 테마(관리자와 동일 톤) ───── */
+/* .counselor-sidebar 는 .admin-sidebar 의 화이트 배경을 그대로 사용 */
 
 .counselor-brand-icon {
-    background: rgba(99, 102, 241, 0.2);
-    color: #818cf8;
+    background: var(--secondary, #eef3ee);
+    color: var(--primary, #6b8e6f);
 }
 
 .counselor-brand-sub {
-    color: #6366f1;
+    color: var(--muted-foreground, #6b7a6e);
 }
 
+/* 고위험도 메뉴 — 화이트 위에서 빨강 톤으로 항상 강조 */
 .counselor-nav-danger {
-    color: #c4a0a0;
+    color: #b15c5c;
 }
 
 .counselor-nav-danger:hover {
-    background: rgba(193, 68, 68, 0.12);
-    color: #f8b4b4;
+    background: rgba(193, 68, 68, 0.10);
+    color: var(--destructive, #c14444);
 }
 
 .counselor-nav-danger.active {
-    background: rgba(193, 68, 68, 0.2);
-    color: #fca5a5;
+    background: rgba(193, 68, 68, 0.12);
+    color: var(--destructive, #c14444);
+}
+
+.counselor-nav-danger.active::before {
+    background: var(--destructive, #c14444);
 }
 
 .admin-back-btn:hover { color: var(--foreground, #1c2620); }

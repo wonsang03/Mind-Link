@@ -9,7 +9,7 @@
         <div class="mb-8" style="margin-bottom: 2rem;">
             <h1 class="mb-4">상담소 찾기</h1>
             <p class="muted" style="max-width: 48rem;">
-                네이버 지역검색에서 실시간으로 가져온 상담 센터 목록입니다.<br/>
+                실시간으로 검색되는 상담 센터 목록입니다.<br/>
                 키워드와 지역을 함께 입력하면 더 정확한 결과를 얻을 수 있습니다.
             </p>
         </div>
@@ -32,7 +32,7 @@
 
         <p th:if="${apiConfigured}" class="muted" style="font-size: 0.875rem; margin-bottom: 0.75rem;">
             검색어: <strong th:text="${effectiveQuery}">심리상담센터</strong>
-            <span th:if="${query != null and !query.isEmpty()}"> · 네이버 지역검색 API 연동</span>
+            <span th:if="${query != null and !query.isEmpty()}"> · 실시간 검색 결과</span>
         </p>
 
         <form id="centerSearchForm" method="get" th:action="@{/counseling}" class="toolbar">
@@ -131,7 +131,6 @@
         <div th:if="${#lists.isEmpty(centers)}" class="empty-note" style="margin-top: 1rem;">
             <span th:if="${apiConfigured}">
                 검색 결과가 없습니다. 지역명+「심리상담」 등으로 다시 검색해 보세요.
-                (네이버 앱에 <strong>검색 API</strong> 권한이 없으면 항상 비어 있을 수 있습니다.)
             </span>
             <span th:unless="${apiConfigured}">API 키가 설정되지 않아 검색 결과를 가져올 수 없습니다.</span>
         </div>

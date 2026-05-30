@@ -98,6 +98,8 @@
                     <div class="flex-between mb-2">
                         <span th:text="${c.author}">댓글 작성자</span>
                         <div class="flex gap-3" style="align-items: center;">
+                            <button type="button" class="comment-like"
+                                    th:attr="data-comment-id=${c.id}" aria-label="공감">♥</button>
                             <span class="muted" style="font-size: 0.875rem;"
                                   th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-05-07 14:00</span>
                             <form th:if="${loginUser != null and loginUser.name == c.author}"
@@ -286,6 +288,31 @@ function previewComment(input) {
         preview.appendChild(wrap);
     });
 }
+
+// 댓글 공감(하트) — 클릭 시 '빰' 커지는 효과 (이 브라우저에만 표시 저장)
+(function() {
+    var KEY = 'mindlink-comment-likes';
+    function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+    function save(o) { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} }
+    var liked = load();
+    document.querySelectorAll('.comment-like').forEach(function(btn) {
+        var id = btn.getAttribute('data-comment-id');
+        if (liked[id]) btn.classList.add('liked');
+        btn.addEventListener('animationend', function() { btn.classList.remove('pop'); });
+        btn.addEventListener('click', function() {
+            var on = btn.classList.toggle('liked');
+            if (on) {
+                liked[id] = 1;
+                btn.classList.remove('pop');
+                void btn.offsetWidth; // 리플로우 강제 → 애니메이션 재실행
+                btn.classList.add('pop');
+            } else {
+                delete liked[id];
+            }
+            save(liked);
+        });
+    });
+})();
 </script>
 </body>
 </html>

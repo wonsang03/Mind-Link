@@ -4,44 +4,26 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 
-<main>
+<main class="home-anim">
     <!-- Full-bleed hero banner -->
-    <section class="hero-banner">
+    <section class="hero-banner home-hero">
         <div class="hero-banner-inner">
-            <div class="badge">
-                <span class="pico pico-sm" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                    </svg>
-                </span>
-                <span>당신의 마음 건강 파트너</span>
-            </div>
-            <h1>마음이음과 함께하세요</h1>
-            <p>
-                과학적으로 검증된 자가진단부터 개인 맞춤 콘텐츠 추천,
-                전문가 상담 연계까지.<br/>
-                당신의 마음 건강 여정을 함께합니다.
+            <h1 class="home-hero-title">
+                <span class="serif">Mind Link</span>
+            </h1>
+            <p class="home-hero-tagline serif italic">Where your mind finds its calm.</p>
+            <p class="home-hero-sub">
+                자가진단부터 AI 정서 케어, 전문가 연결까지 —<br/>
+                당신의 마음 건강 여정을 한 곳에서 함께합니다.
             </p>
+            <div class="home-hero-cta">
+                <a th:href="@{/self-assessment}" class="btn btn-white">자가진단 시작하기</a>
+                <a th:href="@{/ai-care}" class="btn btn-ghost-light">AI 케어 체험</a>
+            </div>
         </div>
     </section>
 
-    <!-- 속담 -->
-    <div th:if="${proverb != null}" class="proverb-hero-wrap">
-        <div class="proverb-card">
-            <span class="proverb-card-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
-                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
-                </svg>
-            </span>
-            <span class="proverb-card-text" th:text="${proverb.content}"></span>
-            <span th:if="${proverb.source != null}" class="proverb-card-sep">·</span>
-            <span th:if="${proverb.source != null}" class="proverb-card-source"
-                  th:text="${proverb.source}"></span>
-        </div>
-    </div>
-
+    <div class="home-sheet">
     <div class="page">
         <!-- Highlighted Features -->
         <section class="grid grid-2" style="margin-bottom: 3rem;">
@@ -213,8 +195,9 @@
             <section style="margin-bottom: 3rem;">
                 <h3 class="center mb-8" style="margin-bottom: 3rem;">마음이음이 특별한 이유</h3>
                 <div class="grid grid-3">
-                    <div class="center">
-                        <div class="icon-circle icon-circle-lg" style="margin: 0 auto 1rem;">
+                    <div class="card home-step">
+                        <span class="ghost-num" aria-hidden="true">01</span>
+                        <div class="icon-circle icon-circle-lg">
                             <span class="pico pico-xl" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="11" width="18" height="11" rx="2"/>
@@ -225,8 +208,9 @@
                         <h4 class="mb-4">개인정보 보호</h4>
                         <p class="muted">진단 결과와 개인 정보는 암호화되어 안전하게 보관됩니다.</p>
                     </div>
-                    <div class="center">
-                        <div class="icon-circle icon-circle-lg" style="margin: 0 auto 1rem;">
+                    <div class="card home-step">
+                        <span class="ghost-num" aria-hidden="true">02</span>
+                        <div class="icon-circle icon-circle-lg">
                             <span class="pico pico-xl" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
@@ -238,8 +222,9 @@
                         <h4 class="mb-4">과학적 검증</h4>
                         <p class="muted">임상심리학 기반의 검증된 도구와 AI 알고리즘을 사용합니다.</p>
                     </div>
-                    <div class="center">
-                        <div class="icon-circle icon-circle-lg" style="margin: 0 auto 1rem;">
+                    <div class="card home-step">
+                        <span class="ghost-num" aria-hidden="true">03</span>
+                        <div class="icon-circle icon-circle-lg">
                             <span class="pico pico-xl" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="9"/>
@@ -259,6 +244,7 @@
                 <a th:href="@{/self-assessment}" class="btn btn-white">무료로 시작하기</a>
             </section>
         </section>
+    </div>
     </div>
 </main>
 
