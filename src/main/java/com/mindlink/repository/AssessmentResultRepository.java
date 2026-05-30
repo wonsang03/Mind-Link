@@ -27,4 +27,15 @@ public interface AssessmentResultRepository extends JpaRepository<AssessmentResu
     List<AssessmentResult> findByHighRiskTrueOrderByCompletedAtDesc();
 
     List<AssessmentResult> findTop5ByHighRiskTrueOrderByCompletedAtDesc();
+
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT r FROM AssessmentResult r
+            WHERE r.highRisk = true
+              AND r.completedAt = (
+                  SELECT MAX(r2.completedAt) FROM AssessmentResult r2
+                  WHERE r2.user = r.user AND r2.highRisk = true
+              )
+            ORDER BY r.completedAt DESC
+            """)
+    List<AssessmentResult> findLatestHighRiskPerUser();
 }

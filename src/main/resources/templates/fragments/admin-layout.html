@@ -37,6 +37,19 @@
             </span>
             <span>대시보드</span>
         </a>
+        <a th:href="@{/admin/monitoring}" class="admin-nav-item"
+           th:classappend="${active == 'monitoring'} ? 'active'">
+            <span class="admin-nav-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </span>
+            <span>모니터링</span>
+            <span class="admin-nav-badge"
+                  th:if="${unconfirmedHighRiskCount != null and unconfirmedHighRiskCount > 0}"
+                  th:text="${unconfirmedHighRiskCount}"></span>
+        </a>
         <a th:href="@{/admin/cluster}" class="admin-nav-item"
            th:classappend="${active == 'cluster'} ? 'active'">
             <span class="admin-nav-ico" aria-hidden="true">
@@ -155,6 +168,20 @@
                     </svg>
                 </span>
                 <span>대시보드</span>
+            </a>
+
+            <a th:href="@{/admin/monitoring}" class="admin-nav-item"
+               th:classappend="${currentUri == '/admin/monitoring'} ? 'active'">
+                <span class="admin-nav-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </span>
+                <span>모니터링</span>
+                <span class="admin-nav-badge"
+                      th:if="${unconfirmedHighRiskCount != null and unconfirmedHighRiskCount > 0}"
+                      th:text="${unconfirmedHighRiskCount}"></span>
             </a>
 
             <a th:href="@{/admin/cluster}" class="admin-nav-item"

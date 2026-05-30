@@ -18,4 +18,8 @@ public interface UserAlertRepository extends JpaRepository<UserAlert, Long> {
     Optional<UserAlert> findByIdAndUser(Long id, User user);
 
     void deleteByUser(User user);
+
+    List<UserAlert> findByAlertTypeOrderByCreatedAtDesc(String alertType);
+
+    long countByAlertTypeAndAdminConfirmedFalse(String alertType);
 }

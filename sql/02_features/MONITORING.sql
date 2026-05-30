@@ -186,6 +186,7 @@ BEGIN
   add_ua_col('RELATED_POST_ID',    'related_post_id NUMBER');
   add_ua_col('RELATED_COMMENT_ID', 'related_comment_id NUMBER');
   add_ua_col('NOTICE_ID',          'notice_id NUMBER');
+  add_ua_col('ADMIN_CONFIRMED',    'admin_confirmed NUMBER(1) DEFAULT 0 NOT NULL');
 END;
 /
 

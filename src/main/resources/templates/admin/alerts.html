@@ -23,7 +23,8 @@
                     <select name="userId" class="form-input">
                         <option value="">전체 회원 (관리자 제외)</option>
                         <option th:each="u : ${users}" th:value="${u.id}"
-                                th:text="|${u.name} (${u.email}) · ${u.role}|">회원</option>
+                                th:text="|${u.name} (${u.email}) · ${u.role}|"
+                                th:selected="${preselectedUserId != null and u.id == preselectedUserId}">회원</option>
                     </select>
                 </div>
                 <div>

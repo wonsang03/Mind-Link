@@ -248,4 +248,19 @@ public class MonitoringService {
     public void deleteAllAlerts(User user) {
         alertRepo.deleteByUser(user);
     }
+
+    // ===== 관리자 전용 =====
+
+    public List<UserAlert> getHighRiskAlertsForAdmin() {
+        return alertRepo.findByAlertTypeOrderByCreatedAtDesc("HIGH_RISK");
+    }
+
+    @Transactional
+    public void confirmHighRiskAlert(Long alertId) {
+        alertRepo.findById(alertId).ifPresent(a -> a.setAdminConfirmed(true));
+    }
+
+    public long countUnconfirmedHighRisk() {
+        return alertRepo.countByAlertTypeAndAdminConfirmedFalse("HIGH_RISK");
+    }
 }

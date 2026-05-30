@@ -825,3 +825,112 @@
 .log-line.log-info  { color: #93c5fd; }
 .log-line.log-debug { color: #94a3b8; }
 .log-line.log-trace { color: #64748b; }
+
+/* ─── 모니터링 페이지 ───────────────────────────────────── */
+
+/* 클러스터 요약 카드 — admin-stat-card 동일 스타일, 색상 포인트만 다름 */
+.monitoring-cluster-card {
+    background: #fff;
+    border: 1px solid var(--border, #e3e8e3);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 110px;
+}
+
+.monitoring-cluster-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted-foreground, #6b7a6e);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.monitoring-cluster-count {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--foreground, #1c2620);
+    line-height: 1.1;
+}
+
+.monitoring-cluster-sub {
+    font-size: 0.75rem;
+    color: var(--muted-foreground, #6b7a6e);
+}
+
+/* 탭 */
+.monitoring-tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--border, #e3e8e3);
+    margin-bottom: 1.25rem;
+}
+
+.monitoring-tab-btn {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    color: var(--muted-foreground, #6b7a6e);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.15s;
+}
+
+.monitoring-tab-btn.active {
+    color: var(--primary, #6b8e6f);
+    border-bottom-color: var(--primary, #6b8e6f);
+}
+
+.monitoring-tab-badge {
+    background: #e53e3e;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    font-weight: 700;
+}
+
+/* 미확인 HIGH_RISK 알림 행 강조 */
+.admin-alert-unconfirmed {
+    background: #fff1f0;
+    border-left: 4px solid #e53e3e;
+}
+
+.admin-alert-confirmed {
+    background: #f9faf9;
+    border-left: 4px solid transparent;
+    color: var(--muted-foreground, #6b7a6e);
+}
+
+/* 사이드바 배지 (미확인 HIGH_RISK 수) */
+.admin-nav-badge {
+    background: #e53e3e;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    margin-left: auto;
+    font-weight: 700;
+}
+
+/* 고위험군 관리 테이블 인라인 폼 */
+.monitoring-inline-form {
+    background: #f4f7f4;
+    border: 1px solid var(--border, #e3e8e3);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.monitoring-inline-form.open {
+    display: block;
+}

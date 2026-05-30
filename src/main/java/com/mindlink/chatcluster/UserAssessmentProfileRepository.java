@@ -32,4 +32,11 @@ public interface UserAssessmentProfileRepository extends JpaRepository<UserAsses
               )
             """)
     List<UserAssessmentProfile> searchRealUsers(@Param("pattern") String pattern);
+
+    @Query("""
+            SELECT p.clusterId, COUNT(p) FROM UserAssessmentProfile p
+            WHERE p.userId IS NOT NULL AND p.isSynthetic = 0
+            GROUP BY p.clusterId
+            """)
+    List<Object[]> countRealUsersByCluster();
 }

@@ -45,6 +45,9 @@ public class UserAlert {
     @Column(name = "is_read", nullable = false)
     private boolean read;
 
+    @Column(name = "admin_confirmed", nullable = false)
+    private boolean adminConfirmed;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -59,6 +62,7 @@ public class UserAlert {
     public Long getRelatedCommentId() { return relatedCommentId; }
     public Long getNoticeId() { return noticeId; }
     public boolean isRead() { return read; }
+    public boolean isAdminConfirmed() { return adminConfirmed; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setUser(User user) { this.user = user; }
@@ -71,5 +75,6 @@ public class UserAlert {
     public void setRelatedCommentId(Long relatedCommentId) { this.relatedCommentId = relatedCommentId; }
     public void setNoticeId(Long noticeId) { this.noticeId = noticeId; }
     public void setRead(boolean read) { this.read = read; }
+    public void setAdminConfirmed(boolean adminConfirmed) { this.adminConfirmed = adminConfirmed; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

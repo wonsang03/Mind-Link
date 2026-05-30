@@ -3,12 +3,15 @@ package com.mindlink.controller;
 import com.mindlink.domain.Post;
 import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
+import com.mindlink.service.AdminMonitoringService;
 import com.mindlink.service.AdminService;
 import com.mindlink.service.CommunityService;
+import com.mindlink.service.MonitoringService;
 import com.mindlink.service.NoticeService;
 import com.mindlink.service.SqlConsoleService;
 import com.mindlink.service.UserNotificationService;
 import com.mindlink.service.UserService;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +30,8 @@ public class AdminController {
     private final UserService userService;
     private final SqlConsoleService sqlConsoleService;
     private final UserNotificationService notificationService;
+    private final AdminMonitoringService adminMonitoringService;
+    private final MonitoringService monitoringService;
 
     @Value("${chat.cluster.k:6}")
     private int k;
@@ -46,13 +51,29 @@ public class AdminController {
                            NoticeService noticeService,
                            UserService userService,
                            SqlConsoleService sqlConsoleService,
-                           UserNotificationService notificationService) {
-        this.adminService = adminService;
-        this.communityService = communityService;
-        this.noticeService = noticeService;
-        this.userService = userService;
-        this.sqlConsoleService = sqlConsoleService;
-        this.notificationService = notificationService;
+                           UserNotificationService notificationService,
+                           AdminMonitoringService adminMonitoringService,
+                           MonitoringService monitoringService) {
+        this.adminService            = adminService;
+        this.communityService        = communityService;
+        this.noticeService           = noticeService;
+        this.userService             = userService;
+        this.sqlConsoleService       = sqlConsoleService;
+        this.notificationService     = notificationService;
+        this.adminMonitoringService  = adminMonitoringService;
+        this.monitoringService       = monitoringService;
+    }
+
+    // ===== 공통 모델 속성 (모든 GET 자동 주입) =====
+
+    @ModelAttribute("unconfirmedHighRiskCount")
+    public long unconfirmedHighRiskCount(HttpSession session) {
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (!(userId instanceof Long uid)) return 0L;
+        return userService.findById(uid)
+                .filter(u -> u.getRole() == UserRole.ADMIN)
+                .map(u -> monitoringService.countUnconfirmedHighRisk())
+                .orElse(0L);
     }
 
     // ===== 대시보드 =====
@@ -109,9 +130,11 @@ public class AdminController {
     // ===== 알림 발송 (공지와 별도) =====
 
     @GetMapping("/alerts")
-    public String alertsForm(HttpSession session, Model model, RedirectAttributes ra) {
+    public String alertsForm(@RequestParam(required = false) Long userId,
+                             HttpSession session, Model model, RedirectAttributes ra) {
         if (!isAdmin(session)) return denied(ra);
         model.addAttribute("users", userService.findAll());
+        model.addAttribute("preselectedUserId", userId);
         return "admin/alerts";
     }
 
@@ -256,6 +279,41 @@ public class AdminController {
         model.addAttribute("sql", sql);
         model.addAttribute("result", sqlConsoleService.execute(sql));
         return "admin/sql";
+    }
+
+    // ===== 모니터링 =====
+
+    @GetMapping("/monitoring")
+    public String monitoring(HttpSession session, Model model, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        model.addAttribute("clusterSummaries",  adminMonitoringService.getClusterSummaries());
+        model.addAttribute("highRiskAlerts",    monitoringService.getHighRiskAlertsForAdmin());
+        model.addAttribute("unconfirmedCount",  monitoringService.countUnconfirmedHighRisk());
+        model.addAttribute("highRiskUsers",     adminMonitoringService.getHighRiskUsers());
+        return "admin/monitoring";
+    }
+
+    @PostMapping("/monitoring/confirm/{alertId}")
+    public String confirmAlert(@PathVariable Long alertId,
+                               HttpSession session, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        monitoringService.confirmHighRiskAlert(alertId);
+        return "redirect:/admin/monitoring#alerts";
+    }
+
+    @PostMapping("/monitoring/message")
+    public String sendMonitoringMessage(@RequestParam Long userId,
+                                        @RequestParam(required = false) String title,
+                                        @RequestParam String message,
+                                        HttpSession session, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        try {
+            notificationService.sendAdminMessage(userId, title, message, false, null);
+            ra.addFlashAttribute("flash", "메시지를 전송했습니다.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("flash", e.getMessage());
+        }
+        return "redirect:/admin/monitoring#users";
     }
 
     // ===== 서버 로그 뷰어 =====
