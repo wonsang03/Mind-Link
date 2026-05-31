@@ -94,120 +94,96 @@ BEGIN
 END;
 /
 
--- ① 자식→부모 순서로 삭제 (테이블 미존재 시 -942 무시)
-BEGIN
-  EXECUTE IMMEDIATE 'DELETE FROM score_ranges';
-  EXECUTE IMMEDIATE 'DELETE FROM assessment_choices';
-  EXECUTE IMMEDIATE 'DELETE FROM assessment_questions';
-  EXECUTE IMMEDIATE 'DELETE FROM assessment_types';
-EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF;
-END;
-/
+-- assessment_types 삭제 시 ON DELETE CASCADE 로 questions·choices·score_ranges 자동 삭제
+DELETE FROM assessment_types;
 
--- ② assessment_types (4행)
-INSERT ALL
-  INTO assessment_types (name, description, type_key, duration) VALUES ('우울증 자가진단',  'PHQ-9 기반 우울 증상 선별 검사',       'depression', '약 2분')
-  INTO assessment_types (name, description, type_key, duration) VALUES ('불안장애 자가진단', 'GAD-7 기반 불안 수준 평가',             'anxiety',    '약 2분')
-  INTO assessment_types (name, description, type_key, duration) VALUES ('스트레스 자가진단', 'PSS 기반 스트레스 측정',                'stress',     '약 2분')
-  INTO assessment_types (name, description, type_key, duration) VALUES ('번아웃 자가진단',   'CBI 척도 기반 개인·업무 번아웃 측정',   'burnout',    '약 3분')
-SELECT 1 FROM dual;
+INSERT INTO assessment_types (name, description, type_key, duration) VALUES ('우울증 자가진단', 'PHQ-9 기반 우울 증상 선별 검사', 'depression', '약 2분');
+INSERT INTO assessment_types (name, description, type_key, duration) VALUES ('불안장애 자가진단', 'GAD-7 기반 불안 수준 평가', 'anxiety', '약 2분');
+INSERT INTO assessment_types (name, description, type_key, duration) VALUES ('스트레스 자가진단', 'PSS 기반 스트레스 측정', 'stress', '약 2분');
+INSERT INTO assessment_types (name, description, type_key, duration) VALUES ('번아웃 자가진단', 'CBI 척도 기반 개인·업무 번아웃 측정', 'burnout', '약 3분');
 
--- ③ assessment_questions (30행) — UNION ALL로 assessment_types 조회를 통합
---    컬럼: (assessment_type_id, order_num, content, reversed, part)
---    depression/anxiety 는 reversed=0·part=1 기본값이지만 명시적으로 지정
-INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part)
--- depression (9문항)
-SELECT id,  1, '일상적인 일에 대한 흥미나 즐거움이 거의 없었다',                                                                      0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  2, '우울하거나, 기분이 가라앉거나, 희망이 없다고 느꼈다',                                                       0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  3, '잠들기 어렵거나 자주 깼거나, 반대로 너무 많이 잤다',                                                        0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  4, '피곤하거나 기운이 거의 없다고 느꼈다',                                                                      0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  5, '식욕이 없거나 반대로 과식을 했다',                                                                          0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  6, '자신이 실패자라고 느끼거나, 자신 또는 가족을 실망시켰다고 느꼈다',                                           0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  7, '신문을 읽거나 TV를 보는 것 같은 일에 집중하기 어려웠다',                                                    0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  8, '다른 사람이 눈치챌 정도로 말이나 행동이 느려졌거나, 반대로 너무 안절부절못하고 평소보다 많이 움직였다',     0, 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  9, '차라리 죽는 것이 낫겠다고 생각했거나, 자신을 해칠 생각을 했다',                                             0, 1 FROM assessment_types WHERE type_key = 'depression'
--- anxiety (7문항)
-UNION ALL SELECT id,  1, '불안하거나 초조하거나 조마조마한 느낌이 들었다',                                                            0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  2, '걱정을 멈추거나 조절할 수 없었다',                                                                          0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  3, '여러 가지 일에 대해 지나치게 걱정하였다',                                                                   0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  4, '긴장을 풀기가 어려웠다',                                                                                    0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  5, '너무 안절부절못해서 가만히 앉아 있기가 힘들었다',                                                           0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  6, '쉽게 짜증이 나거나 화가 났다',                                                                              0, 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  7, '끔찍한 일이 일어날 것 같은 두려움을 느꼈다',                                                                0, 1 FROM assessment_types WHERE type_key = 'anxiety'
--- stress (10문항, reversed 혼용)
-UNION ALL SELECT id,  1, '예상치 못한 일이 생겨서 속상했다',                 0, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  2, '삶에서 중요한 일들을 통제할 수 없다고 느꼈다',     0, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  3, '불안하고 스트레스를 받는다고 느꼈다',              0, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  4, '개인적인 문제를 처리하는 능력에 자신감을 느꼈다',  1, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  5, '일이 내 뜻대로 잘 풀린다고 느꼈다',                1, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  6, '해야 할 모든 일들을 감당할 수 없다고 느꼈다',      0, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  7, '삶의 짜증스러운 일들을 잘 다스릴 수 있었다',       1, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  8, '상황을 잘 장악하고 있다고 느꼈다',                 1, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id,  9, '내가 통제할 수 없는 일들 때문에 화가 났다',        0, 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 10, '어려움이 너무 쌓여서 극복할 수 없다고 느꼈다',     0, 1 FROM assessment_types WHERE type_key = 'stress'
--- burnout (13문항, part 혼용)
-UNION ALL SELECT id,  1, '얼마나 자주 피로감을 느끼십니까?',                                             0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  2, '얼마나 자주 신체적으로 탈진된다고 느끼십니까?',                                0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  3, '얼마나 자주 감정적으로 탈진된다고 느끼십니까?',                                0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  4, '얼마나 자주 "더 이상 못 하겠다"는 생각이 드십니까?',                          0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  5, '얼마나 자주 기진맥진하다고 느끼십니까?',                                       0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  6, '얼마나 자주 몸이 약해지고 쉽게 아플 것 같다고 느끼십니까?',                   0, 1 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  7, '하루 일과가 끝날 때 기진맥진하다고 느끼십니까?',                               0, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  8, '아침에 또 하루를 출근해야 한다는 생각에 탈진된다고 느끼십니까?',              0, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id,  9, '업무 시간 매 순간이 힘들다고 느끼십니까?',                                     0, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 10, '퇴근 후 가족이나 친구들과 함께할 충분한 에너지가 있습니까?',                  1, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 11, '업무가 감정적으로 소진되게 만듭니까?',                                          0, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 12, '업무로 인해 좌절감을 느끼십니까?',                                             0, 2 FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 13, '업무 때문에 번아웃된다고 느끼십니까?',                                          0, 2 FROM assessment_types WHERE type_key = 'burnout'
-;
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 1, '일상적인 일에 대한 흥미나 즐거움이 거의 없었다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 2, '우울하거나, 기분이 가라앉거나, 희망이 없다고 느꼈다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 3, '잠들기 어렵거나 자주 깼거나, 반대로 너무 많이 잤다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 4, '피곤하거나 기운이 거의 없다고 느꼈다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 5, '식욕이 없거나 반대로 과식을 했다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 6, '자신이 실패자라고 느끼거나, 자신 또는 가족을 실망시켰다고 느꼈다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 7, '신문을 읽거나 TV를 보는 것 같은 일에 집중하기 어려웠다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 8, '다른 사람이 눈치챌 정도로 말이나 행동이 느려졌거나, 반대로 너무 안절부절못하고 평소보다 많이 움직였다' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 9, '차라리 죽는 것이 낫겠다고 생각했거나, 자신을 해칠 생각을 했다' FROM assessment_types WHERE type_key = 'depression';
 
--- ④ assessment_choices (18행)
-INSERT INTO assessment_choices (assessment_type_id, order_num, label, score)
--- depression (4선택지)
-SELECT id, 1, '전혀없음',  0 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 2, '며칠 동안', 1 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 3, '7일 이상',  2 FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 4, '거의 매일', 3 FROM assessment_types WHERE type_key = 'depression'
--- anxiety (4선택지, depression과 동일 구조)
-UNION ALL SELECT id, 1, '전혀없음',  0 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id, 2, '며칠 동안', 1 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id, 3, '7일 이상',  2 FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id, 4, '거의 매일', 3 FROM assessment_types WHERE type_key = 'anxiety'
--- stress (5선택지)
-UNION ALL SELECT id, 1, '전혀없음',  0 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 2, '거의 없음', 1 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 3, '때때로',    2 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 4, '자주',      3 FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 5, '매우 자주', 4 FROM assessment_types WHERE type_key = 'stress'
--- burnout (5선택지, 0~100 단위)
-UNION ALL SELECT id, 1, '전혀없음',   0   FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 2, '거의 없음',  25  FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 3, '때때로',     50  FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 4, '자주',       75  FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 5, '매우 자주',  100 FROM assessment_types WHERE type_key = 'burnout'
-;
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 1, '불안하거나 초조하거나 조마조마한 느낌이 들었다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 2, '걱정을 멈추거나 조절할 수 없었다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 3, '여러 가지 일에 대해 지나치게 걱정하였다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 4, '긴장을 풀기가 어려웠다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 5, '너무 안절부절못해서 가만히 앉아 있기가 힘들었다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 6, '쉽게 짜증이 나거나 화가 났다' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content) SELECT id, 7, '끔찍한 일이 일어날 것 같은 두려움을 느꼈다' FROM assessment_types WHERE type_key = 'anxiety';
 
--- ⑤ score_ranges (15행)
-INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message)
--- depression (5구간)
-SELECT id,  0,  4, '최소',       '최소한의 우울 증상이 있습니다. 일상적인 자기 관리를 유지해주세요.'              FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id,  5,  9, '경증',       '가벼운 우울 증상이 있습니다. 규칙적인 생활과 충분한 휴식에 신경 써주세요.' FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 10, 14, '중등도',     '중간 정도의 우울 증상이 있습니다. 전문가 상담을 고려해보세요.'              FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 15, 19, '중등도-중증','상당한 우울 증상이 있습니다. 전문가의 도움을 받으시기를 권장합니다.'        FROM assessment_types WHERE type_key = 'depression'
-UNION ALL SELECT id, 20, 27, '중증',        '심각한 우울 증상이 있습니다. 즉각적인 전문가의 도움이 필요합니다.'         FROM assessment_types WHERE type_key = 'depression'
--- anxiety (4구간)
-UNION ALL SELECT id,  0,  4, '최소',   '최소한의 불안 증상이 있습니다. 일상적인 자기 관리를 유지해주세요.'          FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id,  5,  9, '경증',   '가벼운 불안 증상이 있습니다. 이완 기법과 충분한 휴식을 취해보세요.'         FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id, 10, 14, '중등도', '중간 정도의 불안 증상이 있습니다. 전문가 상담을 고려해보세요.'               FROM assessment_types WHERE type_key = 'anxiety'
-UNION ALL SELECT id, 15, 21, '중증',   '심각한 불안 증상이 있습니다. 즉각적인 전문가의 도움이 필요합니다.'           FROM assessment_types WHERE type_key = 'anxiety'
--- stress (3구간)
-UNION ALL SELECT id,  0, 13, '낮음', '스트레스 수준이 낮은 안정적인 상태입니다. 현재의 생활 습관을 유지해주세요.'    FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 14, 26, '보통', '보통 수준의 스트레스가 있습니다. 스트레스 원인을 파악하고 꾸준한 관리가 필요합니다.' FROM assessment_types WHERE type_key = 'stress'
-UNION ALL SELECT id, 27, 40, '높음', '심각한 스트레스 상태입니다. 즉각적인 휴식과 전문가의 도움이 필요합니다.'       FROM assessment_types WHERE type_key = 'stress'
--- burnout (3구간)
-UNION ALL SELECT id,  0,  49, '낮음', '현재 번아웃 위험이 낮은 상태입니다. 균형 잡힌 생활을 유지하고 계십니다.'      FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 50,  74, '보통', '중간 수준의 소진이 나타나고 있습니다. 충분한 휴식과 꾸준한 관리가 필요합니다.' FROM assessment_types WHERE type_key = 'burnout'
-UNION ALL SELECT id, 75, 100, '높음', '번아웃 위험이 높은 상태입니다. 전문가 상담을 고려해 보시길 권장합니다.'        FROM assessment_types WHERE type_key = 'burnout'
-;
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 1,  '예상치 못한 일이 생겨서 속상했다', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 2,  '삶에서 중요한 일들을 통제할 수 없다고 느꼈다', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 3,  '불안하고 스트레스를 받는다고 느꼈다', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 4,  '개인적인 문제를 처리하는 능력에 자신감을 느꼈다', 1 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 5,  '일이 내 뜻대로 잘 풀린다고 느꼈다', 1 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 6,  '해야 할 모든 일들을 감당할 수 없다고 느꼈다', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 7,  '삶의 짜증스러운 일들을 잘 다스릴 수 있었다', 1 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 8,  '상황을 잘 장악하고 있다고 느꼈다', 1 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 9,  '내가 통제할 수 없는 일들 때문에 화가 났다', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed) SELECT id, 10, '어려움이 너무 쌓여서 극복할 수 없다고 느꼈다', 0 FROM assessment_types WHERE type_key = 'stress';
+
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 1,  '얼마나 자주 피로감을 느끼십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 2,  '얼마나 자주 신체적으로 탈진된다고 느끼십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 3,  '얼마나 자주 감정적으로 탈진된다고 느끼십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 4,  '얼마나 자주 "더 이상 못 하겠다"는 생각이 드십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 5,  '얼마나 자주 기진맥진하다고 느끼십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 6,  '얼마나 자주 몸이 약해지고 쉽게 아플 것 같다고 느끼십니까?', 0, 1 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 7,  '하루 일과가 끝날 때 기진맥진하다고 느끼십니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 8,  '아침에 또 하루를 출근해야 한다는 생각에 탈진된다고 느끼십니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 9,  '업무 시간 매 순간이 힘들다고 느끼십니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 10, '퇴근 후 가족이나 친구들과 함께할 충분한 에너지가 있습니까?', 1, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 11, '업무가 감정적으로 소진되게 만듭니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 12, '업무로 인해 좌절감을 느끼십니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_questions (assessment_type_id, order_num, content, reversed, part) SELECT id, 13, '업무 때문에 번아웃된다고 느끼십니까?', 0, 2 FROM assessment_types WHERE type_key = 'burnout';
+
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 1, '전혀없음', 0 FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 2, '며칠 동안', 1 FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 3, '7일 이상', 2 FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 4, '거의 매일', 3 FROM assessment_types WHERE type_key = 'depression';
+
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 1, '전혀없음', 0 FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 2, '며칠 동안', 1 FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 3, '7일 이상', 2 FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 4, '거의 매일', 3 FROM assessment_types WHERE type_key = 'anxiety';
+
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 1, '전혀없음', 0 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 2, '거의 없음', 1 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 3, '때때로',   2 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 4, '자주',     3 FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 5, '매우 자주', 4 FROM assessment_types WHERE type_key = 'stress';
+
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 1, '전혀없음',  0   FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 2, '거의 없음', 25  FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 3, '때때로',    50  FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 4, '자주',      75  FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO assessment_choices (assessment_type_id, order_num, label, score) SELECT id, 5, '매우 자주', 100 FROM assessment_types WHERE type_key = 'burnout';
+
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 0, 4, '최소', '최소한의 우울 증상이 있습니다. 일상적인 자기 관리를 유지해주세요.' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 5, 9, '경증', '가벼운 우울 증상이 있습니다. 규칙적인 생활과 충분한 휴식에 신경 써주세요.' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 10, 14, '중등도', '중간 정도의 우울 증상이 있습니다. 전문가 상담을 고려해보세요.' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 15, 19, '중등도-중증', '상당한 우울 증상이 있습니다. 전문가의 도움을 받으시기를 권장합니다.' FROM assessment_types WHERE type_key = 'depression';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 20, 27, '중증', '심각한 우울 증상이 있습니다. 즉각적인 전문가의 도움이 필요합니다.' FROM assessment_types WHERE type_key = 'depression';
+
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 0, 4, '최소', '최소한의 불안 증상이 있습니다. 일상적인 자기 관리를 유지해주세요.' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 5, 9, '경증', '가벼운 불안 증상이 있습니다. 이완 기법과 충분한 휴식을 취해보세요.' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 10, 14, '중등도', '중간 정도의 불안 증상이 있습니다. 전문가 상담을 고려해보세요.' FROM assessment_types WHERE type_key = 'anxiety';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 15, 21, '중증', '심각한 불안 증상이 있습니다. 즉각적인 전문가의 도움이 필요합니다.' FROM assessment_types WHERE type_key = 'anxiety';
+
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 0,  13, '낮음', '스트레스 수준이 낮은 안정적인 상태입니다. 현재의 생활 습관을 유지해주세요.' FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 14, 26, '보통', '보통 수준의 스트레스가 있습니다. 스트레스 원인을 파악하고 꾸준한 관리가 필요합니다.' FROM assessment_types WHERE type_key = 'stress';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 27, 40, '높음', '심각한 스트레스 상태입니다. 즉각적인 휴식과 전문가의 도움이 필요합니다.' FROM assessment_types WHERE type_key = 'stress';
+
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 0,  49,  '낮음', '현재 번아웃 위험이 낮은 상태입니다. 균형 잡힌 생활을 유지하고 계십니다.' FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 50, 74,  '보통', '중간 수준의 소진이 나타나고 있습니다. 충분한 휴식과 꾸준한 관리가 필요합니다.' FROM assessment_types WHERE type_key = 'burnout';
+INSERT INTO score_ranges (assessment_type_id, min_score, max_score, result_level, message) SELECT id, 75, 100, '높음', '번아웃 위험이 높은 상태입니다. 전문가 상담을 고려해 보시길 권장합니다.' FROM assessment_types WHERE type_key = 'burnout';
 
 COMMIT;
