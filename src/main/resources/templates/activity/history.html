@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 활동 일지')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<link rel="stylesheet" th:href="@{/css/activities.css}"/>
+
+<main>
+    <div class="page" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+        <div style="max-width: 640px; margin: 0 auto;">
+
+            <div class="page-header" style="margin-bottom: 1.75rem;">
+                <h1>활동 일지</h1>
+                <p class="muted">지금까지 수행한 추천 활동 기록이에요. 꾸준히 쌓아가 보세요.</p>
+            </div>
+
+            <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+            <div class="actlog-stats">
+                <div class="actlog-stat">
+                    <div class="actlog-stat-num" th:text="${total}">0</div>
+                    <div class="actlog-stat-label">누적 활동</div>
+                </div>
+                <div class="actlog-stat">
+                    <div class="actlog-stat-num" th:text="${week}">0</div>
+                    <div class="actlog-stat-label">이번 주</div>
+                </div>
+                <div class="actlog-stat">
+                    <div class="actlog-stat-num" th:text="${#lists.size(items)}">0</div>
+                    <div class="actlog-stat-label">최근 기록</div>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(items)}" class="empty-note" style="text-align:center; padding:2.5rem 1rem;">
+                아직 기록된 활동이 없어요.<br/>
+                <a th:href="@{/recommendations}" style="color:var(--primary);">추천 활동</a>에서 하나 시작해 보세요.
+            </div>
+
+            <div th:unless="${#lists.isEmpty(items)}" class="card" style="padding: 0.5rem 1.5rem;">
+                <div class="actlog-item" th:each="it : ${items}">
+                    <span class="actlog-dot"></span>
+                    <div class="actlog-body">
+                        <div class="actlog-title" th:text="${it.label}">활동명</div>
+                        <div class="actlog-detail" th:if="${it.detail != null and !it.detail.isEmpty()}" th:text="${it.detail}"></div>
+                    </div>
+                    <span class="actlog-time" th:text="${it.time}">시각</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a th:href="@{/recommendations}" class="btn btn-primary btn-sm">추천 활동 하러 가기</a>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

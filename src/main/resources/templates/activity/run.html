@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - ' + ${activityLabel})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<link rel="stylesheet" th:href="@{/css/activities.css}"/>
+
+<main>
+    <div class="page" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+        <div class="activity-run">
+
+            <a th:href="@{/recommendations}" class="activity-run-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+                추천 활동으로 돌아가기
+            </a>
+
+            <div class="activity-run-head">
+                <h1 th:text="${activityLabel}">활동</h1>
+                <p class="meta" th:text="${activityMeta}">약 3분</p>
+            </div>
+
+            <div class="activity-run-panel">
+                <div id="actHost" th:attr="data-key=${activityKey}"></div>
+            </div>
+
+            <div id="actSaved" class="act-saved">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>활동 일지에 기록되었어요.</span>
+            </div>
+
+            <div class="activity-run-actions">
+                <a th:href="@{/activities/history}" class="btn btn-outline btn-sm">내 활동 일지 보기</a>
+                <a th:href="@{/recommendations}" class="btn btn-outline btn-sm">다른 활동 둘러보기</a>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script th:src="@{/js/activities.js}"></script>
+<script>
+    (function () {
+        var host = document.getElementById('actHost');
+        if (!host || !window.MindLinkActivities) return;
+        var saved = document.getElementById('actSaved');
+        MindLinkActivities.setOnLogged(function () {
+            if (saved) saved.classList.add('show');
+        });
+        MindLinkActivities.run(host.dataset.key, host);
+    })();
+</script>
+</body>
+</html>

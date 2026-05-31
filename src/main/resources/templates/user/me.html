@@ -180,6 +180,25 @@
             </div>
             <!-- /.profile-card -->
 
+            <!-- 활동 일지 진입 -->
+            <a th:href="@{/activities/history}" class="card card-link"
+               style="display:flex; align-items:center; gap:0.85rem; margin-top:1.25rem; padding:1rem 1.25rem; text-decoration:none;">
+                <span class="pico pico-md" style="color: var(--primary);" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </span>
+                <span style="flex:1;">
+                    <span style="display:block; font-weight:600;">내 활동 일지</span>
+                    <span class="muted" style="font-size:0.85rem;">수행한 추천 활동 기록을 확인해요</span>
+                </span>
+                <span class="pico pico-sm" style="color: var(--muted-foreground);" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 6 15 12 9 18"/>
+                    </svg>
+                </span>
+            </a>
+
             <!-- 액션 버튼 -->
             <div class="profile-actions">
                 <a th:href="@{/user/me/edit}" class="btn btn-primary" style="flex: 1; min-width: 120px;">
