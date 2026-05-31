@@ -33,79 +33,29 @@ END;
 
 DELETE FROM proverbs;
 
--- =============================================================================
--- HOME  홈 화면 (7개)
--- =============================================================================
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('천 리 길도 한 걸음부터', '한국 속담', 'HOME', 1);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('시작이 반이다', '한국 속담', 'HOME', 2);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('마음이 편해야 몸도 편하다', '한국 속담', 'HOME', 3);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('고생 끝에 낙이 온다', '한국 속담', 'HOME', 4);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('웃음이 최고의 보약이다', '한국 속담', 'HOME', 5);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('오늘 하루도 충분히 잘 해냈습니다', '마음이음', 'HOME', 6);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('자신을 돌보는 것은 이기적인 것이 아니라 필수적인 것이다', '오드리 로드', 'HOME', 7);
-
--- =============================================================================
--- COMMUNITY  커뮤니티 (7개)
--- =============================================================================
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('백지장도 맞들면 낫다', '한국 속담', 'COMMUNITY', 1);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('말 한마디로 천 냥 빚을 갚는다', '한국 속담', 'COMMUNITY', 2);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('혼자 가면 빨리 가고, 함께 가면 멀리 간다', '아프리카 속담', 'COMMUNITY', 3);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('동병상련 — 같은 처지에 있는 이가 서로의 마음을 가장 잘 안다', '한국 속담', 'COMMUNITY', 4);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('당신의 이야기가 누군가에게 힘이 됩니다', '마음이음', 'COMMUNITY', 5);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('울고 싶을 땐 울어도 괜찮아요. 감정을 나누면 반이 됩니다', '마음이음', 'COMMUNITY', 6);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('함께라면 어떤 어둠도 조금은 밝아집니다', '마음이음', 'COMMUNITY', 7);
-
--- =============================================================================
--- RECOMMENDATIONS  맞춤 추천 (7개)
--- =============================================================================
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('작은 것이 쌓여 큰 것이 된다', '한국 속담', 'RECOMMENDATIONS', 1);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('배움에는 끝이 없다', '한국 속담', 'RECOMMENDATIONS', 2);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('나를 사랑하는 것이 모든 변화의 시작이다', '마음이음', 'RECOMMENDATIONS', 3);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('오늘의 나는 어제의 나보다 조금 더 나아졌습니다', '마음이음', 'RECOMMENDATIONS', 4);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('몸과 마음을 함께 돌봐야 진정한 건강이다', '마음이음', 'RECOMMENDATIONS', 5);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('변화는 거창하지 않아도 됩니다. 오늘 단 한 가지만 바꿔보세요', '마음이음', 'RECOMMENDATIONS', 6);
-
-INSERT INTO proverbs (content, source, page, sort_order)
-VALUES ('지금 이 순간을 돌보는 것이 미래의 나를 돌보는 것입니다', '마음이음', 'RECOMMENDATIONS', 7);
+-- HOME(7) · COMMUNITY(7) · RECOMMENDATIONS(7) — 총 21행
+INSERT ALL
+  INTO proverbs (content, source, page, sort_order) VALUES ('천 리 길도 한 걸음부터',                                       '한국 속담',   'HOME',            1)
+  INTO proverbs (content, source, page, sort_order) VALUES ('시작이 반이다',                                               '한국 속담',   'HOME',            2)
+  INTO proverbs (content, source, page, sort_order) VALUES ('마음이 편해야 몸도 편하다',                                   '한국 속담',   'HOME',            3)
+  INTO proverbs (content, source, page, sort_order) VALUES ('고생 끝에 낙이 온다',                                         '한국 속담',   'HOME',            4)
+  INTO proverbs (content, source, page, sort_order) VALUES ('웃음이 최고의 보약이다',                                       '한국 속담',   'HOME',            5)
+  INTO proverbs (content, source, page, sort_order) VALUES ('오늘 하루도 충분히 잘 해냈습니다',                             '마음이음',    'HOME',            6)
+  INTO proverbs (content, source, page, sort_order) VALUES ('자신을 돌보는 것은 이기적인 것이 아니라 필수적인 것이다',     '오드리 로드', 'HOME',            7)
+  INTO proverbs (content, source, page, sort_order) VALUES ('백지장도 맞들면 낫다',                                         '한국 속담',   'COMMUNITY',       1)
+  INTO proverbs (content, source, page, sort_order) VALUES ('말 한마디로 천 냥 빚을 갚는다',                               '한국 속담',   'COMMUNITY',       2)
+  INTO proverbs (content, source, page, sort_order) VALUES ('혼자 가면 빨리 가고, 함께 가면 멀리 간다',                   '아프리카 속담','COMMUNITY',       3)
+  INTO proverbs (content, source, page, sort_order) VALUES ('동병상련 — 같은 처지에 있는 이가 서로의 마음을 가장 잘 안다','한국 속담',   'COMMUNITY',       4)
+  INTO proverbs (content, source, page, sort_order) VALUES ('당신의 이야기가 누군가에게 힘이 됩니다',                       '마음이음',    'COMMUNITY',       5)
+  INTO proverbs (content, source, page, sort_order) VALUES ('울고 싶을 땐 울어도 괜찮아요. 감정을 나누면 반이 됩니다',     '마음이음',    'COMMUNITY',       6)
+  INTO proverbs (content, source, page, sort_order) VALUES ('함께라면 어떤 어둠도 조금은 밝아집니다',                       '마음이음',    'COMMUNITY',       7)
+  INTO proverbs (content, source, page, sort_order) VALUES ('작은 것이 쌓여 큰 것이 된다',                                 '한국 속담',   'RECOMMENDATIONS', 1)
+  INTO proverbs (content, source, page, sort_order) VALUES ('배움에는 끝이 없다',                                           '한국 속담',   'RECOMMENDATIONS', 2)
+  INTO proverbs (content, source, page, sort_order) VALUES ('나를 사랑하는 것이 모든 변화의 시작이다',                     '마음이음',    'RECOMMENDATIONS', 3)
+  INTO proverbs (content, source, page, sort_order) VALUES ('오늘의 나는 어제의 나보다 조금 더 나아졌습니다',               '마음이음',    'RECOMMENDATIONS', 4)
+  INTO proverbs (content, source, page, sort_order) VALUES ('몸과 마음을 함께 돌봐야 진정한 건강이다',                     '마음이음',    'RECOMMENDATIONS', 5)
+  INTO proverbs (content, source, page, sort_order) VALUES ('변화는 거창하지 않아도 됩니다. 오늘 단 한 가지만 바꿔보세요', '마음이음',    'RECOMMENDATIONS', 6)
+  INTO proverbs (content, source, page, sort_order) VALUES ('지금 이 순간을 돌보는 것이 미래의 나를 돌보는 것입니다',       '마음이음',    'RECOMMENDATIONS', 7)
+SELECT 1 FROM dual;
 
 COMMIT;

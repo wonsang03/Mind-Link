@@ -148,6 +148,7 @@ BEGIN
         related_comment_id   NUMBER,
         notice_id            NUMBER,
         is_read              NUMBER(1) DEFAULT 0  NOT NULL,
+        admin_confirmed      NUMBER(1) DEFAULT 0  NOT NULL,
         created_at           TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
         CONSTRAINT fk_ua_user   FOREIGN KEY (user_id)
           REFERENCES users(id) ON DELETE CASCADE,
@@ -156,7 +157,8 @@ BEGIN
         CONSTRAINT chk_ua_type  CHECK (alert_type IN (
           'DETERIORATION', 'HIGH_RISK', 'RECOMMEND', 'IMPROVEMENT', 'IMPROVEMENT_MIN',
           'POST_COMMENT', 'COMMENT_REPLY', 'NOTICE', 'ADMIN_MESSAGE')),
-        CONSTRAINT chk_ua_read  CHECK (is_read IN (0, 1))
+        CONSTRAINT chk_ua_read  CHECK (is_read IN (0, 1)),
+        CONSTRAINT chk_ua_confirmed CHECK (admin_confirmed IN (0, 1))
       )
     ]';
     EXECUTE IMMEDIATE 'CREATE INDEX idx_ua_user_read ON user_alerts(user_id, is_read, created_at)';
