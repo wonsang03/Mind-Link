@@ -23,6 +23,24 @@
 
         <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
 
+        <!-- 명언/속담 -->
+        <div th:if="${proverb}" class="section-highlight"
+             style="margin-bottom: 1.75rem; padding: 1.1rem 1.4rem; display:flex; align-items:flex-start; gap:0.9rem;">
+            <span class="pico pico-md" aria-hidden="true" style="color:var(--primary); flex-shrink:0; margin-top:0.1rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="serif italic" style="margin:0; font-size:0.97rem; line-height:1.65;"
+                   th:text="${proverb.content}">명언 내용</p>
+                <p class="muted" style="margin:0.3rem 0 0; font-size:0.8rem;"
+                   th:text="${proverb.source}">출처</p>
+            </div>
+        </div>
+
         <div class="card mb-8" style="margin-bottom: 2rem;">
             <form th:action="@{/community}" method="get" class="flex gap-4 mb-4" style="margin-bottom: 1rem; flex-wrap: wrap;">
                 <input type="hidden" name="category" th:value="${selectedCategory}"/>

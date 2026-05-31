@@ -25,91 +25,200 @@
 
     <div class="home-sheet">
     <div class="page">
-        <!-- Highlighted Features -->
-        <section class="grid grid-2" style="margin-bottom: 3rem;">
-            <div class="section-highlight" style="margin: 0; display: flex; flex-direction: column;">
-                <div class="flex gap-3 mb-4" style="align-items: center;">
-                    <span class="pico pico-xl" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-3 3 3 3 0 0 0 2 2.83V16a3 3 0 0 0 3 3h1"/>
-                            <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3 3 3 0 0 1-2 2.83V16a3 3 0 0 1-3 3h-1"/>
-                            <path d="M12 4v15"/>
-                        </svg>
-                    </span>
-                    <span class="badge-primary">NEW</span>
-                </div>
-                <h2 class="mb-4">AI 기반 정서 케어</h2>
-                <p class="muted mb-6" style="flex: 1;">
-                    키워드 기반 상담 데모를 체험할 수 있습니다. (실제 AI API 연동 예정)<br/>
-                    자가진단·상담소 찾기·맞춤 도서 추천 등 다른 메뉴는 이미 서비스와 연동되어 있습니다.
-                </p>
-                <div>
-                    <a th:href="@{/ai-care}" class="btn btn-primary">AI 케어 시작하기</a>
-                </div>
+
+        <!-- 명언/속담 (전체 너비) -->
+        <div th:if="${proverb}" class="section-highlight"
+             style="margin-bottom:1.5rem; padding:1.1rem 1.3rem;
+                    display:flex; align-items:flex-start; gap:0.85rem;">
+            <span class="pico pico-md" aria-hidden="true"
+                  style="color:var(--primary); flex-shrink:0; margin-top:0.15rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                </svg>
+            </span>
+            <div>
+                <p class="serif italic"
+                   style="margin:0; font-size:0.97rem; line-height:1.65;"
+                   th:text="${proverb.content}">명언 내용</p>
+                <p class="muted"
+                   style="margin:0.35rem 0 0; font-size:0.8rem;"
+                   th:text="${proverb.source}">출처</p>
+            </div>
+        </div>
+
+        <!-- ── 2단 레이아웃: CSS Grid 4칸 + 전폭 구분선 ── -->
+        <div class="home-split"
+             style="display:grid; grid-template-columns:300px 1fr; column-gap:2rem; margin-bottom:3rem;">
+
+            <!-- 행 1 왼쪽: 공지사항 -->
+            <div style="grid-column:1; grid-row:1; padding-bottom:2rem;">
+                <section th:if="${!#lists.isEmpty(notices)}">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                        <h2 style="margin:0; font-size:1rem; font-weight:700;
+                                   display:flex; align-items:center; gap:0.45rem;">
+                            <span class="pico pico-sm" aria-hidden="true" style="color:var(--primary);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                            </span>
+                            공지사항
+                        </h2>
+                        <a th:href="@{/notice}" class="muted" style="font-size:0.85rem;">전체 보기 →</a>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                        <a th:each="n : ${notices}"
+                           th:href="@{/notice/{id}(id=${n.id})}"
+                           class="card card-link"
+                           style="display:flex; align-items:center; justify-content:space-between;
+                                  padding:0.7rem 0.9rem; gap:0.75rem;">
+                            <div style="display:flex; align-items:center; gap:0.55rem; min-width:0;">
+                                <span class="tag tag-secondary"
+                                      style="flex-shrink:0; font-size:0.72rem;"
+                                      th:text="${n.category}">공지</span>
+                                <span style="font-size:0.88rem; font-weight:500;
+                                             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                                      th:text="${n.title}">공지 제목</span>
+                            </div>
+                            <span class="muted" style="font-size:0.78rem; flex-shrink:0;"
+                                  th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd')}">2026-05-01</span>
+                        </a>
+                    </div>
+                </section>
             </div>
 
-            <div class="section-highlight" style="margin: 0; display: flex; flex-direction: column;">
-                <div class="flex gap-3 mb-4" style="align-items: center;">
-                    <span class="pico pico-xl" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="8" y="3" width="8" height="4" rx="1"/>
-                            <path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-                            <polyline points="9 14 11 16 15 12"/>
-                        </svg>
-                    </span>
-                    <span class="badge-primary">BEST</span>
+            <!-- 행 1 오른쪽: AI 케어 + 자가진단 -->
+            <section class="grid grid-2"
+                     style="grid-column:2; grid-row:1; padding-bottom:2rem; margin:0;">
+                <div class="section-highlight" style="margin: 0; display: flex; flex-direction: column;">
+                    <div class="flex gap-3 mb-4" style="align-items: center;">
+                        <span class="pico pico-xl" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-3 3 3 3 0 0 0 2 2.83V16a3 3 0 0 0 3 3h1"/>
+                                <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3 3 3 0 0 1-2 2.83V16a3 3 0 0 1-3 3h-1"/>
+                                <path d="M12 4v15"/>
+                            </svg>
+                        </span>
+                        <span class="badge-primary">NEW</span>
+                    </div>
+                    <h2 class="mb-4">AI 기반 정서 케어</h2>
+                    <p class="muted mb-6" style="flex: 1;">
+                        키워드 기반 상담 데모를 체험할 수 있습니다. (실제 AI API 연동 예정)<br/>
+                        자가진단·상담소 찾기·맞춤 도서 추천 등 다른 메뉴는 이미 서비스와 연동되어 있습니다.
+                    </p>
+                    <div>
+                        <a th:href="@{/ai-care}" class="btn btn-primary">AI 케어 시작하기</a>
+                    </div>
                 </div>
-                <h2 class="mb-4">자가진단</h2>
-                <p class="muted mb-6" style="flex: 1;">
-                    전문적인 심리 검사 도구로 현재 나의 마음 상태를 정확히 파악하고,<br/>
-                    필요한 도움을 찾아보세요.
-                </p>
-                <div>
-                    <a th:href="@{/self-assessment}" class="btn btn-primary">진단 시작하기</a>
-                </div>
-            </div>
-        </section>
 
-        <!-- Main Features -->
-        <section class="grid grid-3">
-            <a th:href="@{/community}" class="card card-link">
-                <div class="icon-circle">
-                    <span class="pico pico-lg" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </span>
+                <div class="section-highlight" style="margin: 0; display: flex; flex-direction: column;">
+                    <div class="flex gap-3 mb-4" style="align-items: center;">
+                        <span class="pico pico-xl" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="8" y="3" width="8" height="4" rx="1"/>
+                                <path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                                <polyline points="9 14 11 16 15 12"/>
+                            </svg>
+                        </span>
+                        <span class="badge-primary">BEST</span>
+                    </div>
+                    <h2 class="mb-4">자가진단</h2>
+                    <p class="muted mb-6" style="flex: 1;">
+                        전문적인 심리 검사 도구로 현재 나의 마음 상태를 정확히 파악하고,<br/>
+                        필요한 도움을 찾아보세요.
+                    </p>
+                    <div>
+                        <a th:href="@{/self-assessment}" class="btn btn-primary">진단 시작하기</a>
+                    </div>
                 </div>
-                <h3 class="mb-4">커뮤니티</h3>
-                <p class="muted mb-4">비슷한 고민을 가진 사람들과 따뜻한 이야기를 나누고, 서로의 마음을 응원해보세요.</p>
-                <div style="color: var(--primary);">커뮤니티 참여하기 →</div>
-            </a>
-            <a th:href="@{/recommendations}" class="card card-link">
-                <div class="icon-circle">
-                    <span class="pico pico-lg" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z"/>
-                        </svg>
-                    </span>
-                </div>
-                <h3 class="mb-4">맞춤 추천</h3>
-                <p class="muted mb-4">진단 결과를 바탕으로 나에게 딱 맞는 도서, 활동, 커뮤니티를 추천받고 마음 건강을 개선해보세요.</p>
-                <div style="color: var(--primary);">추천 받기 →</div>
-            </a>
-            <a th:href="@{/counseling}" class="card card-link">
-                <div class="icon-circle">
-                    <span class="pico pico-lg" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                    </span>
-                </div>
-                <h3 class="mb-4">상담소 찾기</h3>
-                <p class="muted mb-4">검증된 전문 상담 센터를 한눈에 비교하고, 가까운 곳에서 도움을 받아보세요.</p>
-                <div style="color: var(--primary);">상담소 찾기 →</div>
-            </a>
-        </section>
+            </section>
+
+            <!-- 구분선 (왼쪽 열만) -->
+            <hr style="grid-column:1; grid-row:2;
+                       border:none; border-top:1px solid var(--border); margin:0 0 2rem;"/>
+
+            <!-- 행 3 왼쪽: 커뮤니티 최근 글 -->
+            <div style="grid-column:1; grid-row:3;">
+                <section th:if="${!#lists.isEmpty(recentPosts)}">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                        <h2 style="margin:0; font-size:1rem; font-weight:700;
+                                   display:flex; align-items:center; gap:0.45rem;">
+                            <span class="pico pico-sm" aria-hidden="true" style="color:var(--primary);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </span>
+                            커뮤니티 최근 글
+                        </h2>
+                        <a th:href="@{/community}" class="muted" style="font-size:0.85rem;">전체 보기 →</a>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                        <a th:each="p : ${recentPosts}"
+                           th:href="@{/community/{id}(id=${p.id})}"
+                           class="card card-link"
+                           style="display:flex; align-items:center; justify-content:space-between;
+                                  padding:0.7rem 0.9rem; gap:0.75rem;">
+                            <div style="display:flex; align-items:center; gap:0.55rem; min-width:0;">
+                                <span class="tag tag-secondary"
+                                      style="flex-shrink:0; font-size:0.72rem;"
+                                      th:text="${p.category}">카테고리</span>
+                                <span style="font-size:0.88rem; font-weight:500;
+                                             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                                      th:text="${p.title}">글 제목</span>
+                            </div>
+                            <span class="muted" style="font-size:0.78rem; flex-shrink:0; white-space:nowrap;">
+                                ♥ <span th:text="${p.likes}">0</span>
+                            </span>
+                        </a>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 행 3 오른쪽: 커뮤니티·맞춤추천·상담소 -->
+            <section class="grid grid-3" style="grid-column:2; grid-row:3; margin:0;">
+                <a th:href="@{/community}" class="card card-link">
+                    <div class="icon-circle">
+                        <span class="pico pico-lg" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <h3 class="mb-4">커뮤니티</h3>
+                    <p class="muted mb-4">비슷한 고민을 가진 사람들과 따뜻한 이야기를 나누고, 서로의 마음을 응원해보세요.</p>
+                    <div style="color: var(--primary);">커뮤니티 참여하기 →</div>
+                </a>
+                <a th:href="@{/recommendations}" class="card card-link">
+                    <div class="icon-circle">
+                        <span class="pico pico-lg" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <h3 class="mb-4">맞춤 추천</h3>
+                    <p class="muted mb-4">진단 결과를 바탕으로 나에게 딱 맞는 도서, 활동, 커뮤니티를 추천받고 마음 건강을 개선해보세요.</p>
+                    <div style="color: var(--primary);">추천 받기 →</div>
+                </a>
+                <a th:href="@{/counseling}" class="card card-link">
+                    <div class="icon-circle">
+                        <span class="pico pico-lg" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <h3 class="mb-4">상담소 찾기</h3>
+                    <p class="muted mb-4">검증된 전문 상담 센터를 한눈에 비교하고, 가까운 곳에서 도움을 받아보세요.</p>
+                    <div style="color: var(--primary);">상담소 찾기 →</div>
+                </a>
+            </section>
+        </div>
 
         <!-- 서비스 소개 (스크롤 시 노출, /info 리다이렉트 앵커) -->
         <section id="service-intro" class="home-service-intro" aria-labelledby="service-intro-title">

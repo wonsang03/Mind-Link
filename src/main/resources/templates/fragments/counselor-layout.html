@@ -67,6 +67,9 @@
                 </svg>
             </span>
             <span>고위험도 관리</span>
+            <span class="admin-nav-badge"
+                  th:if="${unconfirmedHighRiskCount != null and unconfirmedHighRiskCount > 0}"
+                  th:text="${unconfirmedHighRiskCount}"></span>
         </a>
 
         <!-- 알림 발송 -->

@@ -28,6 +28,15 @@
                 <div class="admin-stat-label">고위험도 판정</div>
                 <div class="admin-stat-sub">누적 고위험 검사 수</div>
             </div>
+            <div class="admin-stat-card" style="border-left: 3px solid #e6a817;"
+                 th:if="${unconfirmedCount > 0}">
+                <div class="admin-stat-value" style="color: #e6a817;"
+                     th:text="${unconfirmedCount}">0</div>
+                <div class="admin-stat-label">미확인 고위험 알림</div>
+                <div class="admin-stat-sub">
+                    <a th:href="@{/counselor/high-risk#alerts}" style="color:#e6a817;">확인하러 가기 →</a>
+                </div>
+            </div>
             <div class="admin-stat-card">
                 <div class="admin-stat-value" th:text="${postCount}">0</div>
                 <div class="admin-stat-label">전체 게시글</div>

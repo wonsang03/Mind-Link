@@ -1,5 +1,7 @@
 package com.mindlink.controller;
 
+import com.mindlink.service.CommunityService;
+import com.mindlink.service.NoticeService;
 import com.mindlink.service.ProverbService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,14 +12,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PageController {
 
     private final ProverbService proverbService;
+    private final NoticeService noticeService;
+    private final CommunityService communityService;
 
-    public PageController(ProverbService proverbService) {
+    public PageController(ProverbService proverbService,
+                          NoticeService noticeService,
+                          CommunityService communityService) {
         this.proverbService = proverbService;
+        this.noticeService = noticeService;
+        this.communityService = communityService;
     }
 
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("proverb", proverbService.getRandom("HOME"));
+        var allNotices = noticeService.findAll();
+        model.addAttribute("notices", allNotices.size() > 5 ? allNotices.subList(0, 5) : allNotices);
+        var allPosts = communityService.findAll(null);
+        model.addAttribute("recentPosts", allPosts.size() > 5 ? allPosts.subList(0, 5) : allPosts);
         return "home";
     }
 

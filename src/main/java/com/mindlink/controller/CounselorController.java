@@ -4,7 +4,9 @@ import com.mindlink.domain.UserRole;
 import com.mindlink.repository.AssessmentResultRepository;
 import com.mindlink.repository.PostRepository;
 import com.mindlink.repository.UserRepository;
+import com.mindlink.service.AdminMonitoringService;
 import com.mindlink.service.CommunityService;
+import com.mindlink.service.MonitoringService;
 import com.mindlink.service.UserNotificationService;
 import com.mindlink.service.UserService;
 import com.mindlink.web.SessionConst;
@@ -21,6 +23,8 @@ public class CounselorController {
     private final CommunityService communityService;
     private final UserService userService;
     private final UserNotificationService notificationService;
+    private final MonitoringService monitoringService;
+    private final AdminMonitoringService adminMonitoringService;
     private final AssessmentResultRepository assessmentResultRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -28,15 +32,29 @@ public class CounselorController {
     public CounselorController(CommunityService communityService,
                                UserService userService,
                                UserNotificationService notificationService,
+                               MonitoringService monitoringService,
+                               AdminMonitoringService adminMonitoringService,
                                AssessmentResultRepository assessmentResultRepository,
                                PostRepository postRepository,
                                UserRepository userRepository) {
         this.communityService = communityService;
         this.userService = userService;
         this.notificationService = notificationService;
+        this.monitoringService = monitoringService;
+        this.adminMonitoringService = adminMonitoringService;
         this.assessmentResultRepository = assessmentResultRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+    }
+
+    @ModelAttribute("unconfirmedHighRiskCount")
+    public long unconfirmedHighRiskCount(HttpSession session) {
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (!(userId instanceof Long uid)) return 0L;
+        return userService.findById(uid)
+                .filter(u -> u.getRole() == UserRole.COUNSELOR)
+                .map(u -> monitoringService.countUnconfirmedHighRisk())
+                .orElse(0L);
     }
 
     // ===== 대시보드 =====
@@ -49,6 +67,8 @@ public class CounselorController {
         model.addAttribute("postCount", postRepository.count());
         model.addAttribute("recentHighRisk",
                 assessmentResultRepository.findTop5ByHighRiskTrueOrderByCompletedAtDesc());
+        model.addAttribute("unconfirmedCount", monitoringService.countUnconfirmedHighRisk());
+        model.addAttribute("highRiskAlerts", monitoringService.getHighRiskAlertsForAdmin());
         return "counselor/dashboard";
     }
 
@@ -74,9 +94,18 @@ public class CounselorController {
     @GetMapping("/high-risk")
     public String highRisk(HttpSession session, Model model, RedirectAttributes ra) {
         if (!isCounselor(session)) return denied(ra);
-        model.addAttribute("results",
-                assessmentResultRepository.findByHighRiskTrueOrderByCompletedAtDesc());
+        model.addAttribute("results", adminMonitoringService.getHighRiskUsers());
+        model.addAttribute("highRiskAlerts", monitoringService.getHighRiskAlertsForAdmin());
+        model.addAttribute("unconfirmedCount", monitoringService.countUnconfirmedHighRisk());
         return "counselor/high-risk";
+    }
+
+    @PostMapping("/high-risk/confirm/{alertId}")
+    public String confirmAlert(@PathVariable Long alertId,
+                               HttpSession session, RedirectAttributes ra) {
+        if (!isCounselor(session)) return denied(ra);
+        monitoringService.confirmHighRiskAlert(alertId);
+        return "redirect:/counselor/high-risk#alerts";
     }
 
     @PostMapping("/high-risk/alert")

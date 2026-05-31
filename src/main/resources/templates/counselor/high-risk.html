@@ -15,6 +15,63 @@
 
         <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
 
+        <!-- 탭 버튼 -->
+        <div class="monitoring-tabs">
+            <button type="button" class="monitoring-tab-btn" id="tab-btn-alerts"
+                    onclick="switchTab('alerts')">
+                고위험 알림
+                <span class="monitoring-tab-badge"
+                      th:if="${unconfirmedCount > 0}"
+                      th:text="${unconfirmedCount}"></span>
+            </button>
+            <button type="button" class="monitoring-tab-btn" id="tab-btn-results"
+                    onclick="switchTab('results')">
+                임상 검사 결과
+            </button>
+        </div>
+
+        <!-- 탭 1: 고위험 알림 (UserAlert 기반) -->
+        <div id="tab-alerts">
+            <div th:if="${#lists.isEmpty(highRiskAlerts)}"
+                 class="muted" style="padding:1.5rem 0; font-size:0.9rem;">
+                고위험군 알림이 없습니다.
+            </div>
+            <div th:unless="${#lists.isEmpty(highRiskAlerts)}"
+                 style="display:flex; flex-direction:column; gap:0.5rem;">
+                <div th:each="alert : ${highRiskAlerts}"
+                     th:classappend="${alert.adminConfirmed} ? 'admin-alert-confirmed' : 'admin-alert-unconfirmed'"
+                     style="border-radius:8px; padding:0.85rem 1rem;">
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+                        <div>
+                            <span th:if="${!alert.adminConfirmed}" style="color:#e53e3e; margin-right:0.4rem;">●</span>
+                            <strong th:text="${alert.user.name}">홍길동</strong>
+                            <span class="muted" style="margin:0 0.3rem;">·</span>
+                            <span th:text="${alert.assessmentResult != null ? alert.assessmentResult.typeName : '-'}">우울증 (PHQ-9)</span>
+                            <span class="muted" style="margin:0 0.3rem;">·</span>
+                            <span th:text="${alert.assessmentResult != null ? alert.assessmentResult.level : '-'}">중증</span>
+                            <span class="muted" style="margin:0 0.5rem;">·</span>
+                            <span class="muted" style="font-size:0.82rem;"
+                                  th:text="${#temporals.format(alert.createdAt, 'yyyy-MM-dd HH:mm')}">2025-05-30</span>
+                        </div>
+                        <div style="flex-shrink:0;">
+                            <form th:if="${!alert.adminConfirmed}"
+                                  th:action="@{/counselor/high-risk/confirm/{id}(id=${alert.id})}"
+                                  method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-primary btn-sm">확인</button>
+                            </form>
+                            <span th:if="${alert.adminConfirmed}"
+                                  class="muted" style="font-size:0.82rem;">✓ 확인됨</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:0.35rem; font-size:0.85rem; color:#4a5568;"
+                         th:text="${alert.message}">메시지 내용</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 2: 임상 검사 결과 (AssessmentResult 기반) -->
+        <div id="tab-results" style="display:none;">
+
         <!-- 고위험 없음 -->
         <div th:if="${#lists.isEmpty(results)}"
              style="padding:3rem 0; text-align:center;">
@@ -74,27 +131,26 @@
                     </thead>
                     <tbody>
                     <tr th:each="r : ${results}"
-                        th:attr="data-name=${r.user.name}, data-typekey=${r.typeKey}, data-typename=${r.typeName}">
-                        <td style="font-weight:600;" th:text="${r.user.name}">홍길동</td>
-                        <td class="muted" style="font-size:0.83rem;" th:text="${r.user.email}">user@example.com</td>
+                        th:attr="data-name=${r.name}, data-typekey=${r.typeKey}, data-typename=${r.typeName}">
+                        <td style="font-weight:600;" th:text="${r.name}">홍길동</td>
+                        <td class="muted" style="font-size:0.83rem;" th:text="${r.email}">user@example.com</td>
                         <td>
-                            <span class="tag tag-secondary" th:text="${r.typeName}">검사</span>
+                            <span class="tag tag-secondary" th:text="${r.typeName != null ? r.typeName : '-'}">검사</span>
                         </td>
-                        <td class="num" style="font-weight:600; color:var(--destructive);"
-                            th:text="${r.score != null ? r.score : '-'}">0</td>
+                        <td class="num" style="font-weight:600; color:var(--destructive);">-</td>
                         <td>
                             <span class="tag"
                                   style="background:rgba(193,68,68,0.12); color:var(--destructive); font-weight:600;"
-                                  th:text="${r.level}">고위험</span>
+                                  th:text="${r.level != null ? r.level : '고위험'}">고위험</span>
                         </td>
                         <td class="muted" style="font-size:0.82rem; white-space:nowrap;"
-                            th:text="${#temporals.format(r.completedAt, 'yyyy-MM-dd HH:mm')}">2026-05-23</td>
+                            th:text="${r.completedAt != null ? #temporals.format(r.completedAt, 'yyyy-MM-dd HH:mm') : 'K-Means'}">2026-05-23</td>
                         <td>
                             <button class="btn btn-primary btn-sm"
-                                    th:attr="data-uid=${r.user.id},
-                                             data-uname=${r.user.name},
-                                             data-utype=${r.typeName},
-                                             data-ulevel=${r.level}"
+                                    th:attr="data-uid=${r.userId},
+                                             data-uname=${r.name},
+                                             data-utype=${r.typeName != null ? r.typeName : '고위험군'},
+                                             data-ulevel=${r.level != null ? r.level : '고위험'}"
                                     onclick="openAlertModal(this)"
                                     type="button">
                                 알림 보내기
@@ -105,6 +161,7 @@
                 </table>
             </div>
         </div>
+        </div><!-- /tab-results -->
     </div>
 </div>
 
@@ -206,6 +263,19 @@ function closeAlertModal() {
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeAlertModal();
 });
+
+function switchTab(tab) {
+    document.getElementById('tab-alerts').style.display  = tab === 'alerts'  ? '' : 'none';
+    document.getElementById('tab-results').style.display = tab === 'results' ? '' : 'none';
+    document.getElementById('tab-btn-alerts').classList.toggle('active',  tab === 'alerts');
+    document.getElementById('tab-btn-results').classList.toggle('active', tab === 'results');
+    history.replaceState(null, '', '#' + tab);
+}
+
+(function () {
+    const hash = location.hash === '#results' ? 'results' : 'alerts';
+    switchTab(hash);
+})();
 </script>
 </body>
 </html>
