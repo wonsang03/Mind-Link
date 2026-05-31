@@ -1,0 +1,223 @@
+/* =============================================================================
+   activities.css — 추천 활동 전용 실행 페이지 스타일
+   (기존 모달에서 분리: 이제 각 활동은 /activities/{key} 전용 페이지에서 실행)
+   ============================================================================= */
+
+/* ── 실행 페이지 레이아웃 ───────────────────────── */
+.activity-run        { max-width: 600px; margin: 0 auto; }
+.activity-run-back   {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.9rem; color: var(--muted-foreground);
+    margin-bottom: 1rem; text-decoration: none;
+}
+.activity-run-back:hover { color: var(--primary); }
+.activity-run-head   { margin-bottom: 1.5rem; }
+.activity-run-head h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 0.35rem; }
+.activity-run-head .meta { color: var(--muted-foreground); font-size: 0.9rem; margin: 0; }
+.activity-run-panel  {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.activity-run-actions {
+    display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;
+    margin-top: 1.5rem;
+}
+
+/* ── Shared activity helpers ──────────────────── */
+.act-wrap  { text-align: center; }
+.act-guide { color: var(--muted-foreground); font-size: 0.9rem; margin: 0.75rem 0 1.25rem; }
+.act-btns  { display: flex; gap: 0.75rem; justify-content: center; }
+
+/* ── Breathing circle ─────────────────────────── */
+.breath-scene { display: flex; justify-content: center; margin-bottom: 0.5rem; }
+.breath-stage {
+    width: 11.5rem; height: 11.5rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; overflow: hidden;
+}
+.breath-ring {
+    width: 8.75rem; height: 8.75rem; box-sizing: border-box;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(107,142,111,0.2) 0%, rgba(107,142,111,0.05) 70%);
+    border: 3px solid rgba(107,142,111,0.28);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.2rem;
+    transform: scale(1); transform-origin: center center;
+    transition: transform 0.9s ease-in-out, background 0.9s, border-color 0.9s;
+}
+.breath-ring.inhale {
+    transform: scale(1.1);
+    background: radial-gradient(circle, rgba(107,142,111,0.36) 0%, rgba(107,142,111,0.1) 70%);
+    border-color: rgba(107,142,111,0.6);
+}
+.breath-ring.exhale {
+    transform: scale(0.92);
+    background: radial-gradient(circle, rgba(107,142,111,0.08) 0%, rgba(107,142,111,0.02) 70%);
+    border-color: rgba(107,142,111,0.16);
+}
+.breath-phase { font-weight: 600; color: var(--primary); font-size: 0.95rem; margin: 0; }
+.breath-num   { font-size: 1.85rem; font-weight: 700; color: var(--primary); margin: 0; line-height: 1.1; }
+.breath-remain { text-align: center; font-size: 0.9rem; margin: -0.25rem 0 1.1rem; }
+
+/* ── Gratitude journal ────────────────────────── */
+.grat-card { background: var(--secondary); border-radius: 0.85rem; padding: 1.25rem 1.5rem; margin-top: 0.5rem; }
+.grat-item {
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem;
+}
+.grat-item:last-child { border-bottom: 0; }
+.grat-num {
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+}
+
+/* ── 자기자비 문장 ─────────────────────────────── */
+.scs-wrap { padding: 0.25rem 0; text-align: center; }
+.scs-card { background: linear-gradient(135deg,rgba(107,142,111,.12),rgba(107,142,111,.04)); border: 1px solid rgba(107,142,111,.3); border-radius: 1rem; padding: 2rem 1.5rem; min-height: 7rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+.scs-text { font-size: 1.1rem; line-height: 1.85; color: var(--foreground); margin: 0; }
+.scs-counter { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
+.scs-hint    { font-size: 0.82rem; margin-bottom: 1rem; }
+.scs-nav { display: flex; gap: 0.75rem; justify-content: center; }
+
+/* ── 감정 체크인 ──────────────────────────────── */
+.chk-wrap { padding: 0.25rem 0; }
+.chk-question { text-align: center; font-size: 1.05rem; margin-bottom: 1.25rem; }
+.chk-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.55rem; margin-bottom: 1rem; }
+.chk-btn { background: var(--secondary); border: 2px solid transparent; border-radius: 0.75rem; padding: 0.7rem 0.3rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; transition: border-color .2s, background .2s; }
+.chk-btn:hover   { border-color: var(--primary); }
+.chk-btn.selected{ border-color: var(--primary); background: rgba(107,142,111,.12); }
+.chk-emoji { font-size: 1.6rem; line-height: 1; }
+.chk-label { font-size: 0.7rem; color: var(--text); }
+.chk-result { background: var(--secondary); border-radius: 0.75rem; padding: 1.25rem; text-align: center; margin-top: 0.5rem; }
+.chk-result-emoji { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.chk-result-msg { line-height: 1.75; margin: 0; }
+
+/* ── 점진적 근육 이완 (PMR) ───────────────────── */
+.pmr-wrap { padding: 0.25rem 0; }
+.pmr-progress-bar  { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 0.5rem; overflow: hidden; }
+.pmr-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .4s; }
+.pmr-step-count { text-align: center; margin-bottom: 1rem; font-size: 0.9rem; }
+.pmr-circle-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+.pmr-circle { width: 7rem; height: 7rem; border-radius: 50%; border: 3px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; transition: border-color .4s, background .4s; }
+.pmr-circle.pmr-tense { border-color: #c0392b; background: rgba(192,57,43,.08); }
+.pmr-circle.pmr-relax { border-color: var(--primary); background: rgba(107,142,111,.12); }
+.pmr-circle-label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.pmr-circle-num   { font-size: 1.75rem; font-weight: 700; color: var(--primary); line-height: 1; }
+.pmr-tip  { text-align: center; margin-bottom: 1.25rem; }
+.pmr-done { text-align: center; padding: 1rem 0; }
+
+/* ── 바디스캔 명상 ───────────────────────────── */
+.bds-wrap { padding: 0.25rem 0; }
+.bds-progress { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 0.5rem; overflow: hidden; }
+.bds-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .4s; }
+.bds-count { text-align: center; margin-bottom: 0.75rem; font-size: 0.85rem; }
+.bds-body-label { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+.bds-timer-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+.bds-ring { width: 6rem; height: 6rem; border-radius: 50%; border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; }
+.bds-ring span { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+.bds-guide { text-align: center; line-height: 1.75; margin-bottom: 1.25rem; font-size: 0.92rem; }
+.bds-done { text-align: center; padding: 1rem 0; }
+
+/* ── 5-4-3-2-1 그라운딩 ──────────────────────── */
+.grd-wrap { padding: 0.25rem 0; text-align: center; }
+.grd-badge {
+    width: 3rem; height: 3rem; margin: 0.25rem auto 0.5rem;
+    border-radius: 50%; background: rgba(107,142,111,.12);
+    border: 2px solid var(--primary); color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700; line-height: 1;
+}
+.grd-sense { font-size: 1.15rem; margin: 0 0 0.25rem; }
+.grd-inputs { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; text-align: left; }
+
+/* ── 나비 포옹 ───────────────────────────────── */
+.bf-sides { display: flex; gap: 0.75rem; justify-content: center; margin: 1.25rem 0 0.75rem; }
+.bf-side {
+    flex: 1; max-width: 9rem; padding: 1.75rem 0; border-radius: 1rem;
+    border: 2px solid var(--border); background: var(--secondary);
+    font-size: 1.05rem; font-weight: 600; color: var(--muted-foreground);
+    transition: background .3s, border-color .3s, color .3s, transform .3s;
+}
+.bf-side.active {
+    border-color: var(--primary); background: rgba(107,142,111,.14);
+    color: var(--primary); transform: scale(1.04);
+}
+.bf-count { text-align: center; margin-bottom: 1.25rem; font-size: 0.9rem; }
+
+/* ── 작은 실천 한 가지 ───────────────────────── */
+.sa-wrap { text-align: center; }
+.sa-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+.sa-chip {
+    padding: 0.5rem 0.9rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card);
+    color: var(--text); font-size: 0.88rem; cursor: pointer; transition: all .15s;
+}
+.sa-chip:hover { border-color: var(--primary); }
+.sa-chip.selected {
+    border-color: var(--primary); background: rgba(107,142,111,.14); color: var(--primary); font-weight: 600;
+}
+
+/* ── 일지 저장 확인 창 ───────────────────────── */
+.ml-save-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center; padding: 1rem;
+    opacity: 0; pointer-events: none; transition: opacity 0.18s;
+}
+.ml-save-overlay.is-open { opacity: 1; pointer-events: auto; }
+.ml-save-box {
+    background: var(--card); border-radius: 1.1rem;
+    width: 100%; max-width: 22rem; padding: 1.5rem 1.5rem 1.25rem;
+    text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,0.18);
+    transform: translateY(10px); transition: transform 0.2s;
+}
+.ml-save-overlay.is-open .ml-save-box { transform: translateY(0); }
+.ml-save-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.4rem; }
+.ml-save-desc { font-size: 0.88rem; color: var(--muted-foreground); margin: 0 0 1.25rem; line-height: 1.55; }
+.ml-save-actions { display: flex; gap: 0.6rem; justify-content: center; }
+.ml-save-actions .btn { min-width: 6rem; }
+@media (prefers-reduced-motion: reduce) {
+    .ml-save-overlay, .ml-save-box { transition: none; }
+    .ml-save-box { transform: none; }
+}
+
+/* ── 완료 배너 ───────────────────────────────── */
+.act-saved {
+    display: none; align-items: center; gap: 0.5rem; justify-content: center;
+    margin-top: 1.25rem; padding: 0.6rem 1rem;
+    background: rgba(107,142,111,0.12); border: 1px solid rgba(107,142,111,0.3);
+    border-radius: 0.6rem; color: var(--primary); font-size: 0.9rem; font-weight: 500;
+}
+.act-saved.show { display: flex; }
+
+/* ── 활동 일지 ───────────────────────────────── */
+.actlog-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+.actlog-stat  { background: var(--secondary); border-radius: 1rem; padding: 1.25rem; text-align: center; }
+.actlog-stat-num { font-size: 2rem; font-weight: 700; color: var(--primary); line-height: 1; }
+.actlog-stat-label { font-size: 0.82rem; color: var(--muted-foreground); margin-top: 0.35rem; }
+.actlog-item {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1rem 0; border-bottom: 1px solid var(--border);
+}
+.actlog-item:last-child { border-bottom: 0; }
+.actlog-dot {
+    width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--primary);
+    flex-shrink: 0; margin-top: 0.45rem;
+}
+.actlog-body { flex: 1; }
+.actlog-title { font-weight: 600; }
+.actlog-detail { color: var(--muted-foreground); font-size: 0.9rem; margin-top: 0.2rem; }
+.actlog-time { color: var(--muted-foreground); font-size: 0.82rem; white-space: nowrap; }
+
+/* ── Reduced motion ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .breath-ring { transition: none; }
+    .pmr-circle, .pmr-progress-fill, .bds-fill { transition: none; }
+    .bf-side { transition: background .3s, border-color .3s, color .3s; transform: none; }
+    .bf-side.active { transform: none; }
+}

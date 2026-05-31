@@ -123,8 +123,8 @@
             </div>
         </div>
 
-        <div id="activitiesGrid" class="grid grid-3" style="margin-bottom: 3rem;">
-            <article class="activity-card" data-category="기록 활동" data-keywords="감사 일기 기록 긍정">
+        <div id="activitiesGrid" class="grid grid-3" style="margin-bottom: 1.25rem;">
+            <article class="activity-card" data-activity="gratitude" data-category="기록 활동" data-keywords="감사 일기 기록 긍정">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -136,15 +136,14 @@
                 <h3>감사 일기 쓰기</h3>
                 <p class="muted">5분 · 쉬움</p>
                 <p class="muted">오늘 감사했던 일 세 가지를 적으며 하루를 부드럽게 돌아봅니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="gratitude">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='gratitude')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="신체 활동" data-keywords="호흡 운동 신체 이완 들숨 날숨">
+            <article class="activity-card" data-activity="breathing" data-category="신체 활동" data-keywords="호흡 운동 신체 이완 들숨 날숨">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
-                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
-                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/>
+                            <path d="M10 2c1 .5 2 2 2 5"/>
                         </svg>
                     </span>
                 </div>
@@ -152,15 +151,15 @@
                 <h3>호흡 운동</h3>
                 <p class="muted">3분 · 쉬움</p>
                 <p class="muted">들숨과 날숨을 천천히 반복하며 몸과 마음의 긴장을 풀어줍니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="breathing">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='breathing')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="호흡" data-keywords="느린 호흡 불안 스트레스 긴장 이완 호흡">
+            <article class="activity-card" data-activity="slow_breathing" data-category="호흡" data-keywords="느린 호흡 불안 스트레스 긴장 이완 호흡">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
-                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
-                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 7c.6.5 1.2 1 2.5 1C7 8 7 6 9.5 6c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                            <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                            <path d="M2 17c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
                         </svg>
                     </span>
                 </div>
@@ -168,13 +167,14 @@
                 <h3>느린 호흡</h3>
                 <p class="muted">3분 · 쉬움</p>
                 <p class="muted">천천히 내쉬는 리듬으로 긴장을 낮춥니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="slow_breathing">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='slow_breathing')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="신체 이완" data-keywords="PMR 미니 근육 이완 스트레스 긴장 신체">
+            <article class="activity-card" data-activity="pmr_mini" data-category="신체 이완" data-keywords="PMR 미니 근육 이완 스트레스 긴장 신체">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 5c-1 1-2 2-2 4s1 3 2 4 2 3 2 4"/><path d="M18 5c1 1 2 2 2 4s-1 3-2 4-2 3-2 4"/><line x1="12" y1="2" x2="12" y2="22"/>
+                            <path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/>
+                            <path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/>
                         </svg>
                     </span>
                 </div>
@@ -182,9 +182,9 @@
                 <h3>PMR 미니</h3>
                 <p class="muted">5분 · 쉬움</p>
                 <p class="muted">짧게 긴장했다 푸는 방식으로 몸의 긴장을 낮춥니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="pmr_mini">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='pmr_mini')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="인지" data-keywords="자기자비 자기비난 우울 회복 위로">
+            <article class="activity-card" data-activity="self_compassion_script" data-category="인지" data-keywords="자기자비 자기비난 우울 회복 위로">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -196,9 +196,9 @@
                 <h3>자기자비 문장</h3>
                 <p class="muted">5분 · 쉬움</p>
                 <p class="muted">스스로에게 덜 가혹하게 말하는 연습입니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="self_compassion_script">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='self_compassion_script')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="자기 인식" data-keywords="감정 체크인 기분 일기 자기 이해 감정 인식">
+            <article class="activity-card" data-activity="checkin" data-category="자기 인식" data-keywords="감정 체크인 기분 일기 자기 이해 감정 인식">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -210,13 +210,74 @@
                 <h3>감정 체크인</h3>
                 <p class="muted">2분 · 쉬움</p>
                 <p class="muted">지금 내 마음 상태를 가만히 살피고 짧은 위로를 받아봅니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="checkin">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='checkin')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="신체 활동" data-keywords="점진적 근육 이완 PMR 긴장 스트레스 신체 이완">
+            <article class="activity-card" data-activity="grounding" data-category="자기 인식" data-keywords="그라운딩 5-4-3-2-1 불안 공황 진정 오감 현재 마음챙김">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 5c-1 1-2 2-2 4s1 3 2 4 2 3 2 4"/><path d="M18 5c1 1 2 2 2 4s-1 3-2 4-2 3-2 4"/><line x1="12" y1="2" x2="12" y2="22"/>
+                            <circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">자기 인식</span>
+                <h3>5-4-3-2-1 그라운딩</h3>
+                <p class="muted">3분 · 쉬움</p>
+                <p class="muted">오감으로 지금 이 순간에 닻을 내려 불안을 가라앉힙니다.</p>
+                <a th:href="@{/activities/{k}(k='grounding')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
+            </article>
+            <article class="activity-card" data-activity="thought_dump" data-category="인지" data-keywords="생각 적어내기 걱정 비우기 반추 곱씹기 저널링 글쓰기 불안">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">인지</span>
+                <h3>생각 적어내기</h3>
+                <p class="muted">5분 · 쉬움</p>
+                <p class="muted">머릿속을 맴도는 걱정을 글로 꺼내 한 발 떨어져 바라봅니다.</p>
+                <a th:href="@{/activities/{k}(k='thought_dump')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
+            </article>
+            <article class="activity-card" data-activity="butterfly_hug" data-category="정서 안정" data-keywords="나비 포옹 자기 안정 불안 진정 토닥임 안아주기 정서">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/>
+                            <path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/>
+                            <path d="m2 15 6 6"/>
+                            <path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12z"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">정서 안정</span>
+                <h3>나비 포옹</h3>
+                <p class="muted">2분 · 쉬움</p>
+                <p class="muted">양팔로 나를 안고 좌우로 번갈아 토닥이며 마음을 진정시킵니다.</p>
+                <a th:href="@{/activities/{k}(k='butterfly_hug')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
+            </article>
+            <article class="activity-card" data-activity="small_action" data-category="행동 활성화" data-keywords="작은 실천 한 가지 행동 활성화 무기력 우울 동기 시작">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </span>
+                </div>
+                <span class="tag tag-secondary" style="align-self: flex-start;">행동 활성화</span>
+                <h3>작은 실천 한 가지</h3>
+                <p class="muted">2분 · 쉬움</p>
+                <p class="muted">아주 작은 행동 하나를 골라 지금 가볍게 시작해봅니다.</p>
+                <a th:href="@{/activities/{k}(k='small_action')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
+            </article>
+            <article class="activity-card" data-activity="pmr" data-category="신체 활동" data-keywords="점진적 근육 이완 PMR 긴장 스트레스 신체 이완">
+                <div class="activity-thumb">
+                    <span class="pico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="5" r="1.6"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/>
                         </svg>
                     </span>
                 </div>
@@ -224,9 +285,9 @@
                 <h3>점진적 근육 이완</h3>
                 <p class="muted">10분 · 보통</p>
                 <p class="muted">몸 곳곳을 긴장했다 천천히 풀며 깊게 이완해봅니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="pmr">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='pmr')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
-            <article class="activity-card" data-category="명상" data-keywords="바디스캔 명상 신체 마음챙김 이완 마인드풀니스">
+            <article class="activity-card" data-activity="bodyscan" data-category="명상" data-keywords="바디스캔 명상 신체 마음챙김 이완 마인드풀니스">
                 <div class="activity-thumb">
                     <span class="pico" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -238,8 +299,19 @@
                 <h3>짧은 바디스캔</h3>
                 <p class="muted">10분 · 보통</p>
                 <p class="muted">발끝부터 천천히 몸 감각을 살피며 지금 상태를 알아차립니다.</p>
-                <button class="btn btn-primary btn-sm" style="margin-top: auto;" data-activity="bodyscan">지금 해보기</button>
+                <a th:href="@{/activities/{k}(k='bodyscan')}" class="btn btn-primary btn-sm" style="margin-top: auto;">지금 해보기</a>
             </article>
+        </div>
+
+        <div id="activityToggleWrap" style="text-align:center; margin-bottom: 3rem; display:none;">
+            <button type="button" id="activityToggleBtn" class="btn btn-outline btn-sm">
+                <span id="activityToggleLabel">다른 활동 더보기</span>
+                <span class="pico pico-sm" aria-hidden="true" style="margin-left:0.15rem;">
+                    <svg id="activityToggleChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </span>
+            </button>
         </div>
 
         <div style="background: var(--secondary); border-radius: 1rem; padding: 2rem;">
@@ -388,159 +460,6 @@
     .ml-book-overlay, .ml-book-box { transition: none; }
 }
 
-/* ── Activity Modal ────────────────────────────── */
-.act-modal-overlay {
-    position: fixed; inset: 0; z-index: 300;
-    background: rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
-    padding: 1rem;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.2s;
-}
-.act-modal-overlay.is-open { opacity: 1; pointer-events: auto; }
-.act-modal-box {
-    background: var(--card); border-radius: 1.25rem;
-    width: 100%; max-width: 480px;
-    max-height: 88vh; overflow-y: auto;
-    padding: 2rem;
-    transform: translateY(12px);
-    transition: transform 0.22s;
-    box-shadow: 0 24px 48px rgba(0,0,0,0.16);
-}
-.act-modal-overlay.is-open .act-modal-box { transform: translateY(0); }
-.act-modal-head {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 1rem; margin-bottom: 1.75rem;
-}
-.act-modal-head h3 { margin: 0; font-size: 1.2rem; }
-.act-modal-head p  { margin: 0.2rem 0 0; font-size: 0.85rem; }
-.act-modal-close {
-    flex-shrink: 0; width: 2rem; height: 2rem;
-    background: var(--secondary); border: 0; border-radius: 50%;
-    cursor: pointer; font-size: 1.05rem; line-height: 1;
-    display: inline-flex; align-items: center; justify-content: center;
-    color: var(--muted-foreground); transition: background 0.15s;
-}
-.act-modal-close:hover { background: var(--accent); color: var(--foreground); }
-
-/* ── Shared activity helpers ──────────────────── */
-.act-wrap  { text-align: center; }
-.act-guide { color: var(--muted-foreground); font-size: 0.9rem; margin: 0.75rem 0 1.25rem; }
-.act-btns  { display: flex; gap: 0.75rem; justify-content: center; }
-
-/* ── Breathing circle (scale은 .breath-stage 안에서만) ── */
-.breath-scene {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-}
-.breath-stage {
-    width: 11.5rem;
-    height: 11.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-.breath-ring {
-    width: 8.75rem;
-    height: 8.75rem;
-    box-sizing: border-box;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(107,142,111,0.2) 0%, rgba(107,142,111,0.05) 70%);
-    border: 3px solid rgba(107,142,111,0.28);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.2rem;
-    transform: scale(1);
-    transform-origin: center center;
-    transition: transform 0.9s ease-in-out, background 0.9s, border-color 0.9s;
-}
-.breath-ring.inhale {
-    transform: scale(1.1);
-    background: radial-gradient(circle, rgba(107,142,111,0.36) 0%, rgba(107,142,111,0.1) 70%);
-    border-color: rgba(107,142,111,0.6);
-}
-.breath-ring.exhale {
-    transform: scale(0.92);
-    background: radial-gradient(circle, rgba(107,142,111,0.08) 0%, rgba(107,142,111,0.02) 70%);
-    border-color: rgba(107,142,111,0.16);
-}
-.breath-phase { font-weight: 600; color: var(--primary); font-size: 0.95rem; margin: 0; }
-.breath-num   { font-size: 1.85rem; font-weight: 700; color: var(--primary); margin: 0; line-height: 1.1; }
-
-/* ── Gratitude journal ────────────────────────── */
-.grat-card {
-    background: var(--secondary); border-radius: 0.85rem; padding: 1.25rem 1.5rem; margin-top: 0.5rem;
-}
-.grat-item {
-    display: flex; gap: 0.75rem; align-items: flex-start;
-    padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem;
-}
-.grat-item:last-child { border-bottom: 0; }
-.grat-num {
-    width: 1.5rem; height: 1.5rem; border-radius: 50%;
-    background: var(--primary); color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
-}
-
-/* ── 자기자비 문장 (카드 넘기기) ─────────────── */
-.scs-wrap { padding: 0.25rem 0; text-align: center; }
-.scs-card { background: linear-gradient(135deg,rgba(107,142,111,.12),rgba(107,142,111,.04)); border: 1px solid rgba(107,142,111,.3); border-radius: 1rem; padding: 2rem 1.5rem; min-height: 7rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
-.scs-text { font-size: 1.1rem; line-height: 1.85; color: var(--foreground); margin: 0; }
-.scs-counter { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
-.scs-hint    { font-size: 0.82rem; margin-bottom: 1rem; }
-.scs-nav { display: flex; gap: 0.75rem; justify-content: center; }
-
-/* ── 감정 체크인 ──────────────────────────────── */
-.chk-wrap { padding: 0.25rem 0; }
-.chk-question { text-align: center; font-size: 1.05rem; margin-bottom: 1.25rem; }
-.chk-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.55rem; margin-bottom: 1rem; }
-.chk-btn { background: var(--secondary); border: 2px solid transparent; border-radius: 0.75rem; padding: 0.7rem 0.3rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; transition: border-color .2s, background .2s; }
-.chk-btn:hover   { border-color: var(--primary); }
-.chk-btn.selected{ border-color: var(--primary); background: rgba(107,142,111,.12); }
-.chk-emoji { font-size: 1.6rem; line-height: 1; }
-.chk-label { font-size: 0.7rem; color: var(--text); }
-.chk-result { background: var(--secondary); border-radius: 0.75rem; padding: 1.25rem; text-align: center; margin-top: 0.5rem; }
-.chk-result-emoji { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-.chk-result-msg { line-height: 1.75; margin: 0; }
-
-/* ── 점진적 근육 이완 (PMR) ───────────────────── */
-.pmr-wrap { padding: 0.25rem 0; }
-.pmr-progress-bar  { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 0.5rem; overflow: hidden; }
-.pmr-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .4s; }
-.pmr-step-count { text-align: center; margin-bottom: 1rem; font-size: 0.9rem; }
-.pmr-circle-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
-.pmr-circle { width: 7rem; height: 7rem; border-radius: 50%; border: 3px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; transition: border-color .4s, background .4s; }
-.pmr-circle.pmr-tense { border-color: #c0392b; background: rgba(192,57,43,.08); }
-.pmr-circle.pmr-relax { border-color: var(--primary); background: rgba(107,142,111,.12); }
-.pmr-circle-label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-.pmr-circle-num   { font-size: 1.75rem; font-weight: 700; color: var(--primary); line-height: 1; }
-.pmr-tip  { text-align: center; margin-bottom: 1.25rem; }
-.pmr-done { text-align: center; padding: 1rem 0; }
-
-/* ── 바디스캔 명상 ───────────────────────────── */
-.bds-wrap { padding: 0.25rem 0; }
-.bds-progress { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 0.5rem; overflow: hidden; }
-.bds-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .4s; }
-.bds-count { text-align: center; margin-bottom: 0.75rem; font-size: 0.85rem; }
-.bds-body-label { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
-.bds-timer-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
-.bds-ring { width: 6rem; height: 6rem; border-radius: 50%; border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; }
-.bds-ring span { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
-.bds-guide { text-align: center; line-height: 1.75; margin-bottom: 1.25rem; font-size: 0.92rem; }
-.bds-done { text-align: center; padding: 1rem 0; }
-
-/* ── Reduced motion ───────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-    .act-modal-overlay, .act-modal-box { transition: none; }
-    .breath-ring { transition: none; }
-    .pmr-circle, .pmr-progress-fill, .bds-fill { transition: none; }
-}
 </style>
 <script>
 (function () {
@@ -768,6 +687,63 @@
     })();
     // ─────────────────────────────────────────────────────────────
 
+    // ── 추천 활동: 감정 맞춤 상위 6개 노출 + '더보기' 토글 ──────────
+    (function () {
+        var grid = document.getElementById('activitiesGrid');
+        var toggleWrap = document.getElementById('activityToggleWrap');
+        var toggleBtn = document.getElementById('activityToggleBtn');
+        var toggleLabel = document.getElementById('activityToggleLabel');
+        var chevron = document.getElementById('activityToggleChevron');
+        if (!grid || !toggleWrap || !toggleBtn) return;
+
+        var emotionEl = document.getElementById('emotion-data');
+        var userEmotion = (emotionEl && emotionEl.dataset.emotion) ? emotionEl.dataset.emotion : 'NORMAL';
+
+        // 감정별 우선 추천 활동(상위 6개). 미지정/일반 감정은 기본 세트.
+        var RANK = {
+            DEPRESSION:   ['self_compassion_script', 'small_action', 'gratitude', 'checkin', 'thought_dump', 'bodyscan'],
+            STRESS:       ['pmr_mini', 'slow_breathing', 'breathing', 'pmr', 'bodyscan', 'grounding'],
+            ANXIETY:      ['grounding', 'slow_breathing', 'butterfly_hug', 'breathing', 'pmr_mini', 'thought_dump'],
+            LETHARGY:     ['small_action', 'checkin', 'gratitude', 'breathing', 'self_compassion_script', 'bodyscan'],
+            RELATIONSHIP: ['self_compassion_script', 'thought_dump', 'gratitude', 'checkin', 'breathing', 'small_action'],
+            NORMAL:       ['breathing', 'checkin', 'gratitude', 'slow_breathing', 'bodyscan', 'small_action']
+        };
+        var topKeys = RANK[userEmotion] || RANK.NORMAL;
+
+        var cards = Array.prototype.slice.call(grid.querySelectorAll('.activity-card'));
+        var byKey = {};
+        cards.forEach(function (c) { byKey[c.dataset.activity] = c; });
+
+        // 상위 3개를 지정 순서대로 맨 앞에 두고, 나머지는 그 뒤로 재배치
+        // (appendChild 는 기존 노드를 이동시키므로 순서대로 다시 붙이면 정렬된다)
+        var topCards = [];
+        topKeys.forEach(function (k) { if (byKey[k]) topCards.push(byKey[k]); });
+        topCards.forEach(function (c) { grid.appendChild(c); });
+        cards.forEach(function (c) { if (topCards.indexOf(c) === -1) grid.appendChild(c); });
+
+        var hasExtra = false;
+        cards.forEach(function (c) {
+            if (topCards.indexOf(c) === -1) {
+                c.classList.add('extra', 'hidden');
+                hasExtra = true;
+            }
+        });
+
+        if (!hasExtra) { toggleWrap.style.display = 'none'; return; }
+        toggleWrap.style.display = 'block';
+
+        var expanded = false;
+        toggleBtn.addEventListener('click', function () {
+            expanded = !expanded;
+            grid.querySelectorAll('.activity-card.extra').forEach(function (c) {
+                c.classList.toggle('hidden', !expanded);
+            });
+            if (toggleLabel) toggleLabel.textContent = expanded ? '접기' : '다른 활동 더보기';
+            if (chevron) chevron.style.transform = expanded ? 'rotate(180deg)' : '';
+        });
+    })();
+    // ─────────────────────────────────────────────────────────────
+
 })();
 </script>
 
@@ -789,20 +765,6 @@
     </div>
 </div>
 
-<!-- ── Activity Modal ── -->
-<div id="activityModal" class="act-modal-overlay" role="dialog" aria-modal="true"
-     aria-labelledby="actModalTitle" aria-hidden="true">
-    <div class="act-modal-box">
-        <div class="act-modal-head">
-            <div>
-                <h3 id="actModalTitle">활동</h3>
-                <p id="actModalMeta" class="muted"></p>
-            </div>
-            <button id="actModalClose" class="act-modal-close" aria-label="닫기">&#x2715;</button>
-        </div>
-        <div id="actModalBody"></div>
-    </div>
-</div>
 
 <script>
 /* ── Book Detail Modal JS ── */
@@ -1141,519 +1103,6 @@
     msgInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') doRecommend(); });
 })();
 
-(function () {
-    var overlay  = document.getElementById('activityModal');
-    if (!overlay) return;
-    var boxTitle = document.getElementById('actModalTitle');
-    var boxMeta  = document.getElementById('actModalMeta');
-    var boxBody  = document.getElementById('actModalBody');
-    var closeBtn = document.getElementById('actModalClose');
-    var stopFn   = null;
-
-    function esc(s) {
-        return String(s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    function openModal(key) {
-        var def = ACTS[key];
-        if (!def) return;
-        boxTitle.textContent = def.title;
-        boxMeta.textContent  = def.meta || '';
-        boxBody.innerHTML    = '';
-        if (stopFn) { stopFn(); stopFn = null; }
-        stopFn = def.render(boxBody) || null;
-        overlay.removeAttribute('aria-hidden');
-        overlay.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
-        setTimeout(function () { closeBtn.focus(); }, 50);
-    }
-
-    function closeModal() {
-        overlay.classList.remove('is-open');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        if (stopFn) { stopFn(); stopFn = null; }
-        setTimeout(function () { boxBody.innerHTML = ''; }, 230);
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal();
-    });
-    document.querySelectorAll('[data-activity]').forEach(function (btn) {
-        btn.addEventListener('click', function () { openModal(btn.dataset.activity); });
-    });
-
-    /* ─── Activity definitions ─────────────────────────── */
-    var ACTS = {
-
-        /* 1. 호흡 운동 */
-        breathing: {
-            title: '호흡 운동',
-            meta : '약 3분 · 신체 활동',
-            render: function (el) {
-                el.innerHTML =
-                    '<div class="act-wrap">' +
-                    '<div class="breath-scene"><div class="breath-stage">' +
-                    '<div class="breath-ring" id="bRing">' +
-                    '<p id="bPhase" class="breath-phase">준비</p>' +
-                    '<p id="bNum"   class="breath-num">-</p>' +
-                    '</div></div></div>' +
-                    '<p id="bGuide" class="act-guide">시작 버튼을 눌러 호흡을 시작하세요</p>' +
-                    '<div class="act-btns">' +
-                    '<button id="bStart" class="btn btn-primary">시작</button>' +
-                    '<button id="bReset" class="btn btn-outline">처음으로</button>' +
-                    '</div></div>';
-
-                var ring   = document.getElementById('bRing');
-                var phEl   = document.getElementById('bPhase');
-                var numEl  = document.getElementById('bNum');
-                var guide  = document.getElementById('bGuide');
-                var startB = document.getElementById('bStart');
-                var resetB = document.getElementById('bReset');
-                var PHASES = [
-                    { name: '들숨', dur: 4, cls: 'inhale', txt: '천천히 코로 숨을 들이마세요' },
-                    { name: '날숨', dur: 6, cls: 'exhale', txt: '천천히 입으로 숨을 내쉬세요' }
-                ];
-                var pi = 0, sLeft = 0, timer = null, running = false;
-
-                function startPhase(idx) {
-                    pi = idx; sLeft = PHASES[idx].dur;
-                    ring.className    = 'breath-ring ' + PHASES[idx].cls;
-                    phEl.textContent  = PHASES[idx].name;
-                    guide.textContent = PHASES[idx].txt;
-                    numEl.textContent = sLeft;
-                }
-                function tick() {
-                    sLeft--;
-                    if (sLeft <= 0) { startPhase((pi + 1) % PHASES.length); }
-                    else            { numEl.textContent = sLeft; }
-                }
-                function doStart() {
-                    if (running) return;
-                    running = true; startB.disabled = true; startB.textContent = '진행 중…';
-                    startPhase(0); timer = setInterval(tick, 1000);
-                }
-                function doReset() {
-                    clearInterval(timer); running = false;
-                    ring.className = 'breath-ring';
-                    phEl.textContent = '준비'; numEl.textContent = '-';
-                    guide.textContent = '시작 버튼을 눌러 호흡을 시작하세요';
-                    startB.disabled = false; startB.textContent = '시작';
-                }
-                startB.addEventListener('click', doStart);
-                resetB.addEventListener('click', doReset);
-                return function () { clearInterval(timer); };
-            }
-        },
-
-        /* 2. 느린 호흡 */
-        slow_breathing: {
-            title: '느린 호흡',
-            meta : '약 3분 · 호흡',
-            render: function (el) {
-                el.innerHTML =
-                    '<div class="act-wrap">' +
-                    '<div class="breath-scene"><div class="breath-stage">' +
-                    '<div class="breath-ring" id="sbRing">' +
-                    '<p id="sbPhase" class="breath-phase">준비</p>' +
-                    '<p id="sbNum"   class="breath-num">-</p>' +
-                    '</div></div></div>' +
-                    '<p id="sbGuide" class="act-guide">날숨을 들숨보다 길게 — 천천히 내쉬는 데 집중해요</p>' +
-                    '<div class="act-btns">' +
-                    '<button id="sbStart" class="btn btn-primary">시작</button>' +
-                    '<button id="sbReset" class="btn btn-outline">처음으로</button>' +
-                    '</div></div>';
-
-                var ring   = document.getElementById('sbRing');
-                var phEl   = document.getElementById('sbPhase');
-                var numEl  = document.getElementById('sbNum');
-                var guide  = document.getElementById('sbGuide');
-                var startB = document.getElementById('sbStart');
-                var resetB = document.getElementById('sbReset');
-                var PHASES = [
-                    { name: '들숨', dur: 4, cls: 'inhale', txt: '코로 천천히 들이마셔요' },
-                    { name: '날숨', dur: 7, cls: 'exhale', txt: '입으로 더 천천히 내쉬어요' }
-                ];
-                var pi = 0, sLeft = 0, timer = null, running = false;
-
-                function startPhase(idx) {
-                    pi = idx; sLeft = PHASES[idx].dur;
-                    ring.className    = 'breath-ring ' + PHASES[idx].cls;
-                    phEl.textContent  = PHASES[idx].name;
-                    guide.textContent = PHASES[idx].txt;
-                    numEl.textContent = sLeft;
-                }
-                function tick() {
-                    sLeft--;
-                    if (sLeft <= 0) { startPhase((pi + 1) % PHASES.length); }
-                    else            { numEl.textContent = sLeft; }
-                }
-                function doStart() {
-                    if (running) return;
-                    running = true; startB.disabled = true; startB.textContent = '진행 중…';
-                    startPhase(0); timer = setInterval(tick, 1000);
-                }
-                function doReset() {
-                    clearInterval(timer); running = false;
-                    ring.className = 'breath-ring';
-                    phEl.textContent = '준비'; numEl.textContent = '-';
-                    guide.textContent = '날숨을 들숨보다 길게 — 천천히 내쉬는 데 집중해요';
-                    startB.disabled = false; startB.textContent = '시작';
-                }
-                startB.addEventListener('click', doStart);
-                resetB.addEventListener('click', doReset);
-                return function () { clearInterval(timer); };
-            }
-        },
-
-        /* 3. 감사 일기 */
-        gratitude: {
-            title: '감사 일기',
-            meta : '약 5분 · 기록 활동',
-            render: function (el) {
-                el.innerHTML =
-                    '<div class="act-gratitude">' +
-                    '<p class="muted" style="margin-bottom:1.25rem;">오늘 감사한 일 세 가지를 적어보세요.<br>작은 것도 충분히 가치 있어요.</p>' +
-                    '<div id="gForm">' +
-                    '<div class="form-group"><label for="g1">1번째 감사한 일</label>' +
-                    '<input class="form-input" id="g1" placeholder="예: 오늘 날씨가 맑았다"></div>' +
-                    '<div class="form-group"><label for="g2">2번째 감사한 일</label>' +
-                    '<input class="form-input" id="g2" placeholder="예: 맛있는 점심을 먹었다"></div>' +
-                    '<div class="form-group"><label for="g3">3번째 감사한 일</label>' +
-                    '<input class="form-input" id="g3" placeholder="예: 좋아하는 음악을 들었다"></div>' +
-                    '<button id="gSubmit" class="btn btn-primary btn-block" style="margin-top:0.5rem;">기록 완료</button>' +
-                    '</div>' +
-                    '<div id="gResult" style="display:none;"></div>' +
-                    '</div>';
-
-                document.getElementById('gSubmit').addEventListener('click', function () {
-                    var vals = ['g1','g2','g3']
-                        .map(function (id) { return document.getElementById(id).value.trim(); })
-                        .filter(Boolean);
-                    if (!vals.length) { document.getElementById('g1').focus(); return; }
-                    var items = vals.map(function (t, i) {
-                        return '<div class="grat-item">' +
-                               '<span class="grat-num">' + (i + 1) + '</span>' +
-                               '<span>' + esc(t) + '</span></div>';
-                    }).join('');
-                    var res = document.getElementById('gResult');
-                    res.innerHTML =
-                        '<div class="grat-card">' +
-                        '<h4 style="color:var(--primary);margin:0 0 0.75rem;">오늘의 감사 목록</h4>' +
-                        items + '</div>' +
-                        '<p class="muted center" style="margin:1rem 0;font-size:0.9rem;">감사한 마음을 기록했어요. 오늘도 수고하셨습니다.</p>' +
-                        '<button id="gAgain" class="btn btn-outline btn-block">다시 작성하기</button>';
-                    res.style.display = 'block';
-                    document.getElementById('gForm').style.display = 'none';
-                    document.getElementById('gAgain').addEventListener('click', function () {
-                        res.style.display = 'none'; res.innerHTML = '';
-                        var form = document.getElementById('gForm');
-                        form.style.display = 'block';
-                        form.querySelectorAll('input').forEach(function (i) { i.value = ''; });
-                        document.getElementById('g1').focus();
-                    });
-                });
-            }
-        },
-
-        /* 4. PMR 미니 (짧은 점진적 근육 이완) */
-        pmr_mini: {
-            title: 'PMR 미니',
-            meta : '약 5분 · 신체 이완',
-            render: function (el) {
-                var STEPS = [
-                    { name: '양손·팔', tense: 5, relax: 8, tip: '두 손을 주먹 쥐고 팔에 힘을 줬다 풀어요' },
-                    { name: '어깨·목', tense: 5, relax: 8, tip: '어깨를 귀 쪽으로 올렸다 툭 내려놓아요' },
-                    { name: '얼굴',    tense: 5, relax: 8, tip: '눈과 얼굴을 살짝 찡그렸다 부드럽게 펴요' },
-                    { name: '다리·발', tense: 5, relax: 8, tip: '다리와 발에 힘을 줬다 천천히 풀어요' }
-                ];
-                var si = 0, phase = 'idle', sLeft = 0, timer = null;
-
-                function renderView() {
-                    var s = STEPS[si];
-                    var pct = Math.round((si / STEPS.length) * 100);
-                    var isIdle = phase === 'idle';
-                    var phLabel = phase === 'tense' ? '긴장' : phase === 'relax' ? '이완' : '';
-                    var phCls   = phase === 'tense' ? 'pmr-tense' : phase === 'relax' ? 'pmr-relax' : '';
-                    el.innerHTML =
-                        '<div class="pmr-wrap">' +
-                        '<div class="pmr-progress-bar"><div class="pmr-progress-fill" style="width:' + pct + '%"></div></div>' +
-                        '<p class="pmr-step-count muted">' + (si + 1) + ' / ' + STEPS.length + ' &mdash; ' + esc(s.name) + '</p>' +
-                        '<div class="pmr-circle-wrap"><div class="pmr-circle ' + phCls + '">' +
-                        (isIdle
-                            ? '<span class="pmr-circle-label">준비</span>'
-                            : '<span class="pmr-circle-label">' + phLabel + '</span><span class="pmr-circle-num" id="pmrNum">' + sLeft + '</span>') +
-                        '</div></div>' +
-                        '<p class="act-guide pmr-tip">' + esc(s.tip) + '</p>' +
-                        (isIdle ? '<button id="pmrGo" class="btn btn-primary btn-block">시작</button>' : '') +
-                        '</div>';
-
-                    if (isIdle) {
-                        document.getElementById('pmrGo').addEventListener('click', startTense);
-                    }
-                }
-
-                function startTense() {
-                    phase = 'tense'; sLeft = STEPS[si].tense;
-                    renderView();
-                    timer = setInterval(tick, 1000);
-                }
-
-                function tick() {
-                    sLeft--;
-                    var numEl = document.getElementById('pmrNum');
-                    if (sLeft > 0) { if (numEl) numEl.textContent = sLeft; return; }
-                    clearInterval(timer);
-                    if (phase === 'tense') {
-                        phase = 'relax'; sLeft = STEPS[si].relax;
-                        renderView();
-                        timer = setInterval(tick, 1000);
-                    } else {
-                        si++;
-                        if (si >= STEPS.length) { renderDone(); }
-                        else { phase = 'idle'; renderView(); }
-                    }
-                }
-
-                function renderDone() {
-                    el.innerHTML =
-                        '<div class="pmr-done">' +
-                        '<p style="font-size:2rem;">🌿</p>' +
-                        '<p style="line-height:1.75;margin:0.5rem 0;">짧게 몸을 풀어봤어요.<br>한결 가벼워졌기를 바라요.</p>' +
-                        '<button id="pmrAgain" class="btn btn-outline btn-block" style="margin-top:1rem;">처음부터 다시</button></div>';
-                    document.getElementById('pmrAgain').addEventListener('click', function () {
-                        si = 0; phase = 'idle'; renderView();
-                    });
-                }
-
-                renderView();
-                return function () { clearInterval(timer); };
-            }
-        },
-
-        /* 5. 자기자비 문장 */
-        self_compassion_script: {
-            title: '자기자비 문장',
-            meta : '약 5분 · 인지',
-            render: function (el) {
-                var CARDS = [
-                    '지금 힘든 것도 괜찮아요.',
-                    '누구나 가끔은 버거울 수 있어요.',
-                    '오늘은 여기까지 해도 충분해요.',
-                    '나에게 조금만 관대해져도 돼요.',
-                    '이 감정은 지나갈 수 있어요.'
-                ];
-                var idx = 0;
-
-                function render() {
-                    el.innerHTML =
-                        '<div class="scs-wrap">' +
-                        '<div class="scs-card"><p class="scs-text">&ldquo;' + esc(CARDS[idx]) + '&rdquo;</p></div>' +
-                        '<span class="scs-counter muted">' + (idx + 1) + ' / ' + CARDS.length + '</span>' +
-                        '<p class="scs-hint muted">천천히, 나에게 건네듯 읽어보세요.</p>' +
-                        '<div class="scs-nav">' +
-                        '<button id="scsPrev" class="btn btn-outline btn-sm"' + (idx === 0 ? ' disabled' : '') + '>◀ 이전</button>' +
-                        '<button id="scsNext" class="btn btn-primary btn-sm"' + (idx === CARDS.length - 1 ? ' disabled' : '') + '>다음 ▶</button>' +
-                        '</div></div>';
-                    var prev = document.getElementById('scsPrev');
-                    var next = document.getElementById('scsNext');
-                    prev.addEventListener('click', function () { if (idx > 0) { idx--; render(); } });
-                    next.addEventListener('click', function () { if (idx < CARDS.length - 1) { idx++; render(); } });
-                }
-                render();
-            }
-        },
-
-        /* 6. 감정 체크인 */
-        checkin: {
-            title: '감정 체크인',
-            meta : '약 2분 · 자기 인식',
-            render: function (el) {
-                var MOODS = [
-                    { e: '😊', label: '행복해요',  msg: '오늘 기분이 좋으시군요! 그 에너지를 주변과 나눠보세요.' },
-                    { e: '😌', label: '평온해요',  msg: '마음이 고요하고 편안한 상태네요. 이 평화로움을 즐겨보세요.' },
-                    { e: '😐', label: '그냥 그래요', msg: '평범한 하루도 충분히 괜찮아요. 작은 즐거움을 찾아보세요.' },
-                    { e: '😔', label: '우울해요',  msg: '마음이 무거우시군요. 억지로 나아지려 하지 않아도 괜찮아요. 지금 이 감정을 인정해드려요.' },
-                    { e: '😰', label: '불안해요',  msg: '불안한 마음이 드시는군요. 천천히 숨을 고르며 호흡 활동을 시도해보시겠어요?' },
-                    { e: '😤', label: '화가 나요',  msg: '화가 나는 감정도 자연스러워요. 잠시 심호흡을 해보시거나, 감정을 글로 표현해보세요.' },
-                    { e: '😪', label: '피곤해요',  msg: '많이 지치셨군요. 오늘 충분히 쉬어가셔도 괜찮아요.' },
-                    { e: '🤗', label: '감사해요',  msg: '감사함을 느끼고 계시군요! 감사 일기 활동도 시도해보시겠어요?' }
-                ];
-                var btns = MOODS.map(function (m, i) {
-                    return '<button class="chk-btn" data-i="' + i + '">' +
-                        '<span class="chk-emoji">' + m.e + '</span>' +
-                        '<span class="chk-label">' + esc(m.label) + '</span></button>';
-                }).join('');
-                el.innerHTML =
-                    '<div class="chk-wrap">' +
-                    '<p class="chk-question">지금 이 순간, 당신의 기분은 어떤가요?</p>' +
-                    '<div class="chk-grid">' + btns + '</div>' +
-                    '<div id="chkResult"></div></div>';
-
-                el.querySelectorAll('.chk-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        el.querySelectorAll('.chk-btn').forEach(function (b) { b.classList.remove('selected'); });
-                        btn.classList.add('selected');
-                        var m = MOODS[parseInt(btn.dataset.i, 10)];
-                        document.getElementById('chkResult').innerHTML =
-                            '<div class="chk-result">' +
-                            '<span class="chk-result-emoji">' + m.e + '</span>' +
-                            '<p class="chk-result-msg">' + esc(m.msg) + '</p></div>';
-                    });
-                });
-            }
-        },
-
-        /* 7. 점진적 근육 이완 (PMR) */
-        pmr: {
-            title: '점진적 근육 이완',
-            meta : '약 10분 · 신체 활동',
-            render: function (el) {
-                var STEPS = [
-                    { name: '양손',      tense: 5, relax: 10, tip: '두 손을 꽉 쥐어 주먹을 만드세요' },
-                    { name: '팔뚝·위팔', tense: 5, relax: 10, tip: '팔을 구부려 이두근에 힘을 주세요' },
-                    { name: '어깨',      tense: 5, relax: 10, tip: '어깨를 귀 쪽으로 최대한 올려보세요' },
-                    { name: '얼굴',      tense: 5, relax: 10, tip: '눈을 감고 얼굴 근육 전체를 찡그리세요' },
-                    { name: '가슴·배',   tense: 5, relax: 10, tip: '깊게 숨을 들이마시고 복근에 힘을 주세요' },
-                    { name: '다리',      tense: 5, relax: 10, tip: '허벅지·종아리에 힘을 주고 발가락을 위로 당기세요' },
-                    { name: '발',        tense: 5, relax: 10, tip: '발가락을 아래로 꽉 구부리세요' }
-                ];
-                var si = 0, phase = 'idle', sLeft = 0, timer = null;
-
-                function renderView() {
-                    var s = STEPS[si];
-                    var pct = Math.round((si / STEPS.length) * 100);
-                    var isIdle = phase === 'idle';
-                    var phLabel = phase === 'tense' ? '긴장' : phase === 'relax' ? '이완' : '';
-                    var phCls   = phase === 'tense' ? 'pmr-tense' : phase === 'relax' ? 'pmr-relax' : '';
-                    el.innerHTML =
-                        '<div class="pmr-wrap">' +
-                        '<div class="pmr-progress-bar"><div class="pmr-progress-fill" style="width:' + pct + '%"></div></div>' +
-                        '<p class="pmr-step-count muted">' + (si + 1) + ' / ' + STEPS.length + ' &mdash; ' + esc(s.name) + '</p>' +
-                        '<div class="pmr-circle-wrap"><div class="pmr-circle ' + phCls + '">' +
-                        (isIdle
-                            ? '<span class="pmr-circle-label">준비</span>'
-                            : '<span class="pmr-circle-label">' + phLabel + '</span><span class="pmr-circle-num" id="pmrNum">' + sLeft + '</span>') +
-                        '</div></div>' +
-                        '<p class="act-guide pmr-tip">' + esc(s.tip) + '</p>' +
-                        (isIdle ? '<button id="pmrGo" class="btn btn-primary btn-block">시작</button>' : '') +
-                        '</div>';
-
-                    if (isIdle) {
-                        document.getElementById('pmrGo').addEventListener('click', startTense);
-                    }
-                }
-
-                function startTense() {
-                    phase = 'tense'; sLeft = STEPS[si].tense;
-                    renderView();
-                    timer = setInterval(tick, 1000);
-                }
-
-                function tick() {
-                    sLeft--;
-                    var numEl = document.getElementById('pmrNum');
-                    if (sLeft > 0) { if (numEl) numEl.textContent = sLeft; return; }
-                    clearInterval(timer);
-                    if (phase === 'tense') {
-                        phase = 'relax'; sLeft = STEPS[si].relax;
-                        renderView();
-                        timer = setInterval(tick, 1000);
-                    } else {
-                        si++;
-                        if (si >= STEPS.length) { renderDone(); }
-                        else { phase = 'idle'; renderView(); }
-                    }
-                }
-
-                function renderDone() {
-                    el.innerHTML =
-                        '<div class="pmr-done">' +
-                        '<p style="font-size:2rem;">🌿</p>' +
-                        '<p style="line-height:1.75;margin:0.5rem 0;">온몸의 긴장이 풀렸나요?<br>충분히 이완되셨기를 바랍니다.</p>' +
-                        '<button id="pmrAgain" class="btn btn-outline btn-block" style="margin-top:1rem;">처음부터 다시</button></div>';
-                    document.getElementById('pmrAgain').addEventListener('click', function () {
-                        si = 0; phase = 'idle'; renderView();
-                    });
-                }
-
-                renderView();
-                return function () { clearInterval(timer); };
-            }
-        },
-
-        /* 8. 짧은 바디스캔 */
-        bodyscan: {
-            title: '짧은 바디스캔',
-            meta : '약 10분 · 명상',
-            render: function (el) {
-                var STEPS = [
-                    { name: '발',        dur: 40, guide: '발바닥, 발뒤꿈치, 발가락 사이의 감각을 느껴보세요.' },
-                    { name: '다리',      dur: 40, guide: '종아리, 정강이, 무릎, 허벅지로 천천히 주의를 옮겨보세요.' },
-                    { name: '골반·엉덩이', dur: 30, guide: '골반과 엉덩이 부위를 느껴보세요. 바닥과의 접촉감을 인식하세요.' },
-                    { name: '배·허리',   dur: 30, guide: '숨을 쉴 때 배가 올라가고 내려오는 것을 느껴보세요.' },
-                    { name: '가슴',      dur: 30, guide: '심장이 뛰는 것을 느껴보세요. 가슴이 확장되고 수축하는 것을 인식하세요.' },
-                    { name: '손·팔',     dur: 30, guide: '손끝부터 손목, 팔꿈치, 어깨까지 천천히 주의를 이동하세요.' },
-                    { name: '어깨·목',   dur: 30, guide: '어깨의 긴장을 느껴보세요. 목을 천천히 살펴보세요.' },
-                    { name: '얼굴·머리', dur: 40, guide: '이마, 눈 주변, 볼, 턱을 살펴보세요. 두피까지 주의를 확장해보세요.' },
-                    { name: '전신',      dur: 30, guide: '온몸 전체를 한 번에 느껴보세요. 이 순간, 여기에 온전히 존재하세요.' }
-                ];
-                var si = 0, sLeft = 0, timer = null, running = false;
-
-                function renderStep(idx) {
-                    var s = STEPS[idx];
-                    var pct = Math.round((idx / STEPS.length) * 100);
-                    el.innerHTML =
-                        '<div class="bds-wrap">' +
-                        '<div class="bds-progress"><div class="bds-fill" style="width:' + pct + '%"></div></div>' +
-                        '<p class="muted bds-count">' + (idx + 1) + ' / ' + STEPS.length + '</p>' +
-                        '<div class="bds-body-label">' + esc(s.name) + '</div>' +
-                        '<div class="bds-timer-wrap"><div class="bds-ring"><span id="bdsNum">' + (running ? sLeft : s.dur) + '</span></div></div>' +
-                        '<p class="bds-guide">' + esc(s.guide) + '</p>' +
-                        (!running ? '<button id="bdsGo" class="btn btn-primary btn-block">시작</button>' : '') +
-                        '</div>';
-
-                    if (!running) {
-                        document.getElementById('bdsGo').addEventListener('click', function () {
-                            running = true; sLeft = s.dur;
-                            renderStep(idx);
-                            timer = setInterval(tick, 1000);
-                        });
-                    }
-                }
-
-                function tick() {
-                    sLeft--;
-                    var numEl = document.getElementById('bdsNum');
-                    if (sLeft > 0) { if (numEl) numEl.textContent = sLeft; return; }
-                    clearInterval(timer);
-                    running = false;
-                    si++;
-                    if (si >= STEPS.length) renderDone();
-                    else renderStep(si);
-                }
-
-                function renderDone() {
-                    el.innerHTML =
-                        '<div class="bds-done">' +
-                        '<p style="font-size:2rem;">🧘</p>' +
-                        '<p style="line-height:1.75;margin:0.5rem 0;">바디스캔이 완료되었습니다.<br>온몸의 감각을 느끼며 잠시 머물러 보세요.</p>' +
-                        '<button id="bdsAgain" class="btn btn-outline btn-block" style="margin-top:1rem;">처음부터 다시</button></div>';
-                    document.getElementById('bdsAgain').addEventListener('click', function () {
-                        si = 0; running = false; renderStep(0);
-                    });
-                }
-
-                renderStep(0);
-                return function () { clearInterval(timer); };
-            }
-        }
-    };
-})();
 </script>
 </body>
 </html>
