@@ -45,13 +45,34 @@
                     <div th:if="${#fields.hasErrors('passwordConfirm')}" class="form-error" th:errors="*{passwordConfirm}"></div>
                 </div>
 
-                <label class="flex gap-2 mb-6 muted" style="font-size: 0.875rem; cursor: pointer; align-items: flex-start;">
-                    <input type="checkbox" required style="margin-top: 0.25rem;"/>
-                    <span>
-                        <a href="#" style="color: var(--primary);">이용약관</a> 및
-                        <a href="#" style="color: var(--primary);">개인정보 처리방침</a>에 동의합니다.
-                    </span>
-                </label>
+                <!-- 이용약관 동의 (필수) -->
+                <div class="form-group">
+                    <label class="flex gap-2" style="font-size:0.875rem; cursor:pointer; align-items:flex-start;">
+                        <input type="checkbox" name="agreeTerms" required style="margin-top:0.2rem; flex-shrink:0;"/>
+                        <span><strong>(필수)</strong> <button type="button" onclick="openDocModal('/terms', '이용약관')" style="display:inline; background:none; border:none; padding:0; color:var(--primary); font-size:inherit; font-family:inherit; text-decoration:underline; cursor:pointer;">이용약관</button>에 동의합니다.</span>
+                    </label>
+                </div>
+
+                <!-- 개인정보 수집·이용 동의 (필수) -->
+                <div class="form-group">
+                    <label class="flex gap-2" style="font-size:0.875rem; cursor:pointer; align-items:flex-start;">
+                        <input type="checkbox" name="agreePrivacy" required style="margin-top:0.2rem; flex-shrink:0;"/>
+                        <span><strong>(필수)</strong> <button type="button" onclick="openDocModal('/privacy', '개인정보 처리방침')" style="display:inline; background:none; border:none; padding:0; color:var(--primary); font-size:inherit; font-family:inherit; text-decoration:underline; cursor:pointer;">개인정보 처리방침</button>에 동의합니다.</span>
+                    </label>
+                </div>
+
+                <!-- 민감정보(자가진단 결과) 저장 동의 (선택) -->
+                <div class="form-group">
+                    <label class="flex gap-2" style="font-size:0.875rem; cursor:pointer; align-items:flex-start;">
+                        <input type="checkbox" name="agreeSensitive" th:field="*{agreeSensitive}" style="margin-top:0.2rem; flex-shrink:0;"/>
+                        <span>
+                            <strong>(선택)</strong> 자가진단 결과 저장에 동의합니다.
+                            <span class="muted" style="display:block; font-size:0.8rem; margin-top:0.2rem;">
+                                우울·불안·스트레스·번아웃 점수를 저장해 악화 알림을 받을 수 있습니다. 가입 후 내 정보에서도 변경 가능합니다.
+                            </span>
+                        </span>
+                    </label>
+                </div>
 
                 <button type="submit" class="btn btn-primary btn-block">회원가입</button>
             </form>
@@ -62,6 +83,47 @@
             <a th:href="@{/login}" style="color: var(--primary); text-decoration: underline;">로그인</a>
         </p>
     </div>
+
+    <!-- 약관·처리방침 팝업 모달 -->
+    <div id="docModalOverlay"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; padding:1rem;"
+         onclick="if(event.target===this)closeDocModal()">
+        <div style="background:var(--card,#fff); border-radius:0.75rem; max-width:780px; width:100%; margin:1rem auto; height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+
+            <!-- 모달 헤더 -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid var(--border); flex-shrink:0;">
+                <h2 id="docModalTitle" style="font-size:1rem; font-weight:700; margin:0;"></h2>
+                <button type="button" onclick="closeDocModal()" aria-label="닫기"
+                        style="background:none; border:none; cursor:pointer; padding:0.25rem; color:var(--muted-foreground);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- iframe 영역 -->
+            <iframe id="docModalFrame" src="" title="문서 내용"
+                    style="flex:1; border:none; width:100%;" loading="lazy"></iframe>
+
+        </div>
+    </div>
+
+    <script>
+    function openDocModal(url, title) {
+        document.getElementById('docModalTitle').textContent = title;
+        document.getElementById('docModalFrame').src = url + '?embed=true';
+        document.getElementById('docModalOverlay').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', docEscHandler);
+    }
+    function closeDocModal() {
+        document.getElementById('docModalOverlay').style.display = 'none';
+        document.body.style.overflow = '';
+        document.getElementById('docModalFrame').src = '';
+        document.removeEventListener('keydown', docEscHandler);
+    }
+    function docEscHandler(e) { if (e.key === 'Escape') closeDocModal(); }
+    </script>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

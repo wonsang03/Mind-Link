@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 이용약관')}"></head>
+<body>
+<th:block th:if="${!embed}">
+    <header th:replace="~{fragments/layout :: header}"></header>
+</th:block>
+
+<style>
+.law-ref {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--primary);
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+    line-height: inherit;
+}
+.law-ref:hover { text-decoration-style: solid; opacity: 0.85; }
+</style>
+
+<main>
+    <div class="page-form" style="max-width: 760px;">
+
+        <div class="center mb-8">
+            <h1 class="mb-4">이용약관</h1>
+            <p class="muted">시행일: 2026년 6월 1일</p>
+        </div>
+
+        <!-- 제1조 목적 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--primary);">제1조 (목적)</h2>
+            <p style="line-height:1.8;">
+                이 약관은 마음이음(이하 "서비스")이 제공하는 정서 케어 플랫폼 서비스의 이용 조건 및 절차,
+                서비스 제공자와 이용자 간의 권리·의무와 책임 사항을 규정함을 목적으로 합니다.
+            </p>
+        </section>
+
+        <!-- 제2조 서비스 내용 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--primary);">제2조 (서비스 내용)</h2>
+            <p style="margin-bottom:0.75rem; line-height:1.8;">마음이음은 이용자의 정서 건강 증진을 지원하기 위해 다음 서비스를 제공합니다.</p>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>PHQ-9(우울)·GAD-7(불안)·PSS(스트레스)·CBI(번아웃) 자가진단 검사</li>
+                <li>AI 기반 정서 케어 리포트 및 위로 편지 생성</li>
+                <li>감정 맞춤 도서·활동 AI 추천</li>
+                <li>전문 상담소 검색 및 예약 연결</li>
+                <li>회원 간 소통을 위한 커뮤니티</li>
+            </ul>
+        </section>
+
+        <!-- 제3조 의료 서비스 면책 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem; border-left: 3px solid var(--destructive, #e74c3c);">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--destructive, #e74c3c);">제3조 (의료 서비스 면책)</h2>
+            <p style="line-height:1.8;">
+                본 서비스는 <button type="button" class="law-ref" onclick="openLaw('medical')" style="color:var(--destructive,#e74c3c);">의료법</button>상 의료 행위가 아니며,
+                <strong>자가진단 결과는 의학적 진단을 대체하지 않습니다.</strong>
+                검사 결과가 우려되거나 증상이 지속·악화되는 경우 반드시 정신건강의학과 전문의 또는
+                정신건강 상담 전문가를 찾아주시기 바랍니다.
+                정신건강 전문가의 상담을 적극 권장합니다.
+            </p>
+        </section>
+
+        <!-- 제4조 금지 행위 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--primary);">제4조 (금지 행위)</h2>
+            <p style="margin-bottom:0.75rem; line-height:1.8;">이용자는 다음 행위를 해서는 안 됩니다.</p>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>타인을 비방·모욕하거나 명예를 훼손하는 콘텐츠 게시</li>
+                <li>허위 사실을 유포하거나 다른 이용자를 기만하는 행위</li>
+                <li>타인의 개인정보를 무단으로 수집·이용하거나 제3자에게 제공하는 행위</li>
+                <li>자살·자해를 권유하거나 조장하는 콘텐츠 게시</li>
+                <li>서비스 운영을 방해하거나 서버에 과부하를 주는 행위</li>
+                <li>영리 목적의 무단 광고 및 스팸성 콘텐츠 게시</li>
+            </ul>
+        </section>
+
+        <!-- 제5조 서비스 변경·중단 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--primary);">제5조 (서비스 변경·중단)</h2>
+            <ol style="padding-left:1.25rem; line-height:2.1;">
+                <li>서비스는 운영상·기술상 필요에 따라 서비스 내용을 변경하거나 일부 기능을 중단할 수 있으며, 사전에 공지사항을 통해 안내합니다.</li>
+                <li>서비스 전체를 종료하는 경우 최소 30일 전 공지사항을 통해 고지합니다.</li>
+            </ol>
+        </section>
+
+        <!-- 제6조 면책 조항 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.75rem; color:var(--primary);">제6조 (면책 조항)</h2>
+            <ol style="padding-left:1.25rem; line-height:2.1;">
+                <li>천재지변, 불가항력적 사유, 통신 장애 등으로 인한 서비스 중단에 대해 책임을 지지 않습니다.</li>
+                <li>이용자가 게시한 콘텐츠로 인해 발생하는 분쟁에 대해 서비스는 책임을 지지 않습니다.</li>
+                <li>외부 API(OpenAI, Google Gemini, Naver) 장애로 인한 기능 미제공에 대해 책임을 지지 않습니다.</li>
+                <li>자가진단 결과 및 AI 케어는 참고용이며, 의학적 진단·치료를 대체하지 않습니다.</li>
+            </ol>
+        </section>
+
+        <!-- 시행일 -->
+        <section class="card" style="padding: 1.25rem 1.5rem; background:rgba(108,92,231,0.04); border:1px solid rgba(108,92,231,0.15);">
+            <p style="margin:0; line-height:1.8; text-align:center;">
+                본 약관은 <strong>2026년 6월 1일</strong>부터 시행됩니다.
+                이전 약관은 본 약관으로 대체됩니다.
+            </p>
+        </section>
+
+    </div>
+
+    <!-- ── 법령 모달 ── -->
+    <div id="lawOverlay"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; overflow-y:auto; padding:2rem 1rem;"
+         onclick="if(event.target===this)closeLawModal()">
+        <div style="background:var(--card,#fff); border-radius:0.75rem; max-width:600px; margin:2rem auto; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border);">
+                <div>
+                    <div id="lawModalSub" style="font-size:0.75rem; color:var(--muted-foreground); margin-bottom:0.25rem;"></div>
+                    <h2 id="lawModalTitle" style="font-size:1rem; font-weight:700; margin:0; line-height:1.5;"></h2>
+                </div>
+                <button onclick="closeLawModal()" aria-label="닫기"
+                        style="background:none;border:none;cursor:pointer;padding:0.25rem;color:var(--muted-foreground);flex-shrink:0;margin-left:1rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="lawModalBody" style="padding:1.5rem; max-height:65vh; overflow-y:auto;"></div>
+            <div style="padding:0.875rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(108,92,231,0.03);">
+                <span style="font-size:0.75rem; color:var(--muted-foreground);">출처: 국가법령정보센터</span>
+                <a id="lawModalLink" href="https://www.law.go.kr" target="_blank" rel="noopener noreferrer"
+                   style="font-size:0.8rem; color:var(--primary); text-decoration:none;">law.go.kr 전문 보기 →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var LAWS = {
+            'medical': {
+                title: '의료법',
+                sub: '제27조 — 무면허 의료행위 금지',
+                url: 'https://www.law.go.kr/법령/의료법',
+                articles: [
+                    { num: '제27조 (무면허 의료행위 등 금지)',
+                      text: '① 의료인이 아니면 누구든지 의료행위를 할 수 없으며 의료인도 면허된 것 이외의 의료행위를 할 수 없다. 다만, 다음 각 호의 어느 하나에 해당하는 자는 보건복지부령으로 정하는 범위에서 의료행위를 할 수 있다.\n\n1. 외국의 의료인 면허를 가진 자로서 일정 기간 국내에 체류하는 자\n2. 종합병원 또는 외국 의료원조기관의 의료봉사 또는 연구 및 시범사업을 위하여 의료행위를 하는 자\n3. 의학·치과의학·한방의학 또는 간호학을 전공하는 학교의 학생\n\n[마음이음 안내]\n자가진단 검사(PHQ-9·GAD-7·PSS·CBI)는 표준화된 심리 측정 도구로, 의료법상 의료행위에 해당하지 않습니다. 검사 결과는 자가 점검 참고 정보이며 의사의 진단·처방을 대체하지 않습니다.' },
+                    { num: '제2조 (의료인 정의)',
+                      text: '① 이 법에서 "의료인"이란 보건복지부장관의 면허를 받은 의사·치과의사·한의사·조산사 및 간호사를 말한다.\n\n② 의료인은 종별에 따라 다음 각 호의 임무를 수행하여 국민보건 향상을 이루고 국민의 건강한 생활 확보에 이바지할 사명을 가진다.\n\n1. 의사는 의료와 보건지도를 임무로 한다.\n2. 치과의사는 치과 의료와 구강 보건지도를 임무로 한다.\n3. 한의사는 한방 의료와 한방 보건지도를 임무로 한다.' }
+                ]
+            }
+        };
+
+        window.openLaw = function (key) {
+            var law = LAWS[key];
+            if (!law) return;
+            document.getElementById('lawModalSub').textContent = law.sub || '';
+            document.getElementById('lawModalTitle').textContent = law.title;
+            document.getElementById('lawModalLink').href = law.url;
+
+            var html = '';
+            law.articles.forEach(function (art) {
+                html += '<div style="margin-bottom:1.75rem;">' +
+                    '<div style="font-weight:700; color:var(--primary); margin-bottom:0.6rem; font-size:0.875rem;">' + esc(art.num) + '</div>' +
+                    '<p style="margin:0; white-space:pre-wrap; font-size:0.875rem; line-height:1.9;">' + esc(art.text) + '</p>' +
+                    '</div>';
+            });
+            document.getElementById('lawModalBody').innerHTML = html;
+
+            document.getElementById('lawOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.addEventListener('keydown', escHandler);
+        };
+
+        window.closeLawModal = function () {
+            document.getElementById('lawOverlay').style.display = 'none';
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', escHandler);
+        };
+
+        function escHandler(e) { if (e.key === 'Escape') window.closeLawModal(); }
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    })();
+    </script>
+</main>
+
+<th:block th:if="${!embed}">
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</th:block>
+</body>
+</html>

@@ -101,7 +101,7 @@ public class AuthController {
         if (bindingResult.hasErrors()) return "signup";
 
         try {
-            User user = userService.signup(form.getName(), form.getEmail(), form.getPassword());
+            User user = userService.signup(form.getName(), form.getEmail(), form.getPassword(), form.isAgreeSensitive());
             session.setAttribute(SessionConst.LOGIN_USER_ID, user.getId());
         } catch (IllegalArgumentException e) {
             bindingResult.rejectValue("email", "duplicate", e.getMessage());

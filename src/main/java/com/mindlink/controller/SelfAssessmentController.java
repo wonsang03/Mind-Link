@@ -92,18 +92,26 @@ public class SelfAssessmentController {
         String level = range.getLevel();
         boolean highRisk = "고위험군".equals(level) || "중등도-중증".equals(level) || "중증".equals(level) || "높음".equals(level);
 
-        // 로그인 사용자 → 결과 저장 + 악화 감지
+        // 로그인 사용자 → 동의 여부 확인 후 결과 저장 + 악화 감지
         User loginUser = getLoginUser(session);
         if (loginUser != null) {
-            UserAlert alert = monitoringService.saveAndMonitor(
-                loginUser, typeKey, totalScore, level, highRisk,
-                null, null, null, null);
-            clusterProfileService.mergeAssessmentScore(
-                    loginUser.getId(), loginUser.getName(), typeKey, totalScore);
-            if (alert != null) model.addAttribute("resultAlert", alert);
+            if (loginUser.isSensitiveDataConsent()) {
+                UserAlert alert = monitoringService.saveAndMonitor(
+                    loginUser, typeKey, totalScore, level, highRisk,
+                    null, null, null, null);
+                clusterProfileService.mergeAssessmentScore(
+                        loginUser.getId(), loginUser.getName(), typeKey, totalScore);
+                if (alert != null) model.addAttribute("resultAlert", alert);
+                model.addAttribute("isSavedResult", true);
+            } else {
+                model.addAttribute("saveResultHint",
+                    "현재 민감정보(자가진단 결과) 저장에 동의하지 않아 결과가 저장되지 않습니다. " +
+                    "내 정보 > 개인정보 설정에서 동의하시면 결과 이력과 악화 알림을 받을 수 있습니다.");
+            }
         } else {
             model.addAttribute("saveResultHint",
-                    "로그인 후 검사하면 결과가 저장되고, 고위험·악화 시 알림(상단 종 아이콘)을 받을 수 있습니다.");
+                    "로그인 후 검사하면 개인정보 처리방침에 따라 결과가 저장되며, 악화 감지 시 알림을 받을 수 있습니다. " +
+                    "저장을 원하지 않으시면 로그인 없이 이용하세요.");
         }
 
         model.addAttribute("assessment", assessment);
@@ -141,16 +149,24 @@ public class SelfAssessmentController {
         String workLevel     = burnoutLevel(workScore);
         boolean highRisk = "높음".equals(personalLevel) || "높음".equals(workLevel);
 
-        // 로그인 사용자 → 결과 저장 + 악화 감지
+        // 로그인 사용자 → 동의 여부 확인 후 결과 저장 + 악화 감지
         User loginUser = getLoginUser(session);
         if (loginUser != null) {
-            UserAlert alert = monitoringService.saveAndMonitor(
-                loginUser, assessment.getTypeKey(), null, null, highRisk,
-                personalScore, personalLevel, workScore, workLevel);
-            if (alert != null) model.addAttribute("resultAlert", alert);
+            if (loginUser.isSensitiveDataConsent()) {
+                UserAlert alert = monitoringService.saveAndMonitor(
+                    loginUser, assessment.getTypeKey(), null, null, highRisk,
+                    personalScore, personalLevel, workScore, workLevel);
+                if (alert != null) model.addAttribute("resultAlert", alert);
+                model.addAttribute("isSavedResult", true);
+            } else {
+                model.addAttribute("saveResultHint",
+                    "현재 민감정보(자가진단 결과) 저장에 동의하지 않아 결과가 저장되지 않습니다. " +
+                    "내 정보 > 개인정보 설정에서 동의하시면 결과 이력과 악화 알림을 받을 수 있습니다.");
+            }
         } else {
             model.addAttribute("saveResultHint",
-                    "로그인 후 검사하면 결과가 저장되고, 고위험·악화 시 알림(상단 종 아이콘)을 받을 수 있습니다.");
+                    "로그인 후 검사하면 개인정보 처리방침에 따라 결과가 저장되며, 악화 감지 시 알림을 받을 수 있습니다. " +
+                    "저장을 원하지 않으시면 로그인 없이 이용하세요.");
         }
 
         model.addAttribute("assessment", assessment);

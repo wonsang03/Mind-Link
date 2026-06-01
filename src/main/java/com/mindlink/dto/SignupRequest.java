@@ -21,15 +21,19 @@ public class SignupRequest {
     @NotBlank(message = "비밀번호 확인을 입력해주세요.")
     private String passwordConfirm;
 
+    private boolean agreeSensitive;
+
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public String getPasswordConfirm() { return passwordConfirm; }
+    public boolean isAgreeSensitive() { return agreeSensitive; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setPasswordConfirm(String passwordConfirm) { this.passwordConfirm = passwordConfirm; }
+    public void setAgreeSensitive(boolean agreeSensitive) { this.agreeSensitive = agreeSensitive; }
 
     public boolean passwordMatches() {
         return password != null && password.equals(passwordConfirm);

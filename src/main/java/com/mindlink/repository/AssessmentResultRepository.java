@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface AssessmentResultRepository extends JpaRepository<AssessmentResult, Long> {
 
+    void deleteByUser(User user);
+
     Optional<AssessmentResult> findTopByUserAndTypeKeyOrderByCompletedAtDesc(User user, String typeKey);
 
     boolean existsByUserAndHighRiskTrueAndCompletedAtAfter(User user, LocalDateTime since);

@@ -68,6 +68,39 @@ public class UserController {
         return "user/edit";
     }
 
+    /** 민감정보 동의 토글 */
+    @PostMapping("/me/sensitive-consent")
+    public String updateSensitiveConsent(@RequestParam boolean consent,
+                                         HttpSession session,
+                                         RedirectAttributes ra) {
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (!(userId instanceof Long uid)) return "redirect:/login";
+        userService.updateSensitiveConsent(uid, consent);
+        ra.addFlashAttribute("flash",
+                consent ? "자가진단 결과 저장에 동의하였습니다."
+                        : "동의가 철회되었습니다. 저장된 자가진단 결과와 알림이 삭제되었습니다.");
+        return "redirect:/user/me";
+    }
+
+    /** 회원 탈퇴 처리 */
+    @PostMapping("/me/withdraw")
+    public String withdraw(@RequestParam String currentPassword,
+                           HttpSession session,
+                           RedirectAttributes ra) {
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (!(userId instanceof Long uid)) return "redirect:/login";
+
+        if (!userService.checkPassword(uid, currentPassword)) {
+            ra.addFlashAttribute("withdrawError", "비밀번호가 올바르지 않습니다.");
+            return "redirect:/user/me";
+        }
+
+        userService.withdraw(uid);
+        session.invalidate();
+        ra.addFlashAttribute("flash", "회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        return "redirect:/";
+    }
+
     /** 회원 정보 수정 처리 */
     @PostMapping("/me/edit")
     public String edit(@Valid @ModelAttribute("updateForm") UserUpdateRequest form,

@@ -51,4 +51,16 @@ public class PageController {
         model.addAttribute("proverb", proverbService.getRandom("RECOMMENDATIONS"));
         return "recommendations";
     }
+
+    @GetMapping("/privacy")
+    public String privacy(@RequestParam(defaultValue = "false") boolean embed, Model model) {
+        if (embed) model.addAttribute("embed", true);
+        return "privacy";
+    }
+
+    @GetMapping("/terms")
+    public String terms(@RequestParam(defaultValue = "false") boolean embed, Model model) {
+        if (embed) model.addAttribute("embed", true);
+        return "terms";
+    }
 }

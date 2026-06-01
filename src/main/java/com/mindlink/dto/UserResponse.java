@@ -17,6 +17,7 @@ public class UserResponse {
     private Boolean notificationEnabled;
     private String phone;
     private String profileImageUrl;
+    private boolean sensitiveDataConsent;
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -29,6 +30,7 @@ public class UserResponse {
         this.notificationEnabled = user.getNotificationEnabled();
         this.phone = user.getPhone();
         this.profileImageUrl = user.getProfileImageUrl();
+        this.sensitiveDataConsent = user.isSensitiveDataConsent();
     }
 
     public Long getId() { return id; }
@@ -41,4 +43,5 @@ public class UserResponse {
     public Boolean getNotificationEnabled() { return notificationEnabled; }
     public String getPhone() { return phone; }
     public String getProfileImageUrl() { return profileImageUrl; }
+    public boolean isSensitiveDataConsent() { return sensitiveDataConsent; }
 }

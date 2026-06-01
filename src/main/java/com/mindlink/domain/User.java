@@ -43,11 +43,15 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
+    @Column(name = "sensitive_data_consent", nullable = false)
+    private boolean sensitiveDataConsent = false;
+
     @PrePersist
     void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (role == null) role = UserRole.USER;
         if (notificationEnabled == null) notificationEnabled = false;
+        if (!sensitiveDataConsent) sensitiveDataConsent = false;
     }
 
     public User() {}
@@ -70,6 +74,7 @@ public class User {
     public Boolean getNotificationEnabled() { return notificationEnabled; }
     public String getPhone() { return phone; }
     public String getProfileImageUrl() { return profileImageUrl; }
+    public boolean isSensitiveDataConsent() { return sensitiveDataConsent; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
@@ -80,4 +85,5 @@ public class User {
     public void setNotificationEnabled(Boolean notificationEnabled) { this.notificationEnabled = notificationEnabled; }
     public void setPhone(String phone) { this.phone = phone; }
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
+    public void setSensitiveDataConsent(boolean sensitiveDataConsent) { this.sensitiveDataConsent = sensitiveDataConsent; }
 }

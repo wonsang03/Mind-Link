@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('마음이음 - 개인정보 처리방침')}"></head>
+<body>
+<th:block th:if="${!embed}">
+    <header th:replace="~{fragments/layout :: header}"></header>
+</th:block>
+
+<style>
+.law-ref {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--primary);
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+    line-height: inherit;
+}
+.law-ref:hover { text-decoration-style: solid; opacity: 0.85; }
+</style>
+
+<main>
+    <div class="page-form" style="max-width: 760px;">
+
+        <div class="center mb-8">
+            <h1 class="mb-4">개인정보 처리방침</h1>
+            <p class="muted">시행일: 2026년 6월 1일</p>
+        </div>
+
+        <div class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <p style="line-height: 1.8;">
+                마음이음(이하 "서비스")은
+                <button type="button" class="law-ref" onclick="openLaw('pipa')">「개인정보 보호법」</button> 및
+                <button type="button" class="law-ref" onclick="openLaw('itna')">「정보통신망 이용촉진 및 정보보호 등에 관한 법률」</button>에 따라
+                이용자의 개인정보를 보호하고 이와 관련한 고충을 신속·공정하게 처리하기 위하여 아래와 같이 개인정보 처리방침을 수립·공개합니다.
+            </p>
+        </div>
+
+        <!-- 섹션 1: 수집 항목 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                1. 수집하는 개인정보 항목
+            </h2>
+            <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+                <thead>
+                    <tr style="background:rgba(108,92,231,0.07);">
+                        <th style="padding:0.6rem 0.75rem; border:1px solid var(--border); text-align:left;">구분</th>
+                        <th style="padding:0.6rem 0.75rem; border:1px solid var(--border); text-align:left;">수집 항목</th>
+                        <th style="padding:0.6rem 0.75rem; border:1px solid var(--border); text-align:left;">수집 방법</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">필수</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">이름, 이메일, 비밀번호(암호화 저장)</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">회원가입 시 직접 입력</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">선택</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">닉네임, 지역, 전화번호, 프로필 이미지</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">회원정보 수정 시 직접 입력</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border); color:var(--destructive, #e74c3c); font-weight:500;">민감정보<br/>(별도 동의)</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">
+                            자가진단 결과 — PHQ-9(우울), GAD-7(불안), PSS(스트레스), CBI(번아웃) 점수 및 등급
+                        </td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">자가진단 완료 시 자동 생성 (동의한 경우에만)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">자동 생성</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">가입일시, 접속 로그(IP 마스킹 처리)</td>
+                        <td style="padding:0.6rem 0.75rem; border:1px solid var(--border);">서비스 이용 과정에서 자동 생성</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted-foreground);">
+                ※ 비밀번호는 BCrypt로 암호화 저장되며, 원문 확인이 불가합니다.<br/>
+                ※ 접속 로그는 IP 마지막 옥텟 마스킹, 이메일·전화번호 마스킹 후 기록됩니다.
+            </p>
+        </section>
+
+        <!-- 섹션 2: 수집 및 이용 목적 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                2. 수집 및 이용 목적
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>회원 식별 및 서비스 제공(로그인, 프로필 관리)</li>
+                <li>자가진단 결과 저장·시계열 모니터링·악화 알림 발송 <span style="color:var(--destructive,#e74c3c); font-size:0.8rem;">(민감정보 동의 시에만)</span></li>
+                <li>개인화 서비스 제공(맞춤 도서·활동 추천, AI 정서 케어)</li>
+                <li>상담 예약 관리 및 상담소 연결</li>
+                <li>서비스 품질 개선을 위한 통계 분석(익명 집계 데이터 사용)</li>
+            </ul>
+        </section>
+
+        <!-- 섹션 3: 보유 및 이용 기간 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                3. 보유 및 이용 기간
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>회원 탈퇴 시 개인 식별 정보(이름·이메일·전화번호·주소 등)는 <strong>즉시 파기</strong>합니다.</li>
+                <li>자가진단 결과: 탈퇴 또는 삭제 요청 즉시 파기</li>
+                <li>단, 관계 법령에 따라 보존 의무가 있는 경우 해당 기간 동안 보관합니다.</li>
+            </ul>
+            <table style="width:100%; border-collapse:collapse; font-size:0.875rem; margin-top:0.75rem;">
+                <thead>
+                    <tr style="background:rgba(108,92,231,0.07);">
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">보존 근거 법령</th>
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">보존 항목</th>
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">보존 기간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">
+                            <button type="button" class="law-ref" onclick="openLaw('ecpa')">전자상거래법</button>
+                        </td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">계약·청약철회 기록</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">5년</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">
+                            <button type="button" class="law-ref" onclick="openLaw('wiretap')">통신비밀보호법</button>
+                        </td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">접속 로그</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">3개월</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 섹션 4: 파기 절차 및 방법 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                4. 파기 절차 및 방법
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>전자적 파일: 복구 불가능한 방법으로 즉시 삭제</li>
+                <li>탈퇴 시 이름·이메일·전화번호 등 개인 식별 정보는 즉시 익명화(파기)됩니다.</li>
+                <li>통계 목적의 집계 데이터는 개인을 식별할 수 없도록 익명화 처리 후 보존합니다.</li>
+            </ul>
+        </section>
+
+        <!-- 섹션 5: 제3자 제공 및 처리 위탁 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                5. 제3자 제공 및 처리 위탁
+            </h2>
+            <p style="margin-bottom:0.75rem; line-height:1.8;"><strong>제3자 제공: 없음</strong></p>
+            <p style="margin-bottom:0.75rem; line-height:1.8;">아래 외부 서비스에 일부 기능을 위탁하나, 개인 식별 정보는 전달되지 않습니다.</p>
+            <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+                <thead>
+                    <tr style="background:rgba(108,92,231,0.07);">
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">수탁자</th>
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">위탁 업무</th>
+                        <th style="padding:0.55rem 0.75rem; border:1px solid var(--border); text-align:left;">개인정보 전송 여부</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">OpenAI</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">AI 위로 편지 생성</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">감정 키워드만 전송 (이름·이메일 미포함)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">Google Gemini</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">AI 도서 추천</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">선호 키워드만 전송 (개인 식별 정보 미포함)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">Naver</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">상담소·도서 검색</td>
+                        <td style="padding:0.55rem 0.75rem; border:1px solid var(--border);">검색 쿼리만 전송</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 섹션 6: 정보주체의 권리 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                6. 정보주체의 권리·의무 및 행사 방법
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li><strong>열람·정정</strong>: <a th:href="@{/user/me/edit}" style="color:var(--primary);">회원정보 수정</a>에서 직접 변경 가능</li>
+                <li><strong>삭제(탈퇴)</strong>: <a th:href="@{/user/me}" style="color:var(--primary);">내 정보</a> 하단 탈퇴 메뉴 이용</li>
+                <li><strong>자가진단 결과 개별 삭제</strong>: <a th:href="@{/user/me}" style="color:var(--primary);">내 정보</a> 내 검사 이력에서 삭제 가능</li>
+                <li><strong>처리 정지</strong>: 서비스 내 관리자 문의 기능을 통해 요청</li>
+            </ul>
+        </section>
+
+        <!-- 섹션 7: 민감정보 처리 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem; border-left: 3px solid var(--destructive, #e74c3c);">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--destructive, #e74c3c);">
+                7. 민감정보 처리 (<button type="button" class="law-ref" onclick="openLaw('pipa-23')" style="color:var(--destructive,#e74c3c);">개인정보보호법 제23조</button>)
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>자가진단 결과(PHQ-9·GAD-7·PSS·CBI 점수 및 등급)는 건강 관련 <strong>민감정보</strong>에 해당합니다.</li>
+                <li>회원가입 시 별도 동의를 받은 사용자에 한해 저장되며, <strong>동의하지 않아도 가입 및 검사가 가능</strong>합니다.</li>
+                <li>동의 철회는 <a th:href="@{/user/me}" style="color:var(--primary);">내 정보 &gt; 개인정보 설정</a>에서 언제든지 가능합니다.</li>
+                <li>동의 철회 시 이후 검사 결과는 저장되지 않으며, 기존 저장된 결과는 직접 삭제하거나 탈퇴 시 파기됩니다.</li>
+            </ul>
+        </section>
+
+        <!-- 섹션 8: 안전성 확보 조치 -->
+        <section class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem; color:var(--primary);">
+                8. 안전성 확보 조치
+            </h2>
+            <ul style="padding-left:1.25rem; line-height:2.1;">
+                <li>비밀번호: BCrypt 암호화 저장 (원문 복구 불가)</li>
+                <li>접근 로그: IP 마지막 옥텟 마스킹, 이메일·전화번호 마스킹 처리</li>
+                <li>개인정보처리시스템 접속기록 보관 (3개월 이상)</li>
+                <li>익명화된 계정은 이메일 도메인이 <code>.invalid</code>로 설정되어 실질적 로그인 불가</li>
+            </ul>
+        </section>
+
+        <!-- 섹션 9: 시행일 -->
+        <section class="card" style="padding: 1.25rem 1.5rem; background:rgba(108,92,231,0.04); border:1px solid rgba(108,92,231,0.15);">
+            <h2 style="font-size:1.05rem; font-weight:600; margin-bottom:0.5rem; color:var(--primary);">
+                9. 처리방침 시행일
+            </h2>
+            <p style="margin:0; line-height:1.8;">
+                본 방침은 <strong>2026년 6월 1일</strong>부터 시행됩니다.
+                변경 시 서비스 공지사항을 통해 사전 안내합니다.
+            </p>
+        </section>
+
+    </div>
+
+    <!-- ── 법령 모달 ── -->
+    <div id="lawOverlay"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; overflow-y:auto; padding:2rem 1rem;"
+         onclick="if(event.target===this)closeLawModal()">
+        <div style="background:var(--card,#fff); border-radius:0.75rem; max-width:600px; margin:2rem auto; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border);">
+                <div>
+                    <div id="lawModalSub" style="font-size:0.75rem; color:var(--muted-foreground); margin-bottom:0.25rem;"></div>
+                    <h2 id="lawModalTitle" style="font-size:1rem; font-weight:700; margin:0; line-height:1.5;"></h2>
+                </div>
+                <button onclick="closeLawModal()" aria-label="닫기"
+                        style="background:none;border:none;cursor:pointer;padding:0.25rem;color:var(--muted-foreground);flex-shrink:0;margin-left:1rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="lawModalBody" style="padding:1.5rem; max-height:65vh; overflow-y:auto;"></div>
+            <div style="padding:0.875rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(108,92,231,0.03);">
+                <span style="font-size:0.75rem; color:var(--muted-foreground);">출처: 국가법령정보센터</span>
+                <a id="lawModalLink" href="https://www.law.go.kr" target="_blank" rel="noopener noreferrer"
+                   style="font-size:0.8rem; color:var(--primary); text-decoration:none;">law.go.kr 전문 보기 →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var LAWS = {
+            'pipa': {
+                title: '개인정보 보호법',
+                sub: '법률 제19234호 · 개인정보 처리 및 보호에 관한 기본법',
+                url: 'https://www.law.go.kr/법령/개인정보보호법',
+                articles: [
+                    { num: '제1조 (목적)',
+                      text: '이 법은 개인정보의 처리 및 보호에 관한 사항을 정함으로써 개인의 자유와 권리를 보호하고, 나아가 개인의 존엄과 가치를 구현함을 목적으로 한다.' },
+                    { num: '제3조 (개인정보 보호 원칙)',
+                      text: '① 개인정보처리자는 개인정보의 처리 목적을 명확하게 하여야 하고 그 목적에 필요한 범위에서 최소한의 개인정보만을 적법하고 정당하게 수집하여야 한다.\n② 개인정보처리자는 개인정보의 처리 목적에 필요한 범위에서 적합하게 개인정보를 처리하여야 하며, 그 목적 외의 용도로 활용하여서는 아니 된다.\n③ 개인정보처리자는 개인정보를 익명 또는 가명으로 처리하여도 개인정보 수집목적을 달성할 수 있는 경우 익명처리가 가능한 경우에는 익명에 의하여 처리될 수 있도록 하여야 한다.' },
+                    { num: '제15조 (개인정보의 수집·이용)',
+                      text: '① 개인정보처리자는 다음 각 호의 어느 하나에 해당하는 경우에는 개인정보를 수집할 수 있으며 그 수집 목적의 범위에서 이용할 수 있다.\n\n1. 정보주체의 동의를 받은 경우\n2. 법률에 특별한 규정이 있거나 법령상 의무를 준수하기 위하여 불가피한 경우\n3. 공공기관이 법령 등에서 정하는 소관 업무의 수행을 위하여 불가피한 경우\n4. 정보주체와의 계약의 체결 및 이행을 위하여 불가피하게 필요한 경우' }
+                ]
+            },
+            'pipa-23': {
+                title: '개인정보 보호법 제23조',
+                sub: '민감정보의 처리 제한 — 건강·신념 등 민감한 개인정보에 대한 별도 동의 요건',
+                url: 'https://www.law.go.kr/법령/개인정보보호법',
+                articles: [
+                    { num: '제23조 (민감정보의 처리 제한)',
+                      text: '① 개인정보처리자는 사상·신념, 노동조합·정당의 가입·탈퇴, 정치적 견해, 건강, 성생활 등에 관한 정보, 그 밖에 정보주체의 사생활을 현저히 침해할 우려가 있는 개인정보로서 대통령령으로 정하는 정보(이하 "민감정보"라 한다)를 처리하여서는 아니 된다. 다만, 다음 각 호의 어느 하나에 해당하는 경우에는 그러하지 아니하다.\n\n1. 정보주체에게 제15조제2항 각 호 또는 제17조제2항 각 호의 사항을 알리고 다른 개인정보의 처리에 대한 동의와 별도로 동의를 받은 경우\n2. 법령에서 민감정보의 처리를 요구하거나 허용하는 경우\n\n② 개인정보처리자가 제1항 각 호에 따라 민감정보를 처리하는 경우에는 그 민감정보가 분실·도난·유출·위조·변조 또는 훼손되지 아니하도록 제29조에 따른 안전성 확보에 필요한 조치를 하여야 한다.\n\n[마음이음 적용]\n자가진단 결과(PHQ-9·GAD-7·PSS·CBI 점수)는 "건강에 관한 정보"로 민감정보에 해당합니다. 회원가입 시 일반 개인정보 동의와 별도로 민감정보 저장 동의를 받는 이유입니다.' }
+                ]
+            },
+            'ecpa': {
+                title: '전자상거래 등에서의 소비자보호에 관한 법률',
+                sub: '제6조 — 거래기록 보존 의무',
+                url: 'https://www.law.go.kr/법령/전자상거래등에서의소비자보호에관한법률',
+                articles: [
+                    { num: '제6조 (거래기록의 보존 등)',
+                      text: '① 사업자는 전자상거래 및 통신판매에서의 표시·광고, 계약내용 및 그 이행 등 거래에 관한 기록을 상당한 기간 보존하여야 한다. 이 경우 소비자가 쉽게 거래기록에 접근할 수 있도록 하여야 한다.\n\n[시행령 제6조 — 보존 기간]\n• 표시·광고에 관한 기록: 6개월\n• 계약 또는 청약철회 등에 관한 기록: 5년\n• 대금결제 및 재화 등의 공급에 관한 기록: 5년\n• 소비자의 불만 또는 분쟁처리에 관한 기록: 3년' }
+                ]
+            },
+            'wiretap': {
+                title: '통신비밀보호법',
+                sub: '제15조의2 — 통신사실 확인자료 보존 의무',
+                url: 'https://www.law.go.kr/법령/통신비밀보호법',
+                articles: [
+                    { num: '제15조의2 (전기통신사업자의 협조의무)',
+                      text: '② 전기통신사업자는 검사, 사법경찰관 또는 정보수사기관의 장이 제13조에 따라 통신사실 확인자료의 열람이나 제출을 요청하는 경우에 이에 응하여야 한다.\n\n[시행령 제41조 — 보존 기간]\n• 가입자의 전기통신일시, 개시·종료시간, 발·착신 번호, 사용도수: 1년\n• 컴퓨터통신 또는 인터넷 로그기록자료, 접속지 추적자료: 3개월' }
+                ]
+            },
+            'itna': {
+                title: '정보통신망 이용촉진 및 정보보호 등에 관한 법률',
+                sub: '정보통신망법 — 개인정보 수집·이용 동의',
+                url: 'https://www.law.go.kr/법령/정보통신망이용촉진및정보보호등에관한법률',
+                articles: [
+                    { num: '제22조 (개인정보의 수집·이용 동의 등)',
+                      text: '① 정보통신서비스 제공자는 이용자의 개인정보를 이용하려면 다음 각 호의 모두에 해당하는 경우에 한정하여 개인정보를 수집할 수 있으며 그 수집한 목적의 범위에서 이용할 수 있다.\n\n1. 이용자의 동의를 받은 경우\n2. 정보통신서비스의 제공에 관한 계약을 이행하기 위하여 필요한 개인정보로서 경제적·기술적인 사유로 통상적인 동의를 받는 것이 뚜렷하게 곤란한 경우\n3. 정보통신서비스의 제공에 따른 요금정산을 위하여 필요한 경우\n4. 다른 법률에 특별한 규정이 있는 경우' },
+                    { num: '제24조의2 (개인정보의 제공 동의 등)',
+                      text: '정보통신서비스 제공자는 이용자의 개인정보를 제3자에게 제공하려면 다음 각 호의 모두를 이용자에게 알리고 동의를 받아야 한다.\n\n1. 개인정보를 제공받는 자\n2. 개인정보를 제공받는 자의 개인정보 이용 목적\n3. 제공하는 개인정보의 항목\n4. 개인정보를 제공받는 자의 개인정보 보유 및 이용 기간' }
+                ]
+            }
+        };
+
+        window.openLaw = function (key) {
+            var law = LAWS[key];
+            if (!law) return;
+            document.getElementById('lawModalSub').textContent = law.sub || '';
+            document.getElementById('lawModalTitle').textContent = law.title;
+            document.getElementById('lawModalLink').href = law.url;
+
+            var html = '';
+            law.articles.forEach(function (art) {
+                html += '<div style="margin-bottom:1.75rem;">' +
+                    '<div style="font-weight:700; color:var(--primary); margin-bottom:0.6rem; font-size:0.875rem;">' + esc(art.num) + '</div>' +
+                    '<p style="margin:0; white-space:pre-wrap; font-size:0.875rem; line-height:1.9;">' + esc(art.text) + '</p>' +
+                    '</div>';
+            });
+            document.getElementById('lawModalBody').innerHTML = html;
+
+            document.getElementById('lawOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.addEventListener('keydown', escHandler);
+        };
+
+        window.closeLawModal = function () {
+            document.getElementById('lawOverlay').style.display = 'none';
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', escHandler);
+        };
+
+        function escHandler(e) { if (e.key === 'Escape') window.closeLawModal(); }
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    })();
+    </script>
+</main>
+
+<th:block th:if="${!embed}">
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</th:block>
+</body>
+</html>

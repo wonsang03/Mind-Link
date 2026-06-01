@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
 
+    void deleteByUser(User user);
+
     List<ActivityLog> findByUserOrderByCreatedAtDesc(User user);
 
     List<ActivityLog> findByUserAndActivityKeyOrderByCreatedAtDesc(User user, String activityKey);
