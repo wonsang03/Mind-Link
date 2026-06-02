@@ -826,6 +826,83 @@
 .log-line.log-debug { color: #94a3b8; }
 .log-line.log-trace { color: #64748b; }
 
+/* ── 열 분리 / 레벨 배지 / 스택트레이스 그룹 ── */
+.log-block { display: block; border-radius: 4px; }
+.log-block.lvl-error { background: rgba(239, 68, 68, 0.08); }
+.log-block.lvl-warn  { background: rgba(234, 179, 8, 0.06); }
+
+.log-access-group { margin: 0.15rem 0; border-left: 3px solid #38bdf8; padding-left: 0.35rem; }
+.log-access-head .log-access-toggle {
+    flex: 1 1 auto;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: #bae6fd;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+.log-access-head .log-access-toggle:hover { color: #e0f2fe; text-decoration: underline; }
+.log-access-body { margin: 0.2rem 0 0.35rem 2.5rem; padding-left: 0.5rem; border-left: 1px solid #334155; }
+.log-access-body.collapsed { display: none; }
+.log-access-detail { color: #94a3b8; font-size: 0.78rem; line-height: 1.4; padding: 0.05rem 0; }
+
+.log-view .log-line {
+    display: flex;
+    gap: 0.55rem;
+    align-items: baseline;
+    flex-wrap: nowrap;
+}
+.log-view.log-nowrap .log-line { white-space: pre; }
+
+/* 줄 번호 (체크박스로 표시) */
+.log-ln { display: none; flex: 0 0 3.2rem; text-align: right; color: #475569; user-select: none; }
+.log-view.show-ln .log-ln { display: inline-block; }
+
+.log-ts     { flex: 0 0 auto; color: #64748b; }
+.log-logger { flex: 0 1 auto; color: #7dd3fc; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.log-msg    { flex: 1 1 auto; min-width: 0; word-break: break-all; }
+.log-line.plain .log-msg { white-space: inherit; }
+
+.log-badge {
+    flex: 0 0 auto;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.02rem 0.4rem;
+    border-radius: 4px;
+    line-height: 1.5;
+}
+.log-badge-error { background: #7f1d1d; color: #fecaca; }
+.log-badge-warn  { background: #78350f; color: #fde68a; }
+.log-badge-info  { background: #1e3a8a; color: #bfdbfe; }
+.log-badge-debug { background: #334155; color: #cbd5e1; }
+.log-badge-trace { background: #1f2937; color: #94a3b8; }
+
+.log-trace-toggle {
+    flex: 0 0 auto;
+    background: none;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    padding: 0 0.4rem;
+    margin-left: 0.4rem;
+    cursor: pointer;
+}
+.log-trace-toggle:hover { background: #1e293b; color: #e2e8f0; }
+.log-trace-body {
+    color: #cbd5e1;
+    border-left: 2px solid #334155;
+    margin: 0.15rem 0 0.4rem 1.4rem;
+    padding-left: 0.7rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 0.78rem;
+}
+.log-trace-body.collapsed { display: none; }
+
 /* ─── 모니터링 페이지 ───────────────────────────────────── */
 
 /* 클러스터 요약 카드 — admin-stat-card 동일 스타일, 색상 포인트만 다름 */

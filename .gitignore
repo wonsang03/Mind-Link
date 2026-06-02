@@ -45,3 +45,5 @@ out/
 uploads/
 .claude/
 logs/
+docs/CLAUDE_*.md
+.cursor/

@@ -1,6 +1,7 @@
 package com.mindlink.controller;
 
 import com.mindlink.domain.UserRole;
+import com.mindlink.service.LogViewerService;
 import com.mindlink.service.UserService;
 import com.mindlink.web.SessionConst;
 import jakarta.servlet.http.HttpSession;
@@ -20,9 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class AdminLogController {
 
     private final UserService userService;
+    private final LogViewerService logViewerService;
 
     @Value("${logging.file.name:logs/mindlink.log}")
     private String logFilePath;
@@ -47,34 +50,89 @@ public class AdminLogController {
     private volatile long lastPosition = 0L;
     private volatile boolean started = false;
 
-    public AdminLogController(UserService userService) {
+    public AdminLogController(UserService userService, LogViewerService logViewerService) {
         this.userService = userService;
+        this.logViewerService = logViewerService;
     }
 
-    // 최근 N 라인 조회 (초기 로드)
+    /** 활성 로그 파일명 (예: mindlink.log) */
+    private String currentFileName() {
+        return Paths.get(logFilePath).getFileName().toString();
+    }
+
+    // 로그 파일 목록 (현재 로그 + 롤링 .gz)
+    @GetMapping("/files")
+    public ResponseEntity<?> files(HttpSession session) {
+        if (!isAdmin(session)) return ResponseEntity.status(403).body(Map.of("error", "관리자만 접근할 수 있습니다."));
+        String current = currentFileName();
+        List<Map<String, Object>> files = new ArrayList<>();
+        boolean hasCurrent = false;
+        for (LogViewerService.LogFileInfo f : logViewerService.listFiles()) {
+            boolean isCur = f.name().equals(current);
+            if (isCur) hasCurrent = true;
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("name", f.name());
+            m.put("sizeReadable", f.sizeReadable());
+            m.put("modifiedMillis", f.modifiedMillis());
+            m.put("isCurrent", isCur);
+            files.add(m);
+        }
+        // 활성 로그가 아직 목록에 없으면(방금 생성 등) 항목 추가
+        if (!hasCurrent) {
+            logViewerService.resolve(current).ifPresent(path -> {
+                try {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("name", current);
+                    var info = new LogViewerService.LogFileInfo(current, Files.size(path),
+                            Files.getLastModifiedTime(path).toMillis());
+                    m.put("sizeReadable", info.sizeReadable());
+                    m.put("modifiedMillis", Files.getLastModifiedTime(path).toMillis());
+                    m.put("isCurrent", true);
+                    files.add(0, m);
+                } catch (IOException ignore) {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("name", current);
+                    m.put("sizeReadable", "0 B");
+                    m.put("modifiedMillis", 0L);
+                    m.put("isCurrent", true);
+                    files.add(0, m);
+                }
+            });
+        }
+        return ResponseEntity.ok(Map.of("files", files, "current", current));
+    }
+
+    // 선택 파일 최근 N 라인 조회 (초기 로드 / 파일 전환). file 미지정 시 활성 로그.
     @GetMapping("/recent")
-    public ResponseEntity<?> recent(@RequestParam(defaultValue = "200") int lines,
+    public ResponseEntity<?> recent(@RequestParam(required = false) String file,
+                                    @RequestParam(defaultValue = "300") int lines,
                                     HttpSession session) {
         if (!isAdmin(session)) return ResponseEntity.status(403).body(Map.of("error", "관리자만 접근할 수 있습니다."));
-        if (lines <= 0) lines = 200;
-        if (lines > 2000) lines = 2000;
+        if (lines <= 0) lines = 300;
+        String name = (file == null || file.isBlank()) ? currentFileName() : file;
         try {
-            Path path = Paths.get(logFilePath);
+            Optional<Path> resolved = logViewerService.resolve(name);
+            if (resolved.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "잘못된 로그 파일 경로입니다."));
+            }
+            Path path = resolved.get();
             if (!Files.exists(path)) {
                 return ResponseEntity.ok(Map.of(
                         "lines", List.of(),
+                        "file", name,
                         "path", path.toAbsolutePath().toString(),
                         "exists", false
                 ));
             }
-            List<String> tail = tailLines(path, lines);
+            List<String> tail = logViewerService.tailLines(name, lines);
             return ResponseEntity.ok(Map.of(
                     "lines", tail,
+                    "file", name,
                     "path", path.toAbsolutePath().toString(),
                     "exists", true,
                     "size", Files.size(path)
             ));
-        } catch (IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "로그 파일 읽기 실패: " + e.getMessage()));
         }
     }
@@ -182,13 +240,6 @@ public class AdminLogController {
             }
         }
         emitters.removeAll(dead);
-    }
-
-    private List<String> tailLines(Path path, int n) throws IOException {
-        if (Files.size(path) == 0) return Collections.emptyList();
-        List<String> all = Files.readAllLines(path, StandardCharsets.UTF_8);
-        int from = Math.max(0, all.size() - n);
-        return all.subList(from, all.size());
     }
 
     private boolean isAdmin(HttpSession session) {

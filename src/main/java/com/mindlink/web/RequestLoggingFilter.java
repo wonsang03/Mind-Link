@@ -41,7 +41,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     /** 액세스 로그에서 제외할 경로 prefix */
     private static final Set<String> SKIP_PREFIXES = Set.of(
             "/css/", "/js/", "/images/", "/img/", "/static/",
-            "/webjars/", "/uploads/", "/favicon"
+            "/webjars/", "/uploads/", "/favicon",
+            "/admin/logs/"  /* 로그 뷰어 SSE·API — 자기 자신 노이즈 방지 */
     );
 
     private static final Pattern QUERY_PAIR = Pattern.compile("([^=&]+)=([^&]*)");

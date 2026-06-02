@@ -10,30 +10,27 @@
     <div class="admin-main">
         <div class="admin-page-header">
             <h1>서버 로그</h1>
-            <p class="muted">실시간 서버 로그를 확인합니다. (logs/mindlink.log)</p>
+            <p class="muted">로그 파일을 선택해 줄·레벨·파일별로 확인합니다. 활성 파일(mindlink.log)은 실시간 갱신됩니다.</p>
         </div>
 
         <div class="log-toolbar">
             <div class="log-toolbar-left">
                 <span id="log-status" class="log-status log-status-connecting">연결 중…</span>
-                <label class="log-checkbox">
-                    <input type="checkbox" id="log-autoscroll" checked/>
-                    <span>자동 스크롤</span>
-                </label>
-                <label class="log-checkbox">
-                    <input type="checkbox" id="log-pause"/>
-                    <span>일시정지</span>
-                </label>
-                <label class="log-checkbox">
-                    <input type="checkbox" id="log-wrap" checked/>
-                    <span>줄바꿈</span>
-                </label>
-                <label class="log-checkbox">
-                    <input type="checkbox" id="log-colorize" checked/>
-                    <span>색상 강조</span>
-                </label>
+                <select id="log-file" class="log-filter-select" title="로그 파일 선택"></select>
+                <select id="log-lines" class="log-filter-select" title="최근 N줄">
+                    <option value="100">최근 100줄</option>
+                    <option value="300" selected>최근 300줄</option>
+                    <option value="500">최근 500줄</option>
+                    <option value="1000">최근 1000줄</option>
+                </select>
+                <button type="button" id="log-refresh" class="btn btn-secondary btn-sm">새로고침</button>
             </div>
             <div class="log-toolbar-right">
+                <select id="log-preset" class="log-filter-select" title="로그 종류">
+                    <option value="">전체</option>
+                    <option value="APP">앱</option>
+                    <option value="ACCESS">HTTP 접근</option>
+                </select>
                 <input type="text" id="log-filter" class="log-filter" placeholder="필터 (대소문자 무시)"/>
                 <select id="log-level-filter" class="log-filter-select">
                     <option value="">모든 레벨</option>
@@ -42,199 +39,28 @@
                     <option value="INFO">INFO+</option>
                     <option value="DEBUG">DEBUG+</option>
                 </select>
+                <label class="log-checkbox"><input type="checkbox" id="log-autoscroll" checked/><span>자동 스크롤</span></label>
+                <label class="log-checkbox"><input type="checkbox" id="log-pause"/><span>일시정지</span></label>
+                <label class="log-checkbox"><input type="checkbox" id="log-wrap" checked/><span>줄바꿈</span></label>
+                <label class="log-checkbox"><input type="checkbox" id="log-colorize" checked/><span>색상·열 분리</span></label>
+                <label class="log-checkbox"><input type="checkbox" id="log-linenums"/><span>줄 번호</span></label>
+                <label class="log-checkbox" title="같은 API를 짧은 시간에 여러 번 호출한 ACCESS 로그를 한 줄로 묶습니다"><input type="checkbox" id="log-merge-access" checked/><span>ACCESS 묶기</span></label>
                 <button type="button" id="log-clear" class="btn btn-secondary btn-sm">화면 비우기</button>
                 <button type="button" id="log-download" class="btn btn-secondary btn-sm">다운로드</button>
             </div>
         </div>
 
-        <div id="log-meta" class="log-meta">파일 정보를 불러오는 중…</div>
+        <div id="log-meta" class="log-meta"
+             th:data-files-url="@{/admin/logs/files}"
+             th:data-recent-url="@{/admin/logs/recent}"
+             th:data-stream-url="@{/admin/logs/stream}">
+            파일 정보를 불러오는 중…
+        </div>
 
         <pre id="log-view" class="log-view"></pre>
     </div>
 </div>
 
-<script th:inline="javascript">
-(function() {
-    const view       = document.getElementById('log-view');
-    const status     = document.getElementById('log-status');
-    const meta       = document.getElementById('log-meta');
-    const autoscroll = document.getElementById('log-autoscroll');
-    const pause      = document.getElementById('log-pause');
-    const wrap       = document.getElementById('log-wrap');
-    const colorize   = document.getElementById('log-colorize');
-    const filter     = document.getElementById('log-filter');
-    const levelFilter= document.getElementById('log-level-filter');
-    const clearBtn   = document.getElementById('log-clear');
-    const downloadBtn= document.getElementById('log-download');
-
-    const MAX_LINES = 5000;
-    let lines = [];          // 모든 원본 라인
-    let buffered = [];       // pause 중 누적
-    const LEVEL_ORDER = { 'TRACE':0, 'DEBUG':1, 'INFO':2, 'WARN':3, 'ERROR':4 };
-
-    function setStatus(text, cls) {
-        status.textContent = text;
-        status.className = 'log-status ' + cls;
-    }
-
-    function detectLevel(line) {
-        if (line.indexOf(' ERROR ') >= 0) return 'ERROR';
-        if (line.indexOf(' WARN ')  >= 0) return 'WARN';
-        if (line.indexOf(' INFO ')  >= 0) return 'INFO';
-        if (line.indexOf(' DEBUG ') >= 0) return 'DEBUG';
-        if (line.indexOf(' TRACE ') >= 0) return 'TRACE';
-        return '';
-    }
-
-    function passesFilter(line) {
-        const q = filter.value.trim().toLowerCase();
-        if (q && line.toLowerCase().indexOf(q) < 0) return false;
-        const min = levelFilter.value;
-        if (min) {
-            const lvl = detectLevel(line);
-            if (!lvl) return false;
-            if (LEVEL_ORDER[lvl] < LEVEL_ORDER[min]) return false;
-        }
-        return true;
-    }
-
-    function levelClass(level) {
-        switch (level) {
-            case 'ERROR': return 'log-line log-error';
-            case 'WARN':  return 'log-line log-warn';
-            case 'INFO':  return 'log-line log-info';
-            case 'DEBUG': return 'log-line log-debug';
-            case 'TRACE': return 'log-line log-trace';
-            default:      return 'log-line';
-        }
-    }
-
-    function escapeHtml(s) {
-        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function render() {
-        const frag = document.createDocumentFragment();
-        for (const line of lines) {
-            if (!passesFilter(line)) continue;
-            const div = document.createElement('div');
-            if (colorize.checked) {
-                div.className = levelClass(detectLevel(line));
-            } else {
-                div.className = 'log-line';
-            }
-            div.textContent = line;
-            frag.appendChild(div);
-        }
-        view.innerHTML = '';
-        view.appendChild(frag);
-        if (autoscroll.checked) {
-            view.scrollTop = view.scrollHeight;
-        }
-    }
-
-    function appendLine(line) {
-        lines.push(line);
-        if (lines.length > MAX_LINES) lines.splice(0, lines.length - MAX_LINES);
-        if (!passesFilter(line)) return;
-        const div = document.createElement('div');
-        if (colorize.checked) {
-            div.className = levelClass(detectLevel(line));
-        } else {
-            div.className = 'log-line';
-        }
-        div.textContent = line;
-        view.appendChild(div);
-        // 화면 라인 수 제한
-        while (view.childNodes.length > MAX_LINES) {
-            view.removeChild(view.firstChild);
-        }
-        if (autoscroll.checked) {
-            view.scrollTop = view.scrollHeight;
-        }
-    }
-
-    function flushBuffered() {
-        if (buffered.length === 0) return;
-        for (const l of buffered) appendLine(l);
-        buffered = [];
-    }
-
-    function handleChunk(chunk) {
-        const split = chunk.split(/\r?\n/);
-        // 마지막이 비어있으면 trailing newline에서 발생 — 제거
-        if (split.length && split[split.length - 1] === '') split.pop();
-        for (const ln of split) {
-            if (pause.checked) {
-                buffered.push(ln);
-                if (buffered.length > MAX_LINES) buffered.splice(0, buffered.length - MAX_LINES);
-            } else {
-                appendLine(ln);
-            }
-        }
-    }
-
-    // 초기 로드
-    fetch(/*[[@{/admin/logs/recent}]]*/ '/admin/logs/recent?lines=300')
-        .then(r => r.ok ? r.json() : Promise.reject(r))
-        .then(data => {
-            if (data.error) {
-                meta.textContent = data.error;
-                return;
-            }
-            meta.textContent = (data.exists
-                ? ('파일: ' + data.path + ' · ' + (data.size || 0).toLocaleString() + ' B')
-                : ('파일 없음 (' + data.path + ') — 새 로그가 기록되면 표시됩니다.'));
-            lines = (data.lines || []).slice();
-            if (lines.length > MAX_LINES) lines.splice(0, lines.length - MAX_LINES);
-            render();
-        })
-        .catch(() => { meta.textContent = '초기 로그를 불러오지 못했습니다.'; });
-
-    // SSE 연결
-    let evt = null;
-    function connect() {
-        if (evt) try { evt.close(); } catch (e) {}
-        setStatus('연결 중…', 'log-status-connecting');
-        evt = new EventSource(/*[[@{/admin/logs/stream}]]*/ '/admin/logs/stream');
-        evt.addEventListener('ready', () => setStatus('● 실시간 연결됨', 'log-status-live'));
-        evt.addEventListener('log', e => handleChunk(e.data));
-        evt.addEventListener('ping', () => {});
-        evt.onerror = () => {
-            setStatus('연결 끊김 — 재시도 중…', 'log-status-error');
-            try { evt.close(); } catch (e) {}
-            setTimeout(connect, 3000);
-        };
-    }
-    connect();
-
-    // 이벤트 핸들러
-    filter.addEventListener('input', render);
-    levelFilter.addEventListener('change', render);
-    colorize.addEventListener('change', render);
-    wrap.addEventListener('change', () => {
-        view.classList.toggle('log-nowrap', !wrap.checked);
-    });
-    pause.addEventListener('change', () => {
-        if (!pause.checked) flushBuffered();
-    });
-    clearBtn.addEventListener('click', () => {
-        lines = [];
-        view.innerHTML = '';
-    });
-    downloadBtn.addEventListener('click', () => {
-        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mindlink-' + new Date().toISOString().replace(/[:.]/g, '-') + '.log';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
-})();
-</script>
-
+<script th:src="@{/js/admin-logs.js}"></script>
 </body>
 </html>
