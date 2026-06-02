@@ -556,6 +556,9 @@ p { margin: 0; }
 @media (max-width: 768px) {
   .center-card { flex-direction: column; }
   .center-thumb { width: 100%; height: 6rem; }
+  /* 상담소 검색 툴바 — 모바일에서 줄바꿈 */
+  .toolbar { flex-wrap: wrap; }
+  .toolbar .search-field { order: -1; flex: 1 1 100%; }
 }
 
 /* ============== Mobile Navigation (hamburger) ============== */
@@ -1311,6 +1314,21 @@ video { max-width: 100%; }
 .guide-tips ul { margin: 0; padding: 0 0 0 1.1rem; list-style: disc; }
 .guide-tips ul li { font-size: 0.83rem; color: var(--muted-foreground); margin-bottom: 0.3rem; line-height: 1.55; }
 .guide-tips ul li:last-child { margin-bottom: 0; }
+.guide-modal-foot {
+  border-top: 1px solid var(--border);
+  padding: 0.7rem 1.25rem;
+  flex-shrink: 0;
+}
+.guide-noshow-label {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: var(--muted-foreground);
+  cursor: pointer; user-select: none;
+}
+.guide-noshow-label input[type="checkbox"] {
+  width: 1rem; height: 1rem; cursor: pointer;
+  accent-color: var(--primary); flex-shrink: 0;
+}
+.guide-noshow-label:hover { color: var(--foreground); }
 @media (max-width: 600px) {
   .guide-modal { max-height: 90vh; }
   .guide-detail { padding: 1.1rem 1.1rem; }
@@ -1359,6 +1377,15 @@ h2 { font-size: clamp(1.375rem, 3.5vw, 1.875rem); }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .quick-bar-actions { width: 100%; }
   .quick-bar-actions .quick-btn { flex: 1 1 auto; text-align: center; }
+  /* 폰에서 카드 패딩 축소 */
+  .card { padding: 1rem; }
+  /* section-highlight 좌우 패딩 축소 */
+  .section-highlight { padding: 1.25rem 1.1rem; }
+  /* 히어로 버튼 전체폭 */
+  .home-hero-cta { flex-direction: column; gap: 0.75rem; }
+  .home-hero-cta .btn { width: 100%; text-align: center; }
+  /* 홈 서비스 소개 텍스트 */
+  .home-service-intro p { font-size: 0.92rem; }
 }
 
 /* ============================================================
@@ -1576,6 +1603,49 @@ a:focus-visible, button:focus-visible,
 @media (max-width: 768px) {
   .home-anim .home-hero { padding: 4rem 1.25rem 6rem; }
   .home-anim .home-sheet { border-radius: 1.5rem 1.5rem 0 0; }
+}
+
+/* ============== Home split layout (공지+커뮤니티 좌 / 서비스 카드 우) ============== */
+.home-split {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  column-gap: 2rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 900px) {
+  .home-split { grid-template-columns: 260px 1fr; }
+}
+@media (max-width: 768px) {
+  .home-split {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 0;
+  }
+  /* 모든 자식의 명시적 grid 위치 리셋 + min-width:0으로 내용물 팽창 차단 */
+  .home-split > * {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    min-width: 0;         /* 핵심: auto면 white-space:nowrap 콘텐츠가 트랙을 늘림 */
+    overflow: hidden;
+  }
+  /* 데스크톱용 구분선은 모바일에서 숨김 */
+  .home-split > hr { display: none; }
+  /* 패딩 조정 */
+  .home-split > div { padding-bottom: 1.5rem; }
+  .home-split > section { margin-bottom: 0; }
+}
+
+/* ============== Guide modal 480px 보완 ============== */
+@media (max-width: 480px) {
+  .guide-overlay { padding: 0.5rem; }
+  .guide-modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 1rem 1rem 0 0;
+  }
+  .guide-modal-head { padding: 0.85rem 1rem; }
+  .guide-modal-foot { padding: 0.55rem 1rem; }
+  .guide-detail { padding: 1rem; }
 }
 
 /* ============================================================

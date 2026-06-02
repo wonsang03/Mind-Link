@@ -49,8 +49,7 @@
         </div>
 
         <!-- ── 2단 레이아웃: CSS Grid 4칸 + 전폭 구분선 ── -->
-        <div class="home-split"
-             style="display:grid; grid-template-columns:300px 1fr; column-gap:2rem; margin-bottom:3rem;">
+        <div class="home-split">
 
             <!-- 행 1 왼쪽: 공지사항 -->
             <div style="grid-column:1; grid-row:1; padding-bottom:2rem;">
@@ -356,6 +355,15 @@
     </div>
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var today = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem('mindlink_guide_noshow') !== today) {
+        if (typeof openUserGuide === 'function') openUserGuide();
+    }
+});
+</script>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
