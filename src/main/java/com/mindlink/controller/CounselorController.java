@@ -1,11 +1,14 @@
 package com.mindlink.controller;
 
+import com.mindlink.domain.Booking;
+import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
 import com.mindlink.repository.AssessmentResultRepository;
 import com.mindlink.repository.PostRepository;
 import com.mindlink.repository.UserRepository;
 import com.mindlink.service.AdminMonitoringService;
 import com.mindlink.service.CommunityService;
+import com.mindlink.service.CounselingService;
 import com.mindlink.service.MonitoringService;
 import com.mindlink.service.UserNotificationService;
 import com.mindlink.service.UserService;
@@ -28,6 +31,7 @@ public class CounselorController {
     private final AssessmentResultRepository assessmentResultRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CounselingService counselingService;
 
     public CounselorController(CommunityService communityService,
                                UserService userService,
@@ -36,7 +40,8 @@ public class CounselorController {
                                AdminMonitoringService adminMonitoringService,
                                AssessmentResultRepository assessmentResultRepository,
                                PostRepository postRepository,
-                               UserRepository userRepository) {
+                               UserRepository userRepository,
+                               CounselingService counselingService) {
         this.communityService = communityService;
         this.userService = userService;
         this.notificationService = notificationService;
@@ -45,6 +50,7 @@ public class CounselorController {
         this.assessmentResultRepository = assessmentResultRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.counselingService = counselingService;
     }
 
     @ModelAttribute("unconfirmedHighRiskCount")
@@ -122,6 +128,68 @@ public class CounselorController {
             ra.addFlashAttribute("flash", e.getMessage());
         }
         return "redirect:/counselor/high-risk";
+    }
+
+    // ===== 상담 예약 관리 (배정 기반) =====
+
+    @GetMapping("/bookings")
+    public String bookings(HttpSession session, Model model, RedirectAttributes ra) {
+        if (!isCounselor(session)) return denied(ra);
+        model.addAttribute("unassigned", counselingService.findUnassignedBookings());
+        model.addAttribute("myBookings", counselingService.findBookingsByCounselor(currentUser(session)));
+        model.addAttribute("statuses", Booking.Status.values());
+        return "counselor/bookings";
+    }
+
+    /** 미배정 예약을 본인 담당으로 수락 */
+    @PostMapping("/bookings/{id}/accept")
+    public String acceptBooking(@PathVariable Long id, HttpSession session, RedirectAttributes ra) {
+        if (!isCounselor(session)) return denied(ra);
+        try {
+            counselingService.acceptBooking(id, currentUser(session));
+            ra.addFlashAttribute("flash", "예약을 담당으로 수락했습니다.");
+        } catch (IllegalArgumentException | IllegalStateException | SecurityException e) {
+            ra.addFlashAttribute("flash", e.getMessage());
+        }
+        return "redirect:/counselor/bookings";
+    }
+
+    /** 본인 담당 예약 상태 변경 */
+    @PostMapping("/bookings/{id}/status")
+    public String changeBookingStatus(@PathVariable Long id,
+                                      @RequestParam String status,
+                                      HttpSession session, RedirectAttributes ra) {
+        if (!isCounselor(session)) return denied(ra);
+        try {
+            counselingService.changeStatusByCounselor(id, currentUser(session), Booking.Status.valueOf(status));
+            ra.addFlashAttribute("flash", "예약 상태를 변경했습니다.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("flash", "상태 변경 실패: " + e.getMessage());
+        } catch (SecurityException e) {
+            ra.addFlashAttribute("flash", e.getMessage());
+        }
+        return "redirect:/counselor/bookings";
+    }
+
+    /** 본인 담당 예약 배정 해제(미배정 풀로 반환) */
+    @PostMapping("/bookings/{id}/release")
+    public String releaseBooking(@PathVariable Long id, HttpSession session, RedirectAttributes ra) {
+        if (!isCounselor(session)) return denied(ra);
+        try {
+            counselingService.releaseBooking(id, currentUser(session));
+            ra.addFlashAttribute("flash", "담당을 해제했습니다.");
+        } catch (IllegalArgumentException | SecurityException e) {
+            ra.addFlashAttribute("flash", e.getMessage());
+        }
+        return "redirect:/counselor/bookings";
+    }
+
+    private User currentUser(HttpSession session) {
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (userId instanceof Long uid) {
+            return userService.findById(uid).orElse(null);
+        }
+        return null;
     }
 
     // ===== 알림 발송 =====

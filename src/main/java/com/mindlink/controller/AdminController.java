@@ -1,5 +1,6 @@
 package com.mindlink.controller;
 
+import com.mindlink.domain.Booking;
 import com.mindlink.domain.Post;
 import com.mindlink.domain.User;
 import com.mindlink.domain.UserRole;
@@ -125,6 +126,45 @@ public class AdminController {
         model.addAttribute("bookings", adminService.bookingsByUser(user));
         model.addAttribute("roles", UserRole.values());
         return "admin/user-detail";
+    }
+
+    // ===== 상담 예약 관리 =====
+
+    @GetMapping("/bookings")
+    public String bookings(@RequestParam(required = false) String status,
+                           HttpSession session, Model model, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        Booking.Status filter = parseBookingStatus(status);
+        model.addAttribute("bookings", adminService.allBookings(filter));
+        model.addAttribute("statuses", Booking.Status.values());
+        model.addAttribute("selectedStatus", filter);
+        return "admin/bookings";
+    }
+
+    @PostMapping("/bookings/{id}/status")
+    public String changeBookingStatus(@PathVariable Long id,
+                                      @RequestParam String status,
+                                      @RequestParam(required = false) String filter,
+                                      HttpSession session, RedirectAttributes ra) {
+        if (!isAdmin(session)) return denied(ra);
+        try {
+            adminService.changeBookingStatus(id, Booking.Status.valueOf(status));
+            ra.addFlashAttribute("flash", "예약 상태를 변경했습니다.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("flash", "상태 변경 실패: " + e.getMessage());
+        }
+        return (filter != null && !filter.isBlank())
+                ? "redirect:/admin/bookings?status=" + filter
+                : "redirect:/admin/bookings";
+    }
+
+    private Booking.Status parseBookingStatus(String status) {
+        if (status == null || status.isBlank()) return null;
+        try {
+            return Booking.Status.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     // ===== 알림 발송 (공지와 별도) =====

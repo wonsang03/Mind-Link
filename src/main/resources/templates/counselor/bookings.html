@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/counselor-layout :: head('마음이음 상담사 - 예약 관리')}"></head>
+<body>
+<link rel="stylesheet" th:href="@{/css/admin.css}"/>
+
+<div class="admin-layout">
+    <aside th:replace="~{fragments/counselor-layout :: sidebar('bookings')}"></aside>
+
+    <div class="admin-main">
+        <div class="admin-page-header">
+            <h1>예약 관리</h1>
+            <p class="muted">미배정 예약을 수락해 담당하고, 내가 담당하는 예약의 상태를 관리합니다.</p>
+        </div>
+
+        <div th:if="${flash}" class="alert alert-info" th:text="${flash}"></div>
+
+        <!-- ── 미배정 예약 풀 ── -->
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <h2>미배정 예약</h2>
+                <span class="admin-panel-count" th:text="|${#lists.size(unassigned)}건|">0건</span>
+            </div>
+            <div class="admin-panel-body">
+                <div th:if="${#lists.isEmpty(unassigned)}" class="admin-empty-state">
+                    수락 대기 중인 예약이 없습니다.
+                </div>
+                <div th:unless="${#lists.isEmpty(unassigned)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th class="num">ID</th>
+                            <th>상담소</th>
+                            <th>예약자</th>
+                            <th>연락처</th>
+                            <th>예약 일시</th>
+                            <th>유형</th>
+                            <th>상태</th>
+                            <th>담당</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="b : ${unassigned}">
+                            <td class="num" th:text="${b.id}">1</td>
+                            <td th:text="${b.centerName}">센터</td>
+                            <td th:text="${b.name}">홍길동</td>
+                            <td class="muted" style="font-size:0.82rem;" th:text="${b.phone}">010-0000-0000</td>
+                            <td class="muted" th:text="|${b.date} ${b.time}|">2026-06-10 14:00</td>
+                            <td th:text="${b.type != null ? b.type : '-'}">—</td>
+                            <td><span class="tag tag-secondary" th:text="${b.status}">REQUESTED</span></td>
+                            <td>
+                                <form th:action="@{/counselor/bookings/{id}/accept(id=${b.id})}" method="post" style="margin:0;">
+                                    <button type="submit" class="btn btn-primary btn-sm">내 담당으로 수락</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 내 담당 예약 ── -->
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <h2>내 담당 예약</h2>
+                <span class="admin-panel-count" th:text="|${#lists.size(myBookings)}건|">0건</span>
+            </div>
+            <div class="admin-panel-body">
+                <div th:if="${#lists.isEmpty(myBookings)}" class="admin-empty-state">
+                    담당 중인 예약이 없습니다. 위 미배정 예약에서 수락해 주세요.
+                </div>
+                <div th:unless="${#lists.isEmpty(myBookings)}" class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th class="num">ID</th>
+                            <th>상담소</th>
+                            <th>예약자</th>
+                            <th>연락처</th>
+                            <th>예약 일시</th>
+                            <th>유형</th>
+                            <th>상태</th>
+                            <th>상태 변경</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="b : ${myBookings}">
+                            <td class="num" th:text="${b.id}">1</td>
+                            <td th:text="${b.centerName}">센터</td>
+                            <td th:text="${b.name}">홍길동</td>
+                            <td class="muted" style="font-size:0.82rem;" th:text="${b.phone}">010-0000-0000</td>
+                            <td class="muted" th:text="|${b.date} ${b.time}|">2026-06-10 14:00</td>
+                            <td th:text="${b.type != null ? b.type : '-'}">—</td>
+                            <td><span class="tag tag-secondary" th:text="${b.status}">REQUESTED</span></td>
+                            <td>
+                                <form th:action="@{/counselor/bookings/{id}/status(id=${b.id})}" method="post"
+                                      style="display:flex; gap:0.35rem; align-items:center;">
+                                    <select name="status" style="font-size:0.82rem; padding:0.25rem;">
+                                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                                                th:selected="${s == b.status}">REQUESTED</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-secondary btn-sm">변경</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form th:action="@{/counselor/bookings/{id}/release(id=${b.id})}" method="post" style="margin:0;"
+                                      onsubmit="return confirm('이 예약의 담당을 해제하시겠습니까? 다시 미배정 풀로 돌아갑니다.');">
+                                    <button type="submit" class="btn btn-outline btn-sm">담당 해제</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+</body>
+</html>

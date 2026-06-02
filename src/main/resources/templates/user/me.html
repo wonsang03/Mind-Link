@@ -180,6 +180,44 @@
             </div>
             <!-- /.profile-card -->
 
+            <!-- ── 내 예약 내역 ── -->
+            <div class="card" style="margin-top: 1.25rem;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                    <h3 style="margin:0;">내 상담 예약 내역</h3>
+                    <span class="muted" style="font-size:0.85rem;"
+                          th:text="|총 ${#lists.size(bookings)}건|">총 0건</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(bookings)}" class="muted"
+                     style="padding:1.5rem 0; text-align:center; font-size:0.9rem;">
+                    아직 신청한 상담 예약이 없습니다.
+                    <a th:href="@{/counseling}" style="color:var(--primary); text-decoration:none; font-weight:600;">상담소 찾아보기 →</a>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(bookings)}"
+                     style="display:flex; flex-direction:column; gap:0.75rem;">
+                    <div th:each="b : ${bookings}"
+                         style="border:1px solid var(--border); border-radius:0.6rem; padding:0.9rem 1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+                            <div style="font-weight:600; min-width:0;" th:text="${b.centerName}">상담소 이름</div>
+                            <span th:switch="${b.status.name()}" style="flex-shrink:0;">
+                                <span th:case="'REQUESTED'" class="tag tag-secondary">신청됨</span>
+                                <span th:case="'CONFIRMED'"  class="tag tag-primary">확정</span>
+                                <span th:case="'CANCELLED'"  class="tag">취소됨</span>
+                                <span th:case="*" class="tag" th:text="${b.status}">상태</span>
+                            </span>
+                        </div>
+                        <div class="muted" style="font-size:0.85rem; margin-top:0.4rem; display:flex; flex-wrap:wrap; gap:0.75rem;">
+                            <span th:text="|📅 ${b.date} ${b.time}|">📅 일시</span>
+                            <span th:if="${b.type != null and !#strings.isEmpty(b.type)}" th:text="|🗂 ${b.type}|">유형</span>
+                        </div>
+                        <div th:if="${b.memo != null and !#strings.isEmpty(b.memo)}"
+                             class="muted" style="font-size:0.83rem; margin-top:0.4rem; white-space:pre-wrap;"
+                             th:text="|메모: ${b.memo}|">메모</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 활동 일지 진입 -->
             <a th:href="@{/activities/history}" class="card card-link"
                style="display:flex; align-items:center; gap:0.85rem; margin-top:1.25rem; padding:1rem 1.25rem; text-decoration:none;">

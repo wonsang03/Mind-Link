@@ -3,6 +3,7 @@ package com.mindlink.controller;
 import com.mindlink.domain.User;
 import com.mindlink.dto.UserResponse;
 import com.mindlink.dto.UserUpdateRequest;
+import com.mindlink.service.CounselingService;
 import com.mindlink.service.FileStorageService;
 import com.mindlink.service.UserService;
 import com.mindlink.web.SessionConst;
@@ -25,10 +26,14 @@ public class UserController {
 
     private final UserService userService;
     private final FileStorageService fileStorageService;
+    private final CounselingService counselingService;
 
-    public UserController(UserService userService, FileStorageService fileStorageService) {
+    public UserController(UserService userService,
+                          FileStorageService fileStorageService,
+                          CounselingService counselingService) {
         this.userService = userService;
         this.fileStorageService = fileStorageService;
+        this.counselingService = counselingService;
     }
 
     /** 내 계정 정보 조회 */
@@ -42,6 +47,8 @@ public class UserController {
         User user = userService.findById(uid)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
         model.addAttribute("user", new UserResponse(user));
+        // 본인 예약 내역만 조회 (findBookingsByUser 가 user 기준 필터링)
+        model.addAttribute("bookings", counselingService.findBookingsByUser(user));
         return "user/me";
     }
 

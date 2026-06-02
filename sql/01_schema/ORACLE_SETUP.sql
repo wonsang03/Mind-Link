@@ -132,6 +132,7 @@ BEGIN
         center_phone    VARCHAR2(30 CHAR),
         center_address  VARCHAR2(300 CHAR),
         user_id         NUMBER,
+        counselor_id    NUMBER,
         name            VARCHAR2(50 CHAR)  NOT NULL,
         phone           VARCHAR2(30 CHAR)  NOT NULL,
         email           VARCHAR2(100 CHAR) NOT NULL,
@@ -142,6 +143,7 @@ BEGIN
         status          VARCHAR2(20 CHAR)  DEFAULT 'REQUESTED' NOT NULL,
         created_at      TIMESTAMP          DEFAULT SYSTIMESTAMP NOT NULL,
         CONSTRAINT fk_bookings_user FOREIGN KEY (user_id) REFERENCES users(id),
+        CONSTRAINT fk_bookings_counselor FOREIGN KEY (counselor_id) REFERENCES users(id),
         CONSTRAINT chk_bookings_status CHECK (status IN ('REQUESTED', 'CONFIRMED', 'CANCELLED'))
       )
     ]';
@@ -353,6 +355,64 @@ BEGIN
       )
     ]';
     EXECUTE IMMEDIATE 'CREATE INDEX idx_br_book_link ON book_reviews(book_link)';
+  END IF;
+END;
+/
+
+-- =============================================================================
+-- 2a. bookings 조회 성능 인덱스 (서상원)
+--     - 마이페이지 본인 예약: user_id + created_at (최신순)
+--     - 관리자 상태 필터:     status
+--     - 예약 일시 기준 조회:  booking_date
+--     (이미 있으면 건너뜀. bookings 테이블 존재 시에만 생성)
+-- =============================================================================
+DECLARE
+  t NUMBER;
+  PROCEDURE create_index_if_absent(p_name IN VARCHAR2, p_ddl IN VARCHAR2) IS
+    n NUMBER;
+  BEGIN
+    SELECT COUNT(*) INTO n FROM user_indexes WHERE index_name = p_name;
+    IF n = 0 THEN EXECUTE IMMEDIATE p_ddl; END IF;
+  END;
+BEGIN
+  SELECT COUNT(*) INTO t FROM user_tables WHERE table_name = 'BOOKINGS';
+  IF t = 1 THEN
+    create_index_if_absent('IDX_BOOKINGS_USER_CREATED',
+      'CREATE INDEX idx_bookings_user_created ON bookings(user_id, created_at)');
+    create_index_if_absent('IDX_BOOKINGS_STATUS',
+      'CREATE INDEX idx_bookings_status ON bookings(status)');
+    create_index_if_absent('IDX_BOOKINGS_DATE',
+      'CREATE INDEX idx_bookings_date ON bookings(booking_date)');
+  END IF;
+END;
+/
+
+-- =============================================================================
+-- 2c. bookings 담당 상담사 배정 컬럼 (서상원: counselor_id)
+--     상담사가 미배정 예약을 '수락'하면 counselor_id 에 본인 id 가 들어간다.
+--     (기존 DB 에 컬럼/FK/인덱스가 없으면 추가)
+-- =============================================================================
+DECLARE
+  c NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO c FROM user_tables WHERE table_name = 'BOOKINGS';
+  IF c = 1 THEN
+    SELECT COUNT(*) INTO c FROM user_tab_columns
+      WHERE table_name = 'BOOKINGS' AND column_name = 'COUNSELOR_ID';
+    IF c = 0 THEN
+      EXECUTE IMMEDIATE 'ALTER TABLE bookings ADD (counselor_id NUMBER)';
+    END IF;
+
+    SELECT COUNT(*) INTO c FROM user_constraints WHERE constraint_name = 'FK_BOOKINGS_COUNSELOR';
+    IF c = 0 THEN
+      EXECUTE IMMEDIATE
+        'ALTER TABLE bookings ADD CONSTRAINT fk_bookings_counselor FOREIGN KEY (counselor_id) REFERENCES users(id)';
+    END IF;
+
+    SELECT COUNT(*) INTO c FROM user_indexes WHERE index_name = 'IDX_BOOKINGS_COUNSELOR';
+    IF c = 0 THEN
+      EXECUTE IMMEDIATE 'CREATE INDEX idx_bookings_counselor ON bookings(counselor_id)';
+    END IF;
   END IF;
 END;
 /

@@ -63,6 +63,8 @@ public class AdminService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        // 이 사용자가 상담사로 담당하던 예약은 삭제하지 않고 배정만 해제(예약자는 다른 사람일 수 있음)
+        bookingRepository.clearCounselor(user);
         bookingRepository.deleteByUser(user);
         reportRepository.deleteByReporter(user);
         bookReviewRepository.deleteByUser(user);
@@ -75,6 +77,21 @@ public class AdminService {
 
     public List<Booking> bookingsByUser(User user) {
         return bookingRepository.findByUserOrderByCreatedAtDesc(user);
+    }
+
+    /** 관리자 전체 예약 목록(최신순). status가 주어지면 해당 상태만 조회. */
+    public List<Booking> allBookings(Booking.Status status) {
+        return status == null
+                ? bookingRepository.findAllByOrderByCreatedAtDesc()
+                : bookingRepository.findByStatusOrderByCreatedAtDesc(status);
+    }
+
+    /** 관리자 예약 상태 변경. */
+    @Transactional
+    public void changeBookingStatus(Long bookingId, Booking.Status status) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        booking.changeStatus(status);
     }
 
     public List<PostComment> commentsByUser(User user) {

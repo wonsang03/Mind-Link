@@ -62,6 +62,59 @@ public class CounselingService {
         return bookingRepository.save(booking);
     }
 
+    // ===== 상담사 배정 =====
+
+    /** 아직 담당 상담사가 없는 예약(수락 대기 풀). */
+    public List<Booking> findUnassignedBookings() {
+        return bookingRepository.findByCounselorIsNullOrderByCreatedAtDesc();
+    }
+
+    /** 특정 상담사가 담당하는 예약. */
+    public List<Booking> findBookingsByCounselor(User counselor) {
+        if (counselor == null) return List.of();
+        return bookingRepository.findByCounselorOrderByCreatedAtDesc(counselor);
+    }
+
+    /** 상담사가 미배정 예약을 본인 담당으로 수락한다. 이미 배정된 예약은 가로챌 수 없다. */
+    @Transactional
+    public Booking acceptBooking(Long bookingId, User counselor) {
+        if (counselor == null) {
+            throw new SecurityException("상담사만 예약을 수락할 수 있습니다.");
+        }
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        if (booking.isAssigned()) {
+            boolean mine = booking.getCounselor().getId().equals(counselor.getId());
+            throw new IllegalStateException(mine ? "이미 내가 담당 중인 예약입니다." : "이미 다른 상담사가 담당 중인 예약입니다.");
+        }
+        booking.assignCounselor(counselor);
+        return booking;
+    }
+
+    /** 상담사가 본인 담당 예약의 상태를 변경한다. 본인 담당이 아니면 거부. */
+    @Transactional
+    public void changeStatusByCounselor(Long bookingId, User counselor, Booking.Status status) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        if (booking.getCounselor() == null || counselor == null
+                || !booking.getCounselor().getId().equals(counselor.getId())) {
+            throw new SecurityException("본인이 담당하는 예약만 변경할 수 있습니다.");
+        }
+        booking.changeStatus(status);
+    }
+
+    /** 상담사가 본인 담당 예약의 배정을 해제(다시 미배정 풀로). */
+    @Transactional
+    public void releaseBooking(Long bookingId, User counselor) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        if (booking.getCounselor() == null || counselor == null
+                || !booking.getCounselor().getId().equals(counselor.getId())) {
+            throw new SecurityException("본인이 담당하는 예약만 해제할 수 있습니다.");
+        }
+        booking.releaseCounselor();
+    }
+
     @Transactional
     public void cancelBooking(Long bookingId, User user) {
         Booking booking = bookingRepository.findById(bookingId)

@@ -55,6 +55,19 @@
             <span>게시글 관리</span>
         </a>
 
+        <!-- 예약 관리 -->
+        <a th:href="@{/counselor/bookings}" class="admin-nav-item"
+           th:classappend="${active == 'bookings'} ? 'active'">
+            <span class="admin-nav-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+            </span>
+            <span>예약 관리</span>
+        </a>
+
         <!-- 고위험도 관리 -->
         <a th:href="@{/counselor/high-risk}" class="admin-nav-item counselor-nav-danger"
            th:classappend="${active == 'high-risk'} ? 'active'">

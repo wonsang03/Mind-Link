@@ -32,6 +32,11 @@ public class Booking {
     @JoinColumn(name = "user_id")
     private User user;
 
+    /** 이 예약을 담당하기로 수락한 상담사. 미배정이면 null. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "counselor_id")
+    private User counselor;
+
     @Column(nullable = false, length = 50)
     private String name;
 
@@ -44,6 +49,7 @@ public class Booking {
     @Column(name = "booking_date", nullable = false)
     private LocalDate date;
 
+    @Convert(converter = LocalTimeAttributeConverter.class)
     @Column(name = "booking_time", nullable = false)
     private LocalTime time;
 
@@ -92,6 +98,7 @@ public class Booking {
     public String getCenterPhone() { return centerPhone; }
     public String getCenterAddress() { return centerAddress; }
     public User getUser() { return user; }
+    public User getCounselor() { return counselor; }
     public String getName() { return name; }
     public String getPhone() { return phone; }
     public String getEmail() { return email; }
@@ -104,4 +111,13 @@ public class Booking {
 
     public void cancel() { this.status = Status.CANCELLED; }
     public void confirm() { this.status = Status.CONFIRMED; }
+
+    public void changeStatus(Status status) {
+        if (status == null) throw new IllegalArgumentException("변경할 예약 상태를 선택해 주세요.");
+        this.status = status;
+    }
+
+    public boolean isAssigned() { return counselor != null; }
+    public void assignCounselor(User counselor) { this.counselor = counselor; }
+    public void releaseCounselor() { this.counselor = null; }
 }
