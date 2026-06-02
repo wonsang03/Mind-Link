@@ -12,14 +12,17 @@ sql/
 ├── README.md                              # 이 파일 — 유일한 실행 가이드
 ├── 01_schema/
 │   └── ORACLE_SETUP.sql                   # 전체 DDL + 기본 시드
-├── 02_features/                           # 신규 설치 필수는 이 5개뿐
+├── 02_features/
 │   ├── USERS_PROFILE.sql                  # users 프로필 컬럼 (멱등 ALTER)
+│   ├── PRIVACY_CONSENT.sql                # sensitive_data_consent (민감정보 동의)
 │   ├── ASSESSMENT_SEED.sql                # 자가진단 문항·점수 구간
 │   ├── MONITORING.sql                     # assessment_results + user_alerts(전체) + post_comments.parent_comment_id
 │   ├── CARE_REPORT.sql                    # AI 위로 편지
+│   ├── ACTIVITY_LOG.sql                   # 추천 활동 수행 기록
 │   └── CHAT_CLUSTERING.sql                # 정서 클러스터 + 210 페르소나
 ├── 03_optional/
-│   └── CHAT_CLUSTER_REAL_USER_SEED.sql    # 데모용 실사용자 3명
+│   ├── CHAT_CLUSTER_REAL_USER_SEED.sql    # 데모용 실사용자 3명
+│   └── PROVERBS_SEED.sql                  # 홈·커뮤니티·추천 명언 시드
 └── archive/                               # 평소 실행 안 함 (마이그레이션·복구·진단 전용)
     ├── MONITORING_FIX.sql
     ├── MONITORING_REBUILD.sql
@@ -36,13 +39,16 @@ sql/
 |------|------|------|------|
 | 1 | `01_schema/ORACLE_SETUP.sql` | ✅ | users · posts · post_comments · attachments · reports · notices · bookings · book_reviews · recommendation_books + 관리자·샘플 시드 |
 | 2 | `02_features/USERS_PROFILE.sql` | ✅ | 내 정보 컬럼: nickname, region, phone, notification_enabled, profile_image_url |
-| 3 | `02_features/ASSESSMENT_SEED.sql` | ✅ | 자가진단(PHQ-9 / GAD-7 / PSS-10 / CBI) 문항·점수 구간 |
-| 4 | `02_features/MONITORING.sql` | ✅ | 검사 이력(`assessment_results`) · 알림(`user_alerts` 전체 컬럼·9종 CHECK) · 댓글 답글(`post_comments.parent_comment_id`) |
-| 5 | `02_features/CARE_REPORT.sql` | ✅ | AI 종합 보고서(`care_reports`) — `care_daily_inputs`는 legacy 호환 DDL |
-| 6 | `02_features/CHAT_CLUSTERING.sql` | 클러스터 사용 시 | `user_assessment_profiles` + 210 페르소나 시드 |
-| 7 | `03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql` | 선택 | 데모/개발용 실사용자 3명 |
+| 3 | `02_features/PRIVACY_CONSENT.sql` | ✅ | `users.sensitive_data_consent` (자가진단 민감정보 동의) |
+| 4 | `02_features/ASSESSMENT_SEED.sql` | ✅ | 자가진단(PHQ-9 / GAD-7 / PSS-10 / CBI) 문항·점수 구간 |
+| 5 | `02_features/MONITORING.sql` | ✅ | 검사 이력(`assessment_results`) · 알림(`user_alerts` 전체 컬럼·9종 CHECK) · 댓글 답글(`post_comments.parent_comment_id`) |
+| 6 | `02_features/CARE_REPORT.sql` | ✅ | AI 종합 보고서(`care_reports`) — `care_daily_inputs`는 legacy 호환 DDL |
+| 7 | `02_features/ACTIVITY_LOG.sql` | ✅ | 추천 활동(`activity_log`) |
+| 8 | `02_features/CHAT_CLUSTERING.sql` | 클러스터 사용 시 | `user_assessment_profiles` + 210 페르소나 시드 |
+| 9 | `03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql` | 선택 | 데모/개발용 실사용자 3명 |
+| 10 | `03_optional/PROVERBS_SEED.sql` | 선택 | `proverbs` 테이블·명언 시드 |
 
-> 요약: **01 → USERS_PROFILE → ASSESSMENT_SEED → MONITORING → CARE_REPORT → (CHAT_CLUSTERING) → (03_optional)**.
+> 요약: **01 → USERS_PROFILE → PRIVACY_CONSENT → ASSESSMENT_SEED → MONITORING → CARE_REPORT → ACTIVITY_LOG → (CHAT_CLUSTERING) → (03_optional)**.
 
 ## 2. 기존 DB 업그레이드
 
@@ -91,6 +97,8 @@ sql/
 | `assessment_results`, `user_alerts` | 검사 이력·알림(모니터링) | MONITORING |
 | `care_reports` | AI 위로 편지 | CARE_REPORT |
 | `user_assessment_profiles` | 정서 클러스터(+페르소나 시드) | CHAT_CLUSTERING |
+| `activity_log` | 추천 활동(호흡·감사일기 등) 완료 기록 | ACTIVITY_LOG |
+| `proverbs` | 화면별 랜덤 명언 | PROVERBS_SEED (테이블+시드) |
 
 ## 6. JPA 엔티티 ↔ 테이블 (주요)
 
@@ -98,7 +106,9 @@ sql/
 |--------|----------------------------|------|
 | `assessment_results` | `domain.AssessmentResult` | `score_level`→`level`, `is_high_risk`→`highRisk`(0/1), `type_key`→`typeKey` |
 | `user_alerts` | `domain.UserAlert` | `alert_type` 9종, `is_read`→`read`(0/1) |
-| `users` | `domain.User` | 프로필 컬럼은 USERS_PROFILE.sql |
+| `users` | `domain.User` | 프로필: USERS_PROFILE · 동의: PRIVACY_CONSENT |
+| `activity_log` | `domain.ActivityLog` | `activity_key`, JSON `payload` |
+| `proverbs` | `domain.Proverb` | page: HOME / COMMUNITY / RECOMMENDATIONS |
 | `posts` / `post_comments` | `domain.Post` / `domain.PostComment` | `author`는 **문자열**(User FK 아님), 답글은 `parent_comment_id` |
 | `care_reports` | `care.*` | `care_daily_inputs`는 앱 미사용 |
 | `user_assessment_profiles` | `chatcluster.UserAssessmentProfile` | stress/depression/anxiety norm |

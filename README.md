@@ -1,9 +1,10 @@
 # Mind-Link (마음이음)
 
 목포대학교 웹프로그래밍2 · 5조 팀 프로젝트  
-정서 케어 플랫폼 — 자가진단, 상담소 찾기, 커뮤니티, AI 도서 추천 등을 한 곳에서 제공합니다.
+정서 케어 플랫폼 — 자가진단, 상담 예약, 커뮤니티, AI 도서·위로 편지, 정서 클러스터링 등을 한 곳에서 제공합니다.
 
-**저장소**: [wonsang03/Mind-Link](https://github.com/wonsang03/Mind-Link)
+**저장소**: [wonsang03/Mind-Link](https://github.com/wonsang03/Mind-Link)  
+**기본 브랜치**: `main` (팀 통합) · 개인 작업: `서상원`, `김동주`, `김지훈`, `윤아연` 등
 
 ---
 
@@ -13,9 +14,10 @@
 |------|------|
 | Backend | Java 17, Spring Boot 4, Spring MVC, JPA |
 | DB | **Oracle** (운영·팀 개발 기준), H2는 로컬 테스트용 |
-| UI | Thymeleaf, 정적 CSS |
-| 인증 | HttpSession + BCrypt (Spring Security 필터 미사용) |
-| 외부 API | 네이버 검색(지역·도서·이미지), OpenAI(종합 보고서), Google Gemini(도서 추천) |
+| UI | Thymeleaf, 정적 CSS/JS |
+| 인증 | HttpSession + BCrypt (`USER` / `COUNSELOR` / `ADMIN`) |
+| 로그 | Logback → `logs/mindlink.log`, 관리자 실시간 뷰어(`/admin/logs`) |
+| 외부 API | 네이버(지역·도서·이미지), OpenAI(위로 편지), Google Gemini(도서 추천) |
 
 ---
 
@@ -31,27 +33,33 @@ cp .env.example .env   # Windows: copy .env.example .env
 
 | 변수 | 용도 |
 |------|------|
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Oracle 접속 |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Oracle 접속 (`DB_USERNAME`은 보통 `APP_USER`) |
 | `NAVER_API_CLIENT_ID`, `NAVER_API_CLIENT_SECRET` | 도서·지역·이미지 검색 |
 | `NAVER_OPENAPI_CLIENT_*` | (선택) 지역검색만 별도 키 |
 | `GEMINI_API_KEY` | AI 맞춤 **도서 추천** |
-| `OPENAI_API_KEY` | AI 종합 **보고서(위로 편지)** |
+| `OPENAI_API_KEY` | AI **위로 편지**·종합 보고서 |
 
 네이버 개발자센터 앱에서 **검색 API** 사용을 켜야 상담소·도서 검색이 동작합니다.
 
 ### 2. DB 스크립트 (Oracle)
 
-순서대로 SQL Developer 등에서 실행합니다. 전체 순서·기존 DB 업그레이드·트러블슈팅은 [sql/README.md](sql/README.md) 참고.
+**`APP_USER`**(= `.env`의 `DB_USERNAME`)로 SQL Developer 등에서 **아래 순서대로** 실행합니다.  
+상세·업그레이드·트러블슈팅: [sql/README.md](sql/README.md)
 
-1. [01_schema/ORACLE_SETUP.sql](sql/01_schema/ORACLE_SETUP.sql) — 기본 스키마·시드(관리자·공지·커뮤니티·추천도서·예약 등)  
-2. [02_features/USERS_PROFILE.sql](sql/02_features/USERS_PROFILE.sql) — 내 정보 컬럼(nickname·region·phone·알림 수신·프로필 이미지)
-3. [02_features/ASSESSMENT_SEED.sql](sql/02_features/ASSESSMENT_SEED.sql) — 자가진단 문항·점수 구간
-4. [02_features/MONITORING.sql](sql/02_features/MONITORING.sql) — 검사 이력·알림(`assessment_results`, `user_alerts`)·댓글 답글
-5. [02_features/CARE_REPORT.sql](sql/02_features/CARE_REPORT.sql) — AI 위로 편지(`care_reports`)
-6. [02_features/CHAT_CLUSTERING.sql](sql/02_features/CHAT_CLUSTERING.sql) — 정서 클러스터(`user_assessment_profiles` + 210 페르소나), 클러스터 기능 사용 시
-7. [03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql](sql/03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql) — (선택) 데모/개발용 사용자 시드
+| 순서 | 파일 | 필수 | 내용 |
+|------|------|------|------|
+| 1 | [01_schema/ORACLE_SETUP.sql](sql/01_schema/ORACLE_SETUP.sql) | ✅ | 기본 스키마·시드(회원·공지·커뮤니티·예약·추천도서 등) |
+| 2 | [02_features/USERS_PROFILE.sql](sql/02_features/USERS_PROFILE.sql) | ✅ | 프로필 컬럼(닉네임·지역·연락처·알림·프로필 이미지) |
+| 3 | [02_features/PRIVACY_CONSENT.sql](sql/02_features/PRIVACY_CONSENT.sql) | ✅ | 민감정보(자가진단) 동의 컬럼 |
+| 4 | [02_features/ASSESSMENT_SEED.sql](sql/02_features/ASSESSMENT_SEED.sql) | ✅ | 자가진단 문항·점수 구간 |
+| 5 | [02_features/MONITORING.sql](sql/02_features/MONITORING.sql) | ✅ | 검사 이력·알림(9종)·댓글 답글 |
+| 6 | [02_features/CARE_REPORT.sql](sql/02_features/CARE_REPORT.sql) | ✅ | AI 위로 편지(`care_reports`) |
+| 7 | [02_features/ACTIVITY_LOG.sql](sql/02_features/ACTIVITY_LOG.sql) | ✅ | 추천 활동 수행 기록 |
+| 8 | [02_features/CHAT_CLUSTERING.sql](sql/02_features/CHAT_CLUSTERING.sql) | 클러스터 사용 시 | 정서 프로필 + 페르소나 시드 |
+| 9 | [03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql](sql/03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql) | 선택 | 데모용 실사용자 시드 |
+| 10 | [03_optional/PROVERBS_SEED.sql](sql/03_optional/PROVERBS_SEED.sql) | 선택 | 홈·커뮤니티·추천 화면 명언 |
 
-> 알림(`user_alerts`)의 모든 컬럼(`title`·`link_url`·`related_post_id`·`related_comment_id`·`notice_id`)과 9종 `alert_type`은 **`MONITORING.sql` 하나에 포함**됩니다. 별도 패치 SQL은 없습니다. 반드시 **`APP_USER`**(=`.env`의 `DB_USERNAME`)로 실행하세요.
+> 알림(`user_alerts`) 컬럼·9종 `alert_type`은 **`MONITORING.sql`에 통합**되어 있습니다. 별도 패치 SQL은 없습니다.
 
 ### 3. 서버 실행
 
@@ -65,108 +73,116 @@ cp .env.example .env   # Windows: copy .env.example .env
 
 ## 기능 요약
 
-| 메뉴 | 경로 | 상태 | 설명 |
-|------|------|------|------|
-| 홈 / 소개 | `/` | ✅ | 랜딩. `/info`는 홈 서비스 소개(`/#service-intro`)로 리다이렉트 |
-| 로그인·회원가입 | `/login`, `/signup` | ✅ | 세션 기반, 등급 `USER` / `COUNSELOR` / `ADMIN` |
-| 자가진단 | `/self-assessment/**` | ✅ | PHQ-9, GAD-7, PSS, CBI — 로그인 시 결과 저장 |
-| 알림 | `/alerts` | ✅ | 고위험·악화·개선·맞춤 추천·커뮤니티·공지·관리자 메시지 |
-| 상담소 찾기 | `/counseling` | ✅ | 네이버 **지역검색** API, 지도는 좌표 우선·없으면 장소명 검색 |
-| 상담 예약 | `/counseling/booking` | ✅ | `bookings` 테이블 저장 |
-| 커뮤니티 | `/community/**` | ✅ | 게시글·댓글·답글·좋아요·신고, 이미지/동영상 첨부, 본문 YouTube embed |
-| 공지 | `/notice/**` | ✅ | ADMIN만 작성·수정·삭제 |
-| 내 정보 | `/user/me`, `/user/me/edit` | ✅ | 프로필(닉네임·지역·연락처)·프로필 이미지·알림 수신 설정 |
-| AI 맞춤 추천 | `/recommendations` | ✅ | Gemini + 네이버 도서 검색 (`POST /api/recommendations/ai`) |
-| AI 정서 케어 (위로 편지) | `/care-report` · `/ai-care` | ✅ | 위저드 → OpenAI 장문 편지 + PDF |
-| 관리자 | `/admin/**` | ✅ | 대시보드·유저 관리·게시글·공지·알림 발송·정서 클러스터(3D)·SQL 콘솔 (ADMIN 전용) |
+### 일반 사용자 (`USER`)
+
+| 메뉴 | 경로 | 설명 |
+|------|------|------|
+| 홈 / 소개 | `/`, `/info` | 랜딩·서비스 소개 |
+| 로그인·회원가입 | `/login`, `/signup` | 세션 인증, 가입 시 민감정보 처리 동의 |
+| 개인정보 처리방침 | `/privacy` | 약관·동의 안내 |
+| 자가진단 | `/self-assessment/**` | PHQ-9, GAD-7, PSS, CBI — 동의 시 결과 저장·알림 연동 |
+| 알림 | `/alerts` | 고위험·악화·개선·추천·커뮤니티·공지·관리자 메시지 |
+| 상담소 찾기 | `/counseling` | 네이버 지역검색, 지도(좌표 우선) |
+| 상담 예약 | `/counseling/booking` | `bookings` 저장, **내 정보**에서 예약 목록·취소 |
+| 커뮤니티 | `/community/**` | 글·댓글·답글·좋아요·신고·첨부·YouTube embed |
+| 공지 | `/notice/**` | 목록·상세 (작성은 ADMIN) |
+| 내 정보 | `/user/me`, `/user/me/edit` | 프로필·이미지·알림 설정·민감정보 동의 변경 |
+| AI 맞춤 추천 | `/recommendations` | Gemini + 네이버 도서, 추천 활동 모달 |
+| AI 정서 케어 | `/care-report`, `/ai-care` | 위저드 → OpenAI 위로 편지 + PDF |
+| 정서 클러스터 | `/cluster` | 3D 시각화·유사 사용자(프로필·자가진단 연동) |
+
+### 상담사 (`COUNSELOR`)
+
+| 메뉴 | 경로 | 설명 |
+|------|------|------|
+| 대시보드 | `/counselor` | 상담사 홈 |
+| 커뮤니티 관리 | `/counselor/posts` | 게시글 조회 |
+| 예약 관리 | `/counselor/bookings` | 예약 확인·상태 변경 |
+| 고위험 모니터링 | `/counselor/high-risk` | 고위험 검사 결과 |
+| 알림 | `/counselor/alerts` | 발송·조회 |
+
+### 관리자 (`ADMIN`)
+
+| 메뉴 | 경로 | 설명 |
+|------|------|------|
+| 대시보드 | `/admin` | 통계·요약 |
+| 모니터링 | `/admin/monitoring` | 검사 이력·고위험 확인 |
+| 정서 클러스터 | `/admin/cluster` | 3D 클러스터·재계산 |
+| 회원 관리 | `/admin/users` | 목록·상세 |
+| 예약 관리 | `/admin/bookings` | 전체 예약 조회 |
+| 게시글·공지 | `/admin/posts`, `/admin/notices` | CRUD |
+| 알림 발송 | `/admin/alerts` | 전체/개별 `ADMIN_MESSAGE` |
+| SQL 콘솔 | `/admin/sql` | 읽기 전용 쿼리(개발·운영 보조) |
+| 서버 로그 | `/admin/logs` | `logs/` 파일 tail·SSE·ACCESS 로그 묶기 |
 
 ---
 
 ## 주요 URL
 
-### 화면
+### 화면 (일부)
 
 | 기능 | Method | URL |
 |------|--------|-----|
-| 회원가입 | GET/POST | `/signup` |
-| 로그인 / 로그아웃 | GET·POST / POST | `/login`, `/logout` |
-| 내 정보 | GET | `/user/me` |
-| 정보 수정 | GET/POST | `/user/me/edit` |
-| 공지 목록·상세 | GET | `/notice`, `/notice/{id}` |
-| 공지 작성·수정·삭제 | GET/POST | `/notice/new`, `/notice/{id}/edit`, `/notice/{id}/delete` *(ADMIN)* |
-| 커뮤니티 | GET/POST | `/community`, `/community/{id}`, … |
+| 회원가입 / 로그인 | GET·POST | `/signup`, `/login`, `/logout` |
+| 내 정보·예약 | GET | `/user/me` |
+| 민감정보 동의 | POST | `/user/me/sensitive-consent` |
 | 자가진단 | GET/POST | `/self-assessment`, `/self-assessment/{typeKey}`, `…/result` |
-| 알림 | GET/POST | `/alerts`, `/alerts/read-all`, `/alerts/{id}/delete` |
-| 상담소·예약 | GET/POST | `/counseling`, `/counseling/booking` |
-| 관리자 | GET/POST | `/admin`, `/admin/users`, `/admin/posts`, `/admin/notices`, `/admin/alerts`, `/admin/cluster`, `/admin/sql` *(ADMIN)* |
+| 상담·예약 | GET/POST | `/counseling`, `/counseling/booking` |
+| 관리자 | GET/POST | `/admin/**` |
+| 상담사 | GET/POST | `/counselor/**` |
 
 ### REST API (일부)
 
 | 기능 | Method | URL |
 |------|--------|-----|
 | AI 도서 추천 | POST | `/api/recommendations/ai` |
-| 감정별 도서 목록 | GET | `/api/recommendations?emotion=…` |
+| 감정별 도서 | GET | `/api/recommendations?emotion=…` |
 | 상담소 검색 | GET | `/api/counseling/centers?query=…` |
-| 예약 | POST/GET | `/api/counseling/bookings`, `/bookings/me`, … |
+| 예약 | POST/GET | `/api/counseling/bookings`, `/bookings/me`, `/bookings/{id}/cancel` |
+| 추천 활동 기록 | POST | `/api/activities` |
 | 도서 리뷰 | GET/POST | `/api/reviews` |
+| 정서 클러스터 | GET/POST | `/api/cluster/**` |
+| 관리자 로그 | GET | `/admin/logs/files`, `/recent`, `/stream` (SSE) |
 
-상세 명세: [docs/api.md](docs/api.md)
+상세 명세: [docs/api.md](docs/api.md) (로컬 문서, 팀 발표·PPT용으로 갱신 중)
 
 ---
 
 ## 알림 (`/alerts`)
 
-- **모니터링 알림** — 자가진단 결과 기반: 고위험·악화는 **위험(빨강 톤)**, 개선·맞춤 추천은 긍정 톤
-- **일반 알림** — 공지·커뮤니티 댓글/답글·**관리자 메시지**: 위험 알림과 구분되는 **일반(초록·벨 톤)**
-- 알림에 `link_url`이 있으면 관련 글·공지로 바로 이동합니다.
+- **모니터링 알림** — 자가진단 기반: 고위험·악화(위험 톤), 개선·맞춤 추천(긍정 톤)
+- **일반 알림** — 공지·댓글/답글·관리자 메시지(일반 톤)
+- `link_url`이 있으면 관련 화면으로 바로 이동
 
-### 관리자 알림 발송 (`/admin/alerts`, ADMIN)
-
-- **제목**(선택) + **본문**(필수)으로 특정 회원 또는 전체에게 `ADMIN_MESSAGE` 알림을 보냅니다.
-- **「바로가기 링크 넣기」를 체크했을 때만** `link_url`이 저장되어 알림에 링크가 표시됩니다.
+**관리자 발송** (`/admin/alerts`): 제목(선택)+본문(필수). 「바로가기 링크 넣기」 체크 시에만 `link_url` 저장.
 
 ---
 
-## AI 맞춤 도서 추천 (요약)
+## AI · 상담 · 클러스터 (요약)
 
-`POST /api/recommendations/ai` — body: `{ "message": "..." }`
+**도서 추천** — `POST /api/recommendations/ai`  
+Gemini(감정·검색어) → DB·네이버 후보 → Gemini 3권 선별. 키 없으면 단계별 fallback.
 
-1. **Gemini** — 사용자 문장에서 감정 태그·검색어·요약 추출  
-2. **서버** — DB + 네이버 도서 API로 후보 수집  
-3. **Gemini** — 후보 목록에서 최대 3권 선별·이유 생성 → 필요 시 `recommendation_books`에 반영  
+**위로 편지** — OpenAI 단일 백엔드 (`care` 패키지). PDF 다운로드 지원.
 
-키 미설정 시 단계별 fallback으로 서버는 기동·동작합니다.
+**상담소 지도** — API `mapx`/`mapy` 우선, 없으면 장소명만 검색.
 
----
+**정서 클러스터** — 자가진단 완료 시 `user_assessment_profiles` 동기화, 관리자 화면에서 K-means 재계산 가능.
 
-## 상담소 · 지도
-
-- 목록: `NaverLocalSearchClient` → 네이버 지역검색 OpenAPI  
-- 썸네일: 상위 N건에 이미지 검색 API 보조  
-- **지도 보기**: API `mapx`/`mapy`(WGS84×10⁷)가 있으면 해당 좌표로 열고, 없으면 **장소명만** 검색 (이름+주소 조합은 사용하지 않음)
+**추천 활동** — 호흡·감사 일기 등 완료 시 `POST /api/activities` → `activity_log` (비로그인은 204).
 
 ---
 
-## 팀 통합 이력 (참고)
+## 팀 담당·통합 (참고)
 
-| 담당 | 반영 내용 |
+| 담당 | 주요 반영 |
 |------|-----------|
-| 서상원 | Oracle, AI 맞춤 추천, `ORACLE_SETUP.sql` |
-| 김동주 | 로그인·커뮤니티·공지·첨부파일 |
-| 김지훈 | DB 자가진단, `ASSESSMENT_SEED.sql` |
+| 서상원 | Oracle·AI 도서 추천·종합 보고서·`ORACLE_SETUP`·상담 예약(관리자/상담사/내정보)·관리자 로그 뷰어 |
+| 김동주 | 로그인·커뮤니티·공지·첨부·개인정보 동의·추천 활동 |
+| 김지훈 | 자가진단·`ASSESSMENT_SEED` |
 | 윤아연 | 상담소 검색·예약 API |
 
 구 더미 코드(`MapApiClient`, `Diagnosis*` 등)는 제거되었습니다.
-
----
-
-## 리팩토링 노트 (care 패키지)
-
-- `CareLetterAiRouter` · `CareLetterOpenAiClient` · `CareLetterGeminiClient` · `CareLetterAiResult` · `CareLetterPromptBuilder` → **`CareLetterService` 하나로 통합**
-- Gemini 백업 경로 제거 — 위로 편지는 **OpenAI 단일 백엔드**. 도서 추천(Gemini)은 그대로 유지
-- 사용처가 없던 `CareDailyInput` 엔티티·리포지토리·저장 로직 삭제 (테이블 DDL 은 legacy 로 표시)
-- 개발용 `/api/test/openai` 엔드포인트(`OpenAiTestController`) 제거 · `care.llm.provider`·`CARE_LLM_PROVIDER`·`gemini.model` 설정 정리
-- DTO 7개 클래스 → **record** 전환, 컨트롤러 공통 `currentUser/excerpt` → `CareWebSupport` 로 추출
 
 ---
 
@@ -174,59 +190,75 @@ cp .env.example .env   # Windows: copy .env.example .env
 
 | 문서 | 내용 |
 |------|------|
+| [sql/README.md](sql/README.md) | SQL 실행 순서·업그레이드·트러블슈팅 |
 | [docs/frontend.md](docs/frontend.md) | 화면·템플릿·CSS |
 | [docs/backend.md](docs/backend.md) | 서버·설정 |
 | [docs/db.md](docs/db.md) | DB 연동 |
-| [docs/api.md](docs/api.md) | REST API |
+| [docs/api.md](docs/api.md) | REST API 명세 |
 
 ---
 
-## 관리자
+## 관리자 계정
 
-`role = 'ADMIN'`인 계정으로 로그인하면 `/admin`에서 대시보드·유저 관리·게시글·공지·알림 발송·정서 클러스터(3D)·SQL 콘솔을 사용할 수 있습니다. 초기 관리자·샘플 데이터는 `01_schema/ORACLE_SETUP.sql` 시드에 포함됩니다. 등급을 직접 부여하려면:
+`role = 'ADMIN'` 계정으로 `/admin` 접근. 초기 관리자는 `ORACLE_SETUP.sql` 시드에 포함됩니다.
 
 ```sql
 UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 COMMIT;
 ```
 
+상담사 UI는 `role = 'COUNSELOR'` 입니다.
+
 ---
 
 ## 로컬 H2 (선택)
 
-Oracle 없이 화면만 볼 때는 `application.properties` 프로필에 따라 H2·`data.sql`을 사용할 수 있습니다.  
-팀 기본 환경은 Oracle이며, `spring.sql.init.mode=never`로 앱 기동 시 SQL 자동 실행은 끄는 설정이 일반적입니다.
+Oracle 없이 화면만 볼 때 H2 프로필을 쓸 수 있습니다. 팀 기본은 Oracle이며 `spring.sql.init.mode=never`로 앱 기동 시 SQL 자동 실행은 하지 않습니다.
+
+---
+
+## Git 브랜치 (팀 작업)
+
+```text
+main          ← 팀 통합 (배포·데모 기준)
+서상원 / 김동주 / 김지훈 / 윤아연  ← 개인 기능 개발 후 main에 merge
+```
+
+개인 브랜치에서 작업 → `main` fast-forward 또는 merge → `git push origin main`
 
 ---
 
 ## 추후 작업
 
-- 게시글 페이지네이션  
-- 커뮤니티 작성자 — 현재 `posts.author` 문자열, `User` FK 정리  
-- 비밀번호 변경 기능  
+- 게시글 페이지네이션
+- 커뮤니티 `posts.author` → `User` FK 정리
+- 비밀번호 변경
+- `docs/api.md` 원격 동기화(선택)
 
 ---
 
 ## 프로젝트 구조 (요약)
 
-```
-src/main/java/
-  com.mindlink/
-    MindLinkApplication.java # Spring Boot 진입점
-    config/                  # SecurityConfig, DotEnvLoader 등
-    controller/              # MVC·REST
-    service/                 # 비즈니스 로직 (NaverLocalSearchClient 등)
-    domain/                  # JPA 엔티티
-    repository/
-    dto/
-    care/                    # AI 종합 보고서(위로 편지)
-    chatcluster/             # 정서 3D 클러스터링
-    recommendation/          # AI 도서 추천 (enum·domain·repository·dto·client·service·web)
+```text
+src/main/java/com/mindlink/
+  MindLinkApplication.java
+  config/           SecurityConfig, DotEnvLoader, LogMaskingConverter …
+  controller/       MVC·REST (admin, counselor, counseling, community …)
+  service/          비즈니스 로직
+  domain/           JPA 엔티티
+  repository/
+  care/             AI 위로 편지·PDF
+  chatcluster/      정서 3D 클러스터링
+  recommendation/   AI 도서 추천
+src/main/resources/
+  templates/        Thymeleaf (admin/, counselor/, user/ …)
+  static/css|js/    style.css, admin.css, admin-logs.js, activities.js …
 sql/
-  README.md                  # 실행 순서·업그레이드·트러블슈팅 가이드
-  01_schema/                 # ORACLE_SETUP.sql (전체 DDL + 시드)
-  02_features/               # USERS_PROFILE · ASSESSMENT_SEED · MONITORING · CARE_REPORT · CHAT_CLUSTERING
-  03_optional/               # CHAT_CLUSTER_REAL_USER_SEED
-  archive/                   # 마이그레이션·복구 전용 (MONITORING_FIX/REBUILD, COMMUNITY_CATEGORY_MIGRATE)
-src/main/resources/templates/   # Thymeleaf 화면 (admin/ 포함)
+  README.md
+  01_schema/        ORACLE_SETUP.sql
+  02_features/      USERS_PROFILE, PRIVACY_CONSENT, ASSESSMENT_SEED,
+                    MONITORING, CARE_REPORT, ACTIVITY_LOG, CHAT_CLUSTERING
+  03_optional/      CHAT_CLUSTER_REAL_USER_SEED, PROVERBS_SEED
+  archive/          마이그레이션·복구 전용
+logs/               mindlink.log (gitignore, 관리자 뷰어 대상)
 ```
