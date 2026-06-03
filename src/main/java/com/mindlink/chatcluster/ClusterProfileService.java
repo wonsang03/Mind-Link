@@ -297,21 +297,43 @@ public class ClusterProfileService {
                 "불안이 상대적으로 높아요. 걱정을 글로 적어보거나 호흡을 고르는 연습이 도움이 될 수 있어요."};
     }
 
-    /** E-1 — 실사용자만(페르소나 제외) 군집별 인원·평균 norm + 동적 유형 라벨. */
-    public List<ClusterDtos.RealClusterStat> realClusterStats() {
-        List<Object[]> rows = repository.realClusterStats();
-        List<ClusterDtos.RealClusterStat> out = new ArrayList<>(rows.size());
-        for (Object[] r : rows) {
-            int cid = r[0] != null ? ((Number) r[0]).intValue() : -1;
-            long cnt = r[1] != null ? ((Number) r[1]).longValue() : 0;
-            double s = r[2] != null ? ((Number) r[2]).doubleValue() : 0;
-            double d = r[3] != null ? ((Number) r[3]).doubleValue() : 0;
-            double a = r[4] != null ? ((Number) r[4]).doubleValue() : 0;
-            String label = classifyType(s, d, a)[0];
-            out.add(new ClusterDtos.RealClusterStat(cid, cnt,
-                    round4(s), round4(d), round4(a), label));
+    /**
+     * E-1 — 실사용자(페르소나 제외)를 정서 유형 5분류(일반/스트레스/우울/불안/복합)로 집계.
+     * 고정 5행(인원 0이어도 표시), 각 유형 인원·평균 norm.
+     */
+    public List<ClusterDtos.RealClusterStat> realCategoryStats() {
+        String[] labels = {"일반", "스트레스", "우울", "불안", "복합"};
+        long[] cnt = new long[5];
+        double[] sumS = new double[5], sumD = new double[5], sumA = new double[5];
+        for (UserAssessmentProfile p : repository.findAllByIsSynthetic(0)) {
+            double s = p.getStressNorm()     != null ? p.getStressNorm()     : 0;
+            double d = p.getDepressionNorm() != null ? p.getDepressionNorm() : 0;
+            double a = p.getAnxietyNorm()    != null ? p.getAnxietyNorm()    : 0;
+            int i = categoryIndex(s, d, a);
+            cnt[i]++; sumS[i] += s; sumD[i] += d; sumA[i] += a;
+        }
+        List<ClusterDtos.RealClusterStat> out = new ArrayList<>(5);
+        for (int i = 0; i < 5; i++) {
+            long c = cnt[i];
+            out.add(new ClusterDtos.RealClusterStat(
+                    i, c,
+                    round4(c > 0 ? sumS[i] / c : 0),
+                    round4(c > 0 ? sumD[i] / c : 0),
+                    round4(c > 0 ? sumA[i] / c : 0),
+                    labels[i]));
         }
         return out;
+    }
+
+    /** 정서 유형 5분류 인덱스 (0 일반·안정, 1 스트레스, 2 우울, 3 불안, 4 복합) — classifyType 과 동일 임계값. */
+    private static int categoryIndex(double s, double d, double a) {
+        double max = Math.max(s, Math.max(d, a));
+        if (max < 0.40) return 0;                                       // 일반(안정·회복)
+        int high = (s >= 0.55 ? 1 : 0) + (d >= 0.55 ? 1 : 0) + (a >= 0.55 ? 1 : 0);
+        if (high >= 2) return 4;                                        // 복합
+        if (s >= d && s >= a) return 1;                                 // 스트레스
+        if (d >= a) return 2;                                           // 우울
+        return 3;                                                       // 불안
     }
 
     private Integer nearestClusterId(UserAssessmentProfile me) {
