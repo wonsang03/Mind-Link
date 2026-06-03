@@ -5,14 +5,33 @@
 
 **전제**: JPA는 `ddl-auto=none` — 테이블·데이터는 아래 스크립트를 SQL Developer / SQL\*Plus에서 **수동 실행**합니다. 빈 스키마여도 `01_schema/ORACLE_SETUP.sql` 섹션 0이 기본 테이블을 생성합니다.
 
+## 0. 서버 띄우기 전 — DB 초기화·전체 설치 (권장)
+
+개발 DB를 **처음부터** 맞추거나 스키마가 꼬였을 때 (`ORA-00904` 등):
+
+| 목적 | 파일 | 설명 |
+|------|------|------|
+| **초기화 + 재설치 한 번에** | `00_FRESH_INSTALL.sql` | DROP 전체 테이블 → 8단계 설치 + 명언 시드 |
+| 테이블만 삭제 | `00_RESET_ALL.sql` | 데이터·테이블 전부 DROP |
+| 설치만 (테이블 있으면 멱등 스킵) | `00_INSTALL_ALL.sql` | 8단계 순차 `@@` 호출 |
+
+```sql
+-- SQL Developer / SQL*Plus — 반드시 APP_USER 로 sql/ 폴더에서
+SQL> @00_FRESH_INSTALL.sql
+```
+
+실행 후 **Spring Boot 재시작** → `http://localhost:8081` (`.env`의 `DB_*`와 동일 계정).
+
 ## 폴더 구조
 
 ```
 sql/
 ├── README.md                              # 이 파일 — 유일한 실행 가이드
-├── 00_INSTALL_ALL.sql                     # 원샷 설치 (아래 필수 6개를 @@ 로 순차 호출)
+├── 00_FRESH_INSTALL.sql                   # RESET + INSTALL 원샷
+├── 00_RESET_ALL.sql                       # 앱 테이블 전부 DROP (개발용)
+├── 00_INSTALL_ALL.sql                     # 원샷 설치 (필수 8개 + PROVERBS)
 ├── 01_schema/
-│   └── ORACLE_SETUP.sql                   # 전체 DDL + 기본 시드(관리자·추천도서)
+│   └── ORACLE_SETUP.sql                   # DDL + 추천도서 시드 (회원·커뮤니티 시드 없음)
 ├── 02_features/
 │   ├── USERS_PROFILE.sql                  # users 프로필 컬럼 (멱등 ALTER)
 │   ├── PRIVACY_CONSENT.sql                # sensitive_data_consent (민감정보 동의)
@@ -20,7 +39,8 @@ sql/
 │   ├── MONITORING.sql                     # assessment_results + user_alerts(전체) + post_comments.parent_comment_id
 │   ├── CARE_REPORT.sql                    # AI 위로 편지
 │   ├── ACTIVITY_LOG.sql                   # 추천 활동 수행 기록
-│   └── CHAT_CLUSTERING.sql                # 정서 클러스터 + 210 페르소나
+│   ├── CHAT_CLUSTERING.sql                # 정서 클러스터 + 210 페르소나
+│   └── CLEAR_RUNTIME_DATA.sql             # 공지·커뮤니티·회원 DELETE
 ├── 03_optional/
 │   └── PROVERBS_SEED.sql                  # (선택) 명언·속담 데이터
 └── archive/                               # 평소 실행 안 함 (마이그레이션·복구·진단 전용)
@@ -35,15 +55,21 @@ sql/
 
 ## 1. 신규 설치
 
-### 가장 쉬운 방법 — 원샷 설치 (권장)
+### 가장 쉬운 방법 — 초기화 후 전체 설치 (권장)
 
-`sql/` 폴더에서 **APP_USER** 로 접속해 한 번만 실행하면 아래 필수 6개가 순서대로 적용됩니다.
+`sql/` 폴더에서 **APP_USER** 로:
+
+```sql
+SQL> @00_FRESH_INSTALL.sql
+```
+
+이미 빈 DB이거나 테이블만 추가하면:
 
 ```sql
 SQL> @00_INSTALL_ALL.sql
 ```
 
-> `00_INSTALL_ALL.sql` 은 `@@` 상대경로로 하위 스크립트를 호출하므로, 반드시 `sql/` 폴더(또는 절대경로)를 기준으로 실행하세요. 명언·속담(`PROVERBS_SEED.sql`)은 기본 비활성이며 파일 안의 주석 한 줄을 해제하면 함께 설치됩니다.
+> `@@` 상대경로이므로 `sql/` 폴더(또는 `@C:\...\sql\00_FRESH_INSTALL.sql` 절대경로) 기준으로 실행하세요. `00_INSTALL_ALL.sql` 은 **PRIVACY_CONSENT · ACTIVITY_LOG · PROVERBS** 까지 포함합니다.
 
 ### 개별 실행 (순서대로)
 
@@ -58,9 +84,16 @@ SQL> @00_INSTALL_ALL.sql
 | 7 | `02_features/ACTIVITY_LOG.sql` | ✅ | 추천 활동(`activity_log`) |
 | 8 | `02_features/CHAT_CLUSTERING.sql` | 클러스터 사용 시 | `user_assessment_profiles` + 210 페르소나 시드 |
 | (선택) | `03_optional/PROVERBS_SEED.sql` | 선택 | `proverbs` 테이블·명언 시드 |
+| 9 | `02_features/CLEAR_RUNTIME_DATA.sql` | ✅ (INSTALL 끝) | 공지·커뮤니티·회원·이력 삭제 |
 
-> 요약: **01 → USERS_PROFILE → PRIVACY_CONSENT → ASSESSMENT_SEED → MONITORING → CARE_REPORT → ACTIVITY_LOG → (CHAT_CLUSTERING) → (PROVERBS_SEED)**.
-> 공지·게시글·댓글·데모 사용자 같은 더미 데이터는 더 이상 시드하지 않습니다. 커뮤니티는 빈 테이블로 시작합니다.
+> 요약: **01 → … → CHAT_CLUSTERING → PROVERBS → `CLEAR_RUNTIME_DATA`**.
+> `00_INSTALL_ALL.sql` **마지막 단계**에서 **공지·커뮤니티(글·댓글·첨부·신고)·회원·검사이력·알림·예약** 등을 **전부 DELETE** 합니다. 관리자 계정도 시드하지 않습니다(회원가입 후 `role='ADMIN'` 부여).
+
+### 데이터만 비우기 (스키마 유지)
+
+```sql
+SQL> @02_features/CLEAR_RUNTIME_DATA.sql
+```
 
 ## 2. 기존 DB 업그레이드
 
@@ -137,9 +170,9 @@ SQL> @00_INSTALL_ALL.sql
 
 ## 7. 관리자 등급 부여
 
-관리자 UI 접근(`/admin/**`)은 `role = 'ADMIN'`인 계정만 가능합니다. ORACLE_SETUP 시드에 기본 관리자가 포함되며, 직접 부여하려면:
+관리자 UI(`/admin/**`)는 `role = 'ADMIN'`만 접근 가능합니다. **기본 관리자 시드는 없습니다.** 회원가입 후:
 
 ```sql
-UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
+UPDATE users SET role = 'ADMIN' WHERE email = '본인이_가입한_이메일';
 COMMIT;
 ```

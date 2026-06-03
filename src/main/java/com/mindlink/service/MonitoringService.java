@@ -1,5 +1,6 @@
 package com.mindlink.service;
 
+import com.mindlink.care.CareSafetyFilter;
 import com.mindlink.domain.AssessmentResult;
 import com.mindlink.domain.User;
 import com.mindlink.domain.UserAlert;
@@ -33,11 +34,14 @@ public class MonitoringService {
 
     private final AssessmentResultRepository resultRepo;
     private final UserAlertRepository alertRepo;
+    private final CareSafetyFilter safetyFilter;
 
     public MonitoringService(AssessmentResultRepository resultRepo,
-                             UserAlertRepository alertRepo) {
+                             UserAlertRepository alertRepo,
+                             CareSafetyFilter safetyFilter) {
         this.resultRepo = resultRepo;
         this.alertRepo  = alertRepo;
+        this.safetyFilter = safetyFilter;
     }
 
     /**
@@ -262,5 +266,50 @@ public class MonitoringService {
 
     public long countUnconfirmedHighRisk() {
         return alertRepo.countByAlertTypeAndAdminConfirmedFalse("HIGH_RISK");
+    }
+
+    /**
+     * 커뮤니티 글/댓글에 위기 키워드가 있으면 HIGH_RISK 알림 생성(관리자 모니터링 탭에 표시).
+     * 동일 글·댓글에 미확인 알림이 이미 있으면 중복 생성하지 않는다.
+     *
+     * @return 알림을 새로 만들었으면 true
+     */
+    @Transactional
+    public boolean recordCommunityCrisisAlert(User user, Long postId, Long commentId,
+                                              String title, String body) {
+        if (user == null || postId == null) return false;
+        String combined = ((title != null ? title : "") + " " + (body != null ? body : "")).trim();
+        if (combined.isBlank() || !safetyFilter.containsCrisisExpression(combined)) {
+            return false;
+        }
+        if (commentId != null) {
+            if (alertRepo.existsByAlertTypeAndRelatedPostIdAndRelatedCommentIdAndAdminConfirmedFalse(
+                    "HIGH_RISK", postId, commentId)) {
+                return false;
+            }
+        } else if (alertRepo.existsByAlertTypeAndRelatedPostIdAndRelatedCommentIdIsNullAndAdminConfirmedFalse(
+                "HIGH_RISK", postId)) {
+            return false;
+        }
+
+        UserAlert alert = new UserAlert();
+        alert.setUser(user);
+        alert.setAlertType("HIGH_RISK");
+        alert.setTitle(commentId != null ? "커뮤니티 댓글 · 위기 표현" : "커뮤니티 게시글 · 위기 표현");
+        alert.setMessage(commentId != null
+                ? "커뮤니티 댓글에서 위기 관련 표현이 감지되었습니다. 관리자 확인이 필요합니다."
+                : "커뮤니티 게시글에서 위기 관련 표현이 감지되었습니다. 관리자 확인이 필요합니다.");
+        alert.setLinkUrl(commentId != null
+                ? "/community/" + postId + "#comment-" + commentId
+                : "/community/" + postId);
+        alert.setRelatedPostId(postId);
+        if (commentId != null) {
+            alert.setRelatedCommentId(commentId);
+        }
+        alert.setRead(false);
+        alert.setAdminConfirmed(false);
+        alert.setCreatedAt(LocalDateTime.now());
+        alertRepo.save(alert);
+        return true;
     }
 }

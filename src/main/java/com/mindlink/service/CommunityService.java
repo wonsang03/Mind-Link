@@ -5,6 +5,7 @@ import com.mindlink.domain.Post;
 import com.mindlink.domain.PostComment;
 import com.mindlink.domain.Report;
 import com.mindlink.domain.User;
+import com.mindlink.dto.CommunityWriteResult;
 import com.mindlink.repository.CommentRepository;
 import com.mindlink.repository.PostRepository;
 import com.mindlink.repository.ReportRepository;
@@ -23,17 +24,20 @@ public class CommunityService {
     private final ReportRepository reportRepository;
     private final FileStorageService fileStorageService;
     private final UserNotificationService notificationService;
+    private final MonitoringService monitoringService;
 
     public CommunityService(PostRepository postRepository,
                              CommentRepository commentRepository,
                              ReportRepository reportRepository,
                              FileStorageService fileStorageService,
-                             UserNotificationService notificationService) {
+                             UserNotificationService notificationService,
+                             MonitoringService monitoringService) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.reportRepository = reportRepository;
         this.fileStorageService = fileStorageService;
         this.notificationService = notificationService;
+        this.monitoringService = monitoringService;
     }
 
     public List<Post> findAll(String category) {
@@ -48,20 +52,24 @@ public class CommunityService {
     }
 
     @Transactional
-    public Post create(String author, String title, String content, String category,
-                       MultipartFile[] files, String[] linkUrls) {
+    public CommunityWriteResult<Post> create(User user, String title, String content, String category,
+                                             MultipartFile[] files, String[] linkUrls) {
+        String author = user.getName();
         Post post = new Post(author, title, content, category);
         Post saved = postRepository.save(post);
         fileStorageService.saveFiles(files, Attachment.TargetType.POST, saved.getId());
         fileStorageService.saveLinks(linkUrls, Attachment.TargetType.POST, saved.getId());
-        return saved;
+        boolean crisis = monitoringService.recordCommunityCrisisAlert(
+                user, saved.getId(), null, title, content);
+        return CommunityWriteResult.of(saved, crisis);
     }
 
     @Transactional
-    public Post updatePost(Long postId, String currentUserName,
-                           String title, String content, String category,
-                           List<Long> removeAttachmentIds, MultipartFile[] newFiles,
-                           String[] newLinkUrls) {
+    public CommunityWriteResult<Post> updatePost(Long postId, User user,
+                                                 String title, String content, String category,
+                                                 List<Long> removeAttachmentIds, MultipartFile[] newFiles,
+                                                 String[] newLinkUrls) {
+        String currentUserName = user.getName();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         if (!post.getAuthor().equals(currentUserName)) {
@@ -78,13 +86,16 @@ public class CommunityService {
         }
         fileStorageService.saveFiles(newFiles, Attachment.TargetType.POST, postId);
         fileStorageService.saveLinks(newLinkUrls, Attachment.TargetType.POST, postId);
-        return post;
+        boolean crisis = monitoringService.recordCommunityCrisisAlert(
+                user, postId, null, title, content);
+        return CommunityWriteResult.of(post, crisis);
     }
 
     @Transactional
-    public PostComment addComment(Long postId, String author, String content,
-                                   Long parentCommentId,
-                                   MultipartFile[] files, String[] linkUrls) {
+    public CommunityWriteResult<PostComment> addComment(Long postId, User user, String content,
+                                                        Long parentCommentId,
+                                                        MultipartFile[] files, String[] linkUrls) {
+        String author = user.getName();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         PostComment parent = null;
@@ -102,7 +113,9 @@ public class CommunityService {
         fileStorageService.saveFiles(files, Attachment.TargetType.COMMENT, saved.getId());
         fileStorageService.saveLinks(linkUrls, Attachment.TargetType.COMMENT, saved.getId());
         notificationService.onPostComment(post, saved, author);
-        return saved;
+        boolean crisis = monitoringService.recordCommunityCrisisAlert(
+                user, postId, saved.getId(), null, content);
+        return CommunityWriteResult.of(saved, crisis);
     }
 
     @Transactional
@@ -147,12 +160,16 @@ public class CommunityService {
     }
 
     @Transactional
-    public void adminUpdatePost(Long postId, String title, String content, String category) {
+    public CommunityWriteResult<Post> adminUpdatePost(Long postId, User user,
+                                                    String title, String content, String category) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         post.setTitle(title);
         post.setContent(content);
         post.setCategory(category);
+        boolean crisis = user != null && monitoringService.recordCommunityCrisisAlert(
+                user, postId, null, title, content);
+        return CommunityWriteResult.of(post, crisis);
     }
 
     @Transactional
@@ -164,5 +181,10 @@ public class CommunityService {
         }
         fileStorageService.deleteByTarget(Attachment.TargetType.POST, postId);
         postRepository.delete(post);
+    }
+
+    public static String crisisFlashSuffix() {
+        return " 위기 관련 표현이 감지되어 관리자에게 알림되었습니다. "
+                + "도움이 필요하시면 자살예방 상담 1393, 정신건강 위기 1577-0199, 긴급 119로 연락해 주세요.";
     }
 }

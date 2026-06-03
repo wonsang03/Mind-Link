@@ -186,8 +186,11 @@ public class CommunityController {
         }
         User user = userService.findById(id).orElseThrow();
         try {
-            Post saved = communityService.create(user.getName(), title, content, category, files, linkUrls);
-            return "redirect:/community/" + saved.getId();
+            var result = communityService.create(user, title, content, category, files, linkUrls);
+            if (result.crisisAlertCreated()) {
+                ra.addFlashAttribute("flash", "게시글이 등록되었습니다." + CommunityService.crisisFlashSuffix());
+            }
+            return "redirect:/community/" + result.payload().getId();
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("flash", e.getMessage());
             return "redirect:/community/new";
@@ -235,9 +238,13 @@ public class CommunityController {
         }
         User user = userService.findById(uid).orElseThrow();
         try {
-            communityService.updatePost(id, user.getName(), title, content, category,
+            var result = communityService.updatePost(id, user, title, content, category,
                     removeAttachmentIds, files, linkUrls);
-            ra.addFlashAttribute("flash", "게시글이 수정되었습니다.");
+            String msg = "게시글이 수정되었습니다.";
+            if (result.crisisAlertCreated()) {
+                msg += CommunityService.crisisFlashSuffix();
+            }
+            ra.addFlashAttribute("flash", msg);
             return "redirect:/community/" + id;
         } catch (SecurityException e) {
             ra.addFlashAttribute("flash", e.getMessage());
@@ -263,8 +270,11 @@ public class CommunityController {
         }
         User user = userService.findById(uid).orElseThrow();
         try {
-            var saved = communityService.addComment(id, user.getName(), content, parentCommentId, files, linkUrls);
-            return "redirect:/community/" + id + "#comment-" + saved.getId();
+            var result = communityService.addComment(id, user, content, parentCommentId, files, linkUrls);
+            if (result.crisisAlertCreated()) {
+                ra.addFlashAttribute("flash", "댓글이 등록되었습니다." + CommunityService.crisisFlashSuffix());
+            }
+            return "redirect:/community/" + id + "#comment-" + result.payload().getId();
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("flash", e.getMessage());
         }

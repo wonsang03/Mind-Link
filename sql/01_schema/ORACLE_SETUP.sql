@@ -418,31 +418,10 @@ END;
 /
 
 -- =============================================================================
--- 2b. 기본 관리자 계정 (MERGE — 없을 때만 생성)
---     관리자: admin@mindlink.com / 비밀번호 admin1234
---     ※ 공지·게시글·댓글 등 커뮤니티 샘플 데이터는 더 이상 시드하지 않습니다(빈 테이블로 시작).
+-- 2b. 기본 관리자 계정 — 시드하지 않음 (00_INSTALL 마지막 CLEAR_RUNTIME_DATA 와 동일 정책)
+--     관리자 필요 시: 회원가입 후 UPDATE users SET role='ADMIN' WHERE email='...';
+--     ※ 공지·게시글·댓글·데모 회원 데이터도 시드하지 않습니다.
 -- =============================================================================
-
-DECLARE
-  u NUMBER;
-BEGIN
-  SELECT COUNT(*) INTO u FROM user_tables WHERE table_name = 'USERS';
-  IF u > 0 THEN
-    MERGE INTO users usr
-    USING (SELECT 'admin@mindlink.com' AS email FROM dual) s
-    ON (usr.email = s.email)
-    WHEN NOT MATCHED THEN
-      INSERT (name, email, password, role, created_at)
-      VALUES (
-        '관리자',
-        'admin@mindlink.com',
-        '$2a$10$cjwUlGVCVIxzYLVt7eP3XegA4dxbZtULyD5aPCUrnS.jfKkU3U23G',
-        'ADMIN',
-        SYSTIMESTAMP
-      );
-  END IF;
-END;
-/
 
 -- =============================================================================
 -- 3. recommendation_books — 전량 삭제 후 교보링크 세트 재적재

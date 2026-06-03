@@ -58,9 +58,17 @@
                             <span th:if="${!alert.adminConfirmed}" style="color:#e53e3e; margin-right:0.4rem;">●</span>
                             <strong th:text="${alert.user.name}">홍길동</strong>
                             <span class="muted" style="margin:0 0.3rem;">·</span>
-                            <span th:text="${alert.assessmentResult != null ? alert.assessmentResult.typeName : '-'}">우울증 (PHQ-9)</span>
-                            <span class="muted" style="margin:0 0.3rem;">·</span>
-                            <span th:text="${alert.assessmentResult != null ? alert.assessmentResult.level : '-'}">중증</span>
+                            <span th:if="${alert.assessmentResult != null}"
+                                  th:text="${alert.assessmentResult.typeName}">우울증 (PHQ-9)</span>
+                            <span th:if="${alert.assessmentResult == null and alert.title != null}"
+                                  th:text="${alert.title}">커뮤니티 · 위기</span>
+                            <span th:if="${alert.assessmentResult == null and alert.title == null}">-</span>
+                            <span class="muted" style="margin:0 0.3rem;" th:if="${alert.assessmentResult != null}">·</span>
+                            <span th:if="${alert.assessmentResult != null}"
+                                  th:text="${alert.assessmentResult.level}">중증</span>
+                            <a th:if="${alert.linkUrl != null}"
+                               th:href="${alert.linkUrl}"
+                               style="margin-left:0.4rem; font-size:0.82rem;">글 보기</a>
                             <span class="muted" style="margin:0 0.5rem;">·</span>
                             <span class="muted" style="font-size:0.82rem;"
                                   th:text="${#temporals.format(alert.createdAt, 'yyyy-MM-dd HH:mm')}">2025-05-30</span>

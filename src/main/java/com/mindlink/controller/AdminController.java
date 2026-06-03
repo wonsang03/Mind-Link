@@ -256,8 +256,12 @@ public class AdminController {
         if (!isAdmin(session)) return denied(ra);
         Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
         User user = userService.findById((Long) userId).orElseThrow();
-        communityService.create(user.getName(), title, content, category, files, null);
-        ra.addFlashAttribute("flash", "게시글이 등록되었습니다.");
+        var result = communityService.create(user, title, content, category, files, null);
+        String msg = "게시글이 등록되었습니다.";
+        if (result.crisisAlertCreated()) {
+            msg += CommunityService.crisisFlashSuffix();
+        }
+        ra.addFlashAttribute("flash", msg);
         return "redirect:/admin/posts";
     }
 
@@ -282,8 +286,14 @@ public class AdminController {
                            @RequestParam String category,
                            HttpSession session, RedirectAttributes ra) {
         if (!isAdmin(session)) return denied(ra);
-        communityService.adminUpdatePost(id, title, content, category);
-        ra.addFlashAttribute("flash", "게시글이 수정되었습니다.");
+        Object userId = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        User user = userService.findById((Long) userId).orElseThrow();
+        var result = communityService.adminUpdatePost(id, user, title, content, category);
+        String msg = "게시글이 수정되었습니다.";
+        if (result.crisisAlertCreated()) {
+            msg += CommunityService.crisisFlashSuffix();
+        }
+        ra.addFlashAttribute("flash", msg);
         return "redirect:/admin/posts";
     }
 

@@ -22,4 +22,10 @@ public interface UserAlertRepository extends JpaRepository<UserAlert, Long> {
     List<UserAlert> findByAlertTypeOrderByCreatedAtDesc(String alertType);
 
     long countByAlertTypeAndAdminConfirmedFalse(String alertType);
+
+    boolean existsByAlertTypeAndRelatedPostIdAndRelatedCommentIdIsNullAndAdminConfirmedFalse(
+            String alertType, Long relatedPostId);
+
+    boolean existsByAlertTypeAndRelatedPostIdAndRelatedCommentIdAndAdminConfirmedFalse(
+            String alertType, Long relatedPostId, Long relatedCommentId);
 }

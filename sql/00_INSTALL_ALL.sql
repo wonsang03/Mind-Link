@@ -6,24 +6,24 @@
 --     ORA-00904 같은 오류가 납니다.
 --
 --   ▶ 실행 방법
---       SQL*Plus / SQL Developer 에서 이 파일이 있는 sql/ 폴더를 기준으로 실행:
---         SQL> @00_INSTALL_ALL.sql          (sql/ 폴더에서)
---       또는 절대경로:
---         SQL> @C:\...\sql\00_INSTALL_ALL.sql
---     (@@ 는 "이 스크립트가 있는 폴더 기준 상대경로" 라 어디서 실행하든 하위 파일을 찾습니다.)
+--       SQL*Plus / SQL Developer 에서 sql/ 폴더 기준:
+--         SQL> @00_INSTALL_ALL.sql
+--       초기화 후 재설치:
+--         SQL> @00_FRESH_INSTALL.sql
 --
---   ▶ 포함 순서 (개별 파일은 각 폴더에 그대로 두고 여기서 순차 호출만 함)
---       1) 01_schema/ORACLE_SETUP.sql        기본 DDL + 관리자 계정 + recommendation_books 시드
---       2) 02_features/USERS_PROFILE.sql      내 정보 컬럼
---       3) 02_features/ASSESSMENT_SEED.sql    자가진단 문항·점수 구간
---       4) 02_features/MONITORING.sql         검사 이력·알림·댓글 답글
---       5) 02_features/CARE_REPORT.sql        AI 위로 편지
---       6) 02_features/CHAT_CLUSTERING.sql    정서 클러스터 + 210 합성 페르소나
---       (선택) 03_optional/PROVERBS_SEED.sql  명언·속담 — 필요 시 맨 아래 주석 해제
+--   ▶ 포함 순서
+--       1) 01_schema/ORACLE_SETUP.sql
+--       2) 02_features/USERS_PROFILE.sql
+--       3) 02_features/PRIVACY_CONSENT.sql
+--       4) 02_features/ASSESSMENT_SEED.sql
+--       5) 02_features/MONITORING.sql
+--       6) 02_features/CARE_REPORT.sql
+--       7) 02_features/ACTIVITY_LOG.sql
+--       8) 02_features/CHAT_CLUSTERING.sql
+--       (선택) 03_optional/PROVERBS_SEED.sql
 --
---   ▶ 시드 정책: 공지·게시글·댓글·데모 사용자 같은 더미 데이터는 넣지 않습니다.
---     실제로 채워지는 데이터는 ① 기본 관리자 계정 ② 도서 추천 데이터
---     ③ 자가진단 마스터 ④ 클러스터 3D 시각화용 210 합성 페르소나 뿐입니다.
+--   ▶ 시드: 추천도서·자가진단 마스터·210 페르소나·(선택) 명언
+--   ▶ [9] CLEAR_RUNTIME_DATA: 공지·커뮤니티·회원·이력 전부 삭제 (빈 DB로 서버 오픈)
 -- =============================================================================
 
 SET DEFINE OFF
@@ -32,45 +32,63 @@ ALTER SESSION SET NLS_LENGTH_SEMANTICS=CHAR;
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [1/6] 01_schema/ORACLE_SETUP.sql  — 기본 스키마 + 관리자 + 추천도서
+PROMPT  [1/8] 01_schema/ORACLE_SETUP.sql
 PROMPT ===========================================================================
 @@01_schema/ORACLE_SETUP.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [2/6] 02_features/USERS_PROFILE.sql  — 내 정보 컬럼
+PROMPT  [2/8] 02_features/USERS_PROFILE.sql
 PROMPT ===========================================================================
 @@02_features/USERS_PROFILE.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [3/6] 02_features/ASSESSMENT_SEED.sql  — 자가진단 문항·점수 구간
+PROMPT  [3/8] 02_features/PRIVACY_CONSENT.sql
+PROMPT ===========================================================================
+@@02_features/PRIVACY_CONSENT.sql
+
+PROMPT
+PROMPT ===========================================================================
+PROMPT  [4/8] 02_features/ASSESSMENT_SEED.sql
 PROMPT ===========================================================================
 @@02_features/ASSESSMENT_SEED.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [4/6] 02_features/MONITORING.sql  — 검사 이력·알림·댓글 답글
+PROMPT  [5/8] 02_features/MONITORING.sql
 PROMPT ===========================================================================
 @@02_features/MONITORING.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [5/6] 02_features/CARE_REPORT.sql  — AI 위로 편지
+PROMPT  [6/8] 02_features/CARE_REPORT.sql
 PROMPT ===========================================================================
 @@02_features/CARE_REPORT.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  [6/6] 02_features/CHAT_CLUSTERING.sql  — 정서 클러스터 + 210 페르소나
+PROMPT  [7/8] 02_features/ACTIVITY_LOG.sql
 PROMPT ===========================================================================
-@@02_features/CHAT_CLUSTERING.sql
-
--- (선택) 명언·속담 데이터가 필요하면 아래 한 줄의 주석을 해제하세요.
--- @@03_optional/PROVERBS_SEED.sql
+@@02_features/ACTIVITY_LOG.sql
 
 PROMPT
 PROMPT ===========================================================================
-PROMPT  설치 완료. 위 출력에 ORA- 오류가 없는지 확인하세요.
-PROMPT  (오류가 있으면 대개 APP_USER 가 아닌 계정으로 실행한 경우입니다.)
+PROMPT  [8/8] 02_features/CHAT_CLUSTERING.sql
+PROMPT ===========================================================================
+@@02_features/CHAT_CLUSTERING.sql
+
+-- (선택) 명언·속담 — 홈/커뮤니티/추천 랜덤 문구
+@@03_optional/PROVERBS_SEED.sql
+
+PROMPT
+PROMPT ===========================================================================
+PROMPT  [9/9] 02_features/CLEAR_RUNTIME_DATA.sql  — 공지·커뮤니티·회원 데이터 삭제
+PROMPT ===========================================================================
+@@02_features/CLEAR_RUNTIME_DATA.sql
+
+PROMPT
+PROMPT ===========================================================================
+PROMPT  설치 완료. ORA- 오류 없는지 확인 후 Spring Boot 재시작.
+PROMPT  회원·공지·커뮤니티는 비어 있음 → 회원가입 후 사용. ADMIN은 SQL로 role 부여.
 PROMPT ===========================================================================
