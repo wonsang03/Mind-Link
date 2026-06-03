@@ -272,14 +272,14 @@
         {
             title: '맞춤 추천',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg>',
-            summary: '현재 감정에 맞는 도서·활동을 AI가 추천해드립니다.',
-            desc: '맞춤 추천은 나의 기분과 상태를 입력하면 AI가 그에 맞는 도서, 활동, 커뮤니티를 맞춤 추천해주는 기능입니다.',
+            summary: '오늘의 문장을 적으면 그 마음에 맞는 도서를 추천하고, 도서 목록은 검사 결과 기반으로 정렬됩니다.',
+            desc: '맞춤 추천은 「오늘의 문장」(지금 기분)을 입력하면 AI가 그에 맞는 도서를 골라 주고, 아래 도서 목록은 자가진단 결과를 바탕으로 맞춤·인기순으로 보여 주는 기능입니다.',
             steps: [
                 '상단 메뉴에서 <strong>맞춤 추천</strong>을 클릭합니다.',
-                '현재 기분이나 상태를 자유롭게 입력한 후 <strong>추천받기</strong>를 누릅니다.',
-                'AI가 분석한 맞춤 도서와 활동 목록이 표시됩니다.',
-                '관심 있는 항목을 클릭하면 상세 정보를 확인할 수 있습니다.',
-                '감정 필터 칩으로 원하는 유형의 추천을 골라볼 수 있습니다.'
+                '「오늘의 문장」에 지금 기분을 적고 <strong>오늘의 문장으로 추천받기</strong>를 누릅니다.',
+                'AI가 그 마음에 맞춰 고른 도서가 표시됩니다.',
+                '아래 도서 목록은 <strong>맞춤순/인기순</strong>으로 정렬해 볼 수 있습니다.',
+                '관심 있는 항목을 클릭하면 상세 정보·리뷰를 확인할 수 있습니다.'
             ],
             tips: [
                 '구체적인 감정(예: "회사 때문에 무기력해요")을 입력할수록 더 정확한 추천을 받을 수 있어요.',
@@ -918,6 +918,45 @@
         });
 
         function flesc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    })();
+    </script>
+
+    <!-- 알림 미읽음 폴링 (로그인 사용자만, 25초) -->
+    <script th:if="${loginUser != null}">
+    (function () {
+        var POLL_MS = 25000;
+        var link = document.querySelector('.nav-alert-link');
+        if (!link) return;
+
+        function setBadge(count) {
+            var badge = link.querySelector('.alert-badge');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'alert-badge';
+                    link.appendChild(badge);
+                }
+                badge.textContent = count;
+                link.setAttribute('aria-label', '알림, 읽지 않음 ' + count + '건');
+            } else {
+                if (badge) badge.remove();
+                link.setAttribute('aria-label', '알림');
+            }
+        }
+
+        function poll() {
+            if (document.visibilityState === 'hidden') return;   // 숨김 탭은 건너뜀
+            fetch('/api/alerts/unread-count', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) { if (d) setBadge(d.count || 0); })
+                .catch(function () {});
+        }
+
+        setInterval(poll, POLL_MS);
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') poll();   // 탭 복귀 시 즉시 갱신
+        });
+        setTimeout(poll, POLL_MS);   // 첫 페인트는 서버 렌더 배지 사용, 25초 뒤부터 폴링
     })();
     </script>
 </footer>
