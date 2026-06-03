@@ -83,18 +83,18 @@ SQL> @00_INSTALL_ALL.sql
 
 | 메뉴 | 경로 | 설명 |
 |------|------|------|
-| 홈 / 소개 | `/`, `/info` | 랜딩·서비스 소개 |
+| 홈 / 소개 | `/`, `/info` | 랜딩·서비스 소개. 이용 가이드는 **로그인 + 첫 방문 시 1회** 자동 노출 |
 | 로그인·회원가입 | `/login`, `/signup` | 세션 인증, 가입 시 민감정보 처리 동의 |
 | 개인정보 처리방침 | `/privacy` | 약관·동의 안내 |
 | 자가진단 | `/self-assessment/**` | PHQ-9, GAD-7, PSS, CBI — 동의 시 결과 저장·알림 연동 |
 | 알림 | `/alerts` | 고위험·악화·개선·추천·커뮤니티·공지·관리자 메시지 |
 | 상담소 찾기 | `/counseling` | 네이버 지역검색, 지도(좌표 우선) |
 | 상담 예약 | `/counseling/booking` | `bookings` 저장, **내 정보**에서 예약 목록·취소 |
-| 커뮤니티 | `/community/**` | 글·댓글·답글·좋아요·신고·첨부·YouTube embed |
+| 커뮤니티 | `/community/**` | 글·댓글·답글·좋아요·신고·첨부·YouTube embed. 정렬 **인기순(맞춤)/최신순/좋아요순**, 상단 "나와 비슷한 분들이 많이 본 글" |
 | 공지 | `/notice/**` | 목록·상세 (작성은 ADMIN) |
 | 내 정보 | `/user/me`, `/user/me/edit` | 프로필·이미지·알림 설정·민감정보 동의 변경 |
-| AI 맞춤 추천 | `/recommendations` | Gemini + 네이버 도서, 추천 활동 모달 |
-| AI 정서 케어 | `/care-report`, `/ai-care` | 위저드 → OpenAI 위로 편지 + PDF |
+| AI 맞춤 추천 | `/recommendations` | **오늘의 문장**(Gemini, 위기 시 지원 안내 우선) + 도서 **맞춤순/인기순(별점)** 정렬·기본 8권, 추천 활동 |
+| AI 정서 케어 | `/care-report`, `/ai-care` | 위저드 → OpenAI 위로 편지 + PDF. 기존 편지 있으면 **"내가 받은 편지 보기"** 바로가기 |
 | 정서 클러스터 | `/cluster` | 3D 시각화·유사 사용자(프로필·자가진단 연동) |
 
 ### 상담사 (`COUNSELOR`)
@@ -113,7 +113,7 @@ SQL> @00_INSTALL_ALL.sql
 |------|------|------|
 | 대시보드 | `/admin` | 통계·요약 |
 | 모니터링 | `/admin/monitoring` | 검사 이력·고위험 확인 |
-| 정서 클러스터 | `/admin/cluster` | 3D 클러스터·재계산 |
+| 정서 클러스터 | `/admin/cluster` | 3D 클러스터·재계산 + **실사용자 정서 유형 5분류 분포**(일반/스트레스/우울/불안/복합) |
 | 회원 관리 | `/admin/users` | 목록·상세 |
 | 예약 관리 | `/admin/bookings` | 전체 예약 조회 |
 | 게시글·공지 | `/admin/posts`, `/admin/notices` | CRUD |

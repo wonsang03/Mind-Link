@@ -6,6 +6,13 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 
 <main>
+    <!-- 기존에 받은 편지가 있으면 목록 바로가기 -->
+    <div th:if="${reportCount != null and reportCount > 0}"
+         style="max-width: 640px; margin: 1.25rem auto -0.25rem; padding: 0 1.5rem; text-align: right;">
+        <a th:href="@{/care-report/list}" class="btn btn-secondary" style="font-size: 0.85rem;">
+            내가 받은 편지 보기 <span th:text="|(${reportCount})|">(0)</span>
+        </a>
+    </div>
     <section class="cr-stage">
         <div class="cr-card" role="dialog" aria-labelledby="cr-title" aria-live="polite">
             <div class="cr-progress">

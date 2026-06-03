@@ -356,11 +356,15 @@
     </div>
 </main>
 
-<script>
+<script th:inline="javascript">
 document.addEventListener('DOMContentLoaded', function () {
-    var today = new Date().toISOString().slice(0, 10);
-    if (localStorage.getItem('mindlink_guide_noshow') !== today) {
-        if (typeof openUserGuide === 'function') openUserGuide();
+    // 이용 가이드 자동 노출 = 로그인 사용자 + 이 브라우저에서 처음 들어왔을 때(최초 1회)만
+    var loggedIn = /*[[${loginUser != null}]]*/ false;
+    if (!loggedIn) return;
+    if (localStorage.getItem('mindlink_guide_seen')) return;
+    if (typeof openUserGuide === 'function') {
+        openUserGuide();
+        localStorage.setItem('mindlink_guide_seen', '1');  // 표시 후 다시 자동 노출 안 함
     }
 });
 </script>

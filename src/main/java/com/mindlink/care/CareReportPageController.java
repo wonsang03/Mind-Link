@@ -94,6 +94,7 @@ public class CareReportPageController {
 
         model.addAttribute("userName", user.getName());
         model.addAttribute("assessmentsJson", json);
+        model.addAttribute("reportCount", service.myList(user.getId()).size());
         return "care-report/wizard";
     }
 
