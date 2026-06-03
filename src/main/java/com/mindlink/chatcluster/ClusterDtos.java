@@ -66,6 +66,8 @@ public final class ClusterDtos {
             int clusterId,
             int clusterMemberCount,
             List<String> samePersonaLabels,
+            String clusterLabel,        // 동적 정서 유형명 (예: "스트레스 우세형") — 군집 평균좌표 기반
+            String clusterDescription,  // 유형 설명 1~2문장
             String summary
     ) {}
 
@@ -74,6 +76,16 @@ public final class ClusterDtos {
             Double stressScore,
             Double depressionScore,
             Double anxietyScore
+    ) {}
+
+    /** GET /api/chat-cluster/stats/real 응답 항목 — 실사용자만(페르소나 제외) 군집 통계. */
+    public record RealClusterStat(
+            int clusterId,
+            long memberCount,
+            double avgStressNorm,
+            double avgDepressionNorm,
+            double avgAnxietyNorm,
+            String label
     ) {}
 
     /** POST /api/chat-cluster/recompute 응답. */

@@ -10,8 +10,9 @@
 ```
 sql/
 ├── README.md                              # 이 파일 — 유일한 실행 가이드
+├── 00_INSTALL_ALL.sql                     # 원샷 설치 (아래 필수 6개를 @@ 로 순차 호출)
 ├── 01_schema/
-│   └── ORACLE_SETUP.sql                   # 전체 DDL + 기본 시드
+│   └── ORACLE_SETUP.sql                   # 전체 DDL + 기본 시드(관리자·추천도서)
 ├── 02_features/
 │   ├── USERS_PROFILE.sql                  # users 프로필 컬럼 (멱등 ALTER)
 │   ├── PRIVACY_CONSENT.sql                # sensitive_data_consent (민감정보 동의)
@@ -21,8 +22,7 @@ sql/
 │   ├── ACTIVITY_LOG.sql                   # 추천 활동 수행 기록
 │   └── CHAT_CLUSTERING.sql                # 정서 클러스터 + 210 페르소나
 ├── 03_optional/
-│   ├── CHAT_CLUSTER_REAL_USER_SEED.sql    # 데모용 실사용자 3명
-│   └── PROVERBS_SEED.sql                  # 홈·커뮤니티·추천 명언 시드
+│   └── PROVERBS_SEED.sql                  # (선택) 명언·속담 데이터
 └── archive/                               # 평소 실행 안 함 (마이그레이션·복구·진단 전용)
     ├── MONITORING_FIX.sql
     ├── MONITORING_REBUILD.sql
@@ -33,11 +33,23 @@ sql/
 
 > 알림(`user_alerts`)의 모든 컬럼·제약은 **`MONITORING.sql` 하나**에 포함되어 있습니다. 별도 패치 파일은 없습니다.
 
-## 1. 신규 설치 (순서대로 실행)
+## 1. 신규 설치
+
+### 가장 쉬운 방법 — 원샷 설치 (권장)
+
+`sql/` 폴더에서 **APP_USER** 로 접속해 한 번만 실행하면 아래 필수 6개가 순서대로 적용됩니다.
+
+```sql
+SQL> @00_INSTALL_ALL.sql
+```
+
+> `00_INSTALL_ALL.sql` 은 `@@` 상대경로로 하위 스크립트를 호출하므로, 반드시 `sql/` 폴더(또는 절대경로)를 기준으로 실행하세요. 명언·속담(`PROVERBS_SEED.sql`)은 기본 비활성이며 파일 안의 주석 한 줄을 해제하면 함께 설치됩니다.
+
+### 개별 실행 (순서대로)
 
 | 순서 | 파일 | 필수 | 비고 |
 |------|------|------|------|
-| 1 | `01_schema/ORACLE_SETUP.sql` | ✅ | users · posts · post_comments · attachments · reports · notices · bookings · book_reviews · recommendation_books + 관리자·샘플 시드 |
+| 1 | `01_schema/ORACLE_SETUP.sql` | ✅ | users · posts · post_comments · attachments · reports · notices · bookings · book_reviews · recommendation_books DDL + 관리자 계정 · 추천도서 시드 (커뮤니티 더미 없음) |
 | 2 | `02_features/USERS_PROFILE.sql` | ✅ | 내 정보 컬럼: nickname, region, phone, notification_enabled, profile_image_url |
 | 3 | `02_features/PRIVACY_CONSENT.sql` | ✅ | `users.sensitive_data_consent` (자가진단 민감정보 동의) |
 | 4 | `02_features/ASSESSMENT_SEED.sql` | ✅ | 자가진단(PHQ-9 / GAD-7 / PSS-10 / CBI) 문항·점수 구간 |
@@ -45,10 +57,10 @@ sql/
 | 6 | `02_features/CARE_REPORT.sql` | ✅ | AI 종합 보고서(`care_reports`) — `care_daily_inputs`는 legacy 호환 DDL |
 | 7 | `02_features/ACTIVITY_LOG.sql` | ✅ | 추천 활동(`activity_log`) |
 | 8 | `02_features/CHAT_CLUSTERING.sql` | 클러스터 사용 시 | `user_assessment_profiles` + 210 페르소나 시드 |
-| 9 | `03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql` | 선택 | 데모/개발용 실사용자 3명 |
-| 10 | `03_optional/PROVERBS_SEED.sql` | 선택 | `proverbs` 테이블·명언 시드 |
+| (선택) | `03_optional/PROVERBS_SEED.sql` | 선택 | `proverbs` 테이블·명언 시드 |
 
-> 요약: **01 → USERS_PROFILE → PRIVACY_CONSENT → ASSESSMENT_SEED → MONITORING → CARE_REPORT → ACTIVITY_LOG → (CHAT_CLUSTERING) → (03_optional)**.
+> 요약: **01 → USERS_PROFILE → PRIVACY_CONSENT → ASSESSMENT_SEED → MONITORING → CARE_REPORT → ACTIVITY_LOG → (CHAT_CLUSTERING) → (PROVERBS_SEED)**.
+> 공지·게시글·댓글·데모 사용자 같은 더미 데이터는 더 이상 시드하지 않습니다. 커뮤니티는 빈 테이블로 시작합니다.
 
 ## 2. 기존 DB 업그레이드
 
@@ -80,7 +92,7 @@ sql/
 | `USER_ALERTS_VERIFY.sql` | `archive/dev/USER_ALERTS_VERIFY.sql` |
 | `CARE_REPORT.sql` | `02_features/CARE_REPORT.sql` |
 | `CHAT_CLUSTERING.sql` | `02_features/CHAT_CLUSTERING.sql` |
-| `CHAT_CLUSTER_REAL_USER_SEED.sql` | `03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql` |
+| `CHAT_CLUSTER_REAL_USER_SEED.sql` | **삭제됨** (데모 사용자 더미 시드 제거) |
 | `MONITORING_FIX.sql` / `MONITORING_REBUILD.sql` | `archive/` |
 | `COMMUNITY_CATEGORY_MIGRATE.sql` | `archive/COMMUNITY_CATEGORY_MIGRATE.sql` |
 

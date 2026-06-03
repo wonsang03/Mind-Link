@@ -1,8 +1,11 @@
 package com.mindlink.controller;
 
+import com.mindlink.service.CommunityCategoryPreferenceService;
 import com.mindlink.service.CommunityService;
 import com.mindlink.service.NoticeService;
 import com.mindlink.service.ProverbService;
+import com.mindlink.web.SessionConst;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +17,16 @@ public class PageController {
     private final ProverbService proverbService;
     private final NoticeService noticeService;
     private final CommunityService communityService;
+    private final CommunityCategoryPreferenceService categoryPreferenceService;
 
     public PageController(ProverbService proverbService,
                           NoticeService noticeService,
-                          CommunityService communityService) {
+                          CommunityService communityService,
+                          CommunityCategoryPreferenceService categoryPreferenceService) {
         this.proverbService = proverbService;
         this.noticeService = noticeService;
         this.communityService = communityService;
+        this.categoryPreferenceService = categoryPreferenceService;
     }
 
     @GetMapping("/")
@@ -45,9 +51,30 @@ public class PageController {
 
     @GetMapping("/recommendations")
     public String recommendations(
-            @RequestParam(defaultValue = "NORMAL") String emotion,
+            @RequestParam(required = false) String emotion,
+            HttpSession session,
             Model model) {
-        model.addAttribute("emotion", emotion);
+        // 감정을 명시하지 않고 들어오면(링크 등) 로그인 사용자의 우세 감정으로 기본 설정한다.
+        String resolved = (emotion != null && !emotion.isBlank()) ? emotion : null;
+        Object uid = session.getAttribute(SessionConst.LOGIN_USER_ID);
+        if (resolved == null || "NORMAL".equalsIgnoreCase(resolved)) {
+            if (uid instanceof Long id) {
+                String dominant = categoryPreferenceService.resolveDominantEmotion(id);
+                if (dominant != null) resolved = dominant;
+            }
+        }
+        if (resolved == null || resolved.isBlank()) resolved = "NORMAL";
+        model.addAttribute("emotion", resolved);
+
+        // 맞춤순 정렬용 — 로그인 + 프로필 있으면 3축 norm 전달
+        if (uid instanceof Long id) {
+            java.util.Map<String, Double> norms = categoryPreferenceService.resolveEmotionNorms(id);
+            if (!norms.isEmpty()) {
+                model.addAttribute("stressNorm", norms.get("STRESS"));
+                model.addAttribute("depressionNorm", norms.get("DEPRESSION"));
+                model.addAttribute("anxietyNorm", norms.get("ANXIETY"));
+            }
+        }
         model.addAttribute("proverb", proverbService.getRandom("RECOMMENDATIONS"));
         return "recommendations";
     }

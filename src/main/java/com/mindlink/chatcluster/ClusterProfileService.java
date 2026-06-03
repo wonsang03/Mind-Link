@@ -217,21 +217,26 @@ public class ClusterProfileService {
         return new ClusterDtos.SearchResponse(q, matches.size(), matches);
     }
 
-    /** 내 클러스터·같은 집단 페르소나 라벨 상위 5. */
+    /** 내 클러스터·같은 집단 페르소나 라벨 상위 5 + 동적 정서 유형 해석. */
     public ClusterDtos.MyClusterResponse buildMyClusterResponse(Long userId) {
         Optional<UserAssessmentProfile> opt = repository.findByUserId(userId);
         if (opt.isEmpty() || opt.get().getClusterId() == null) {
             return new ClusterDtos.MyClusterResponse(false, null, -1, 0, List.of(),
+                    null, null,
                     "아직 내 점수가 저장되지 않았어요. 자가진단을 완료한 뒤 다시 확인해 주세요.");
         }
         UserAssessmentProfile me = opt.get();
         int cid = me.getClusterId();
         List<UserAssessmentProfile> all = repository.findAll();
         int sameClusterCount = 0;
+        double sumS = 0, sumD = 0, sumA = 0;  // 같은 군집 평균좌표(centroid) 누적
         Map<String, Integer> personaCount = new LinkedHashMap<>();
         for (UserAssessmentProfile p : all) {
             if (p.getClusterId() != null && p.getClusterId() == cid) {
                 sameClusterCount++;
+                sumS += p.getStressNorm();
+                sumD += p.getDepressionNorm();
+                sumA += p.getAnxietyNorm();
                 if (p.isSynthetic()) {
                     personaCount.merge(p.getPersonaLabel(), 1, Integer::sum);
                 }
@@ -249,11 +254,64 @@ public class ClusterProfileService {
                 me.getStressScore(), me.getDepressionScore(), me.getAnxietyScore(),
                 me.getClusterId(), me.isSynthetic(), true);
 
-        String summary = "당신은 집단 " + cid + " 에 속해 있어요. " +
-                "총 " + sameClusterCount + "명이 비슷한 위치에 있고, 대표 유형은 " +
-                (topLabels.isEmpty() ? "데이터 부족" : String.join(", ", topLabels)) + " 이에요.";
+        // 군집 평균좌표로 유형을 동적 분류 (K-Means recompute 후에도 의미가 유지됨)
+        int n = Math.max(1, sameClusterCount);
+        String[] type = classifyType(sumS / n, sumD / n, sumA / n);
+        String clusterLabel = type[0];
+        String clusterDescription = type[1];
 
-        return new ClusterDtos.MyClusterResponse(true, mePoint, cid, sameClusterCount, topLabels, summary);
+        String summary = "당신은 '" + clusterLabel + "'에 가까워요. " +
+                "비슷한 마음의 또래가 " + sameClusterCount + "명 있고, " +
+                "대표적인 이야기는 " +
+                (topLabels.isEmpty() ? "곧 채워질 거예요" : String.join(", ", topLabels)) + " 예요.";
+
+        return new ClusterDtos.MyClusterResponse(true, mePoint, cid, sameClusterCount,
+                topLabels, clusterLabel, clusterDescription, summary);
+    }
+
+    /**
+     * 정규화 평균좌표(0~1)로 정서 유형을 분류한다.
+     * 시드 시점의 cluster_id 의미(0=안정…)에 의존하지 않고 좌표만 보므로 recompute 후에도 안전.
+     * @return [라벨, 설명]
+     */
+    private static String[] classifyType(double s, double d, double a) {
+        double max = Math.max(s, Math.max(d, a));
+        if (max < 0.40) {
+            return new String[]{"안정·회복형",
+                    "스트레스·우울·불안 세 축이 모두 비교적 낮은, 회복 탄력이 좋은 유형이에요. 지금의 루틴을 유지해 보세요."};
+        }
+        int highCount = (s >= 0.55 ? 1 : 0) + (d >= 0.55 ? 1 : 0) + (a >= 0.55 ? 1 : 0);
+        if (highCount >= 2) {
+            return new String[]{"복합·소진형",
+                    "여러 영역이 동시에 높게 나타나는 복합 유형이에요. 혼자 버티기보다 전문가 상담을 함께 고려해 보세요."};
+        }
+        if (s >= d && s >= a) {
+            return new String[]{"스트레스 우세형",
+                    "세 축 중 스트레스가 가장 두드러져요. 짧은 휴식과 호흡 같은 즉각적인 이완이 도움이 돼요."};
+        }
+        if (d >= a) {
+            return new String[]{"우울 우세형",
+                    "우울감이 상대적으로 높게 나타나요. 작은 활동부터 천천히 시작하고, 마음을 혼자 두지 마세요."};
+        }
+        return new String[]{"불안 우세형",
+                "불안이 상대적으로 높아요. 걱정을 글로 적어보거나 호흡을 고르는 연습이 도움이 될 수 있어요."};
+    }
+
+    /** E-1 — 실사용자만(페르소나 제외) 군집별 인원·평균 norm + 동적 유형 라벨. */
+    public List<ClusterDtos.RealClusterStat> realClusterStats() {
+        List<Object[]> rows = repository.realClusterStats();
+        List<ClusterDtos.RealClusterStat> out = new ArrayList<>(rows.size());
+        for (Object[] r : rows) {
+            int cid = r[0] != null ? ((Number) r[0]).intValue() : -1;
+            long cnt = r[1] != null ? ((Number) r[1]).longValue() : 0;
+            double s = r[2] != null ? ((Number) r[2]).doubleValue() : 0;
+            double d = r[3] != null ? ((Number) r[3]).doubleValue() : 0;
+            double a = r[4] != null ? ((Number) r[4]).doubleValue() : 0;
+            String label = classifyType(s, d, a)[0];
+            out.add(new ClusterDtos.RealClusterStat(cid, cnt,
+                    round4(s), round4(d), round4(a), label));
+        }
+        return out;
     }
 
     private Integer nearestClusterId(UserAssessmentProfile me) {

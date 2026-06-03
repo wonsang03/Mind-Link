@@ -39,4 +39,22 @@ public interface UserAssessmentProfileRepository extends JpaRepository<UserAsses
             GROUP BY p.clusterId
             """)
     List<Object[]> countRealUsersByCluster();
+
+    /** E-1 — 실사용자만 군집별 인원·평균 norm (페르소나 제외). [clusterId, cnt, avgS, avgD, avgA] */
+    @Query("""
+            SELECT p.clusterId, COUNT(p),
+                   AVG(p.stressNorm), AVG(p.depressionNorm), AVG(p.anxietyNorm)
+            FROM UserAssessmentProfile p
+            WHERE p.userId IS NOT NULL AND p.isSynthetic = 0 AND p.clusterId IS NOT NULL
+            GROUP BY p.clusterId
+            ORDER BY p.clusterId
+            """)
+    List<Object[]> realClusterStats();
+
+    /** C-1 — 같은 군집의 실사용자 user_id 목록 (페르소나 제외). */
+    @Query("""
+            SELECT p.userId FROM UserAssessmentProfile p
+            WHERE p.clusterId = :clusterId AND p.userId IS NOT NULL AND p.isSynthetic = 0
+            """)
+    List<Long> findRealUserIdsByCluster(@Param("clusterId") Integer clusterId);
 }

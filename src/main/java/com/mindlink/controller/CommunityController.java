@@ -5,6 +5,7 @@ import com.mindlink.domain.Post;
 import com.mindlink.domain.PostComment;
 import com.mindlink.domain.Report;
 import com.mindlink.domain.User;
+import com.mindlink.chatcluster.ClusterContentService;
 import com.mindlink.dto.AttachmentResponse;
 import com.mindlink.service.CommunityCategoryPreferenceService;
 import com.mindlink.service.CommunityService;
@@ -20,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,32 +40,36 @@ public class CommunityController {
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final CommunityCategoryPreferenceService categoryPreferenceService;
+    private final ClusterContentService clusterContentService;
     private final ProverbService proverbService;
 
     public CommunityController(CommunityService communityService,
                                 UserService userService,
                                 FileStorageService fileStorageService,
                                 CommunityCategoryPreferenceService categoryPreferenceService,
+                                ClusterContentService clusterContentService,
                                 ProverbService proverbService) {
         this.communityService = communityService;
         this.userService = userService;
         this.fileStorageService = fileStorageService;
         this.categoryPreferenceService = categoryPreferenceService;
+        this.clusterContentService = clusterContentService;
         this.proverbService = proverbService;
     }
 
     @GetMapping
     public String list(@RequestParam(required = false) String category,
                        @RequestParam(required = false) String q,
+                       @RequestParam(required = false) String sort,
                        HttpSession session,
                        Model model) {
         // 로그인 유저 맞춤 카테고리 추론
         Object userIdAttr = session.getAttribute(SessionConst.LOGIN_USER_ID);
         Long uid = (userIdAttr instanceof Long l) ? l : null;
         List<String> preferredCategories = categoryPreferenceService.resolvePreferredCategories(uid);
-        String defaultCategory = preferredCategories.isEmpty() ? "전체" : preferredCategories.get(0);
-
-        String selectedCategory = (category != null && !category.isBlank()) ? category : defaultCategory;
+        // 기본은 항상 "전체" — 프로필이 있으면 아래 맞춤 정렬(관심도×최신성)이 적용되어
+        // 단일 카테고리에 가두지 않고 우선순위 순서대로 보여 준다. (가장 위험한 분야만 들이미는 부담도 완화)
+        String selectedCategory = (category != null && !category.isBlank()) ? category : "전체";
 
         List<Post> posts = communityService.findAll(selectedCategory);
         if (q != null && !q.isBlank()) {
@@ -73,18 +80,57 @@ public class CommunityController {
                     .toList();
         }
 
-        // 맞춤 카테고리가 있고 전체 보기일 때: 해당 카테고리 글을 상단에 정렬
-        if (selectedCategory.equals("전체") && !preferredCategories.isEmpty()) {
-            String preferred = preferredCategories.get(0);
-            List<Post> sorted = new ArrayList<>();
-            posts.stream().filter(p -> preferred.equals(p.getCategory())).forEach(sorted::add);
-            posts.stream().filter(p -> !preferred.equals(p.getCategory())).forEach(sorted::add);
-            posts = sorted;
+        // 정렬: popular(기본·인기순) / recent(최신순) / likes(좋아요순)
+        //   - recent : 시간순 (findAll 이 이미 최신순)
+        //   - likes  : 좋아요 많은 순 (동점 시 최신)
+        //   - popular: 프로필 있으면 "관심도×최신성" 그라데이션, 없으면 "좋아요×최신성" 인기 블렌드
+        String activeSort = (sort == null || sort.isBlank()) ? "popular" : sort;
+        if ("recent".equals(activeSort)) {
+            // 이미 최신순 — 변경 없음
+        } else if ("likes".equals(activeSort)) {
+            posts = posts.stream()
+                    .sorted(Comparator.comparingInt(Post::getLikes)
+                            .thenComparing(Post::getCreatedAt).reversed())
+                    .toList();
+        } else { // popular (기본)
+            activeSort = "popular";
+            if (posts.size() > 1) {
+                Map<String, Double> categoryAffinity = categoryPreferenceService.resolveCategoryAffinity(uid);
+                boolean profiled = !categoryAffinity.isEmpty();
+                final double PRIMARY_WEIGHT = 0.6;
+                final double RECENCY_WEIGHT = 0.4;
+                final double NEUTRAL_AFFINITY = 0.15;   // 축 없는 카테고리(인간관계·일상 등)
+                final int n = posts.size();
+                final int maxLikes = Math.max(1, posts.stream().mapToInt(Post::getLikes).max().orElse(0));
+                // findAll 이 최신순 → 현재 인덱스가 곧 최신 순위 (0 = 가장 최신)
+                IdentityHashMap<Post, Integer> recencyRank = new IdentityHashMap<>();
+                for (int i = 0; i < n; i++) recencyRank.put(posts.get(i), i);
+                posts = posts.stream()
+                        .sorted(Comparator.comparingDouble((Post p) -> {
+                            double primary = profiled
+                                    ? categoryAffinity.getOrDefault(p.getCategory(), NEUTRAL_AFFINITY)
+                                    : (p.getLikes() / (double) maxLikes);
+                            double recency = 1.0 - (recencyRank.get(p) / (double) (n - 1));
+                            return PRIMARY_WEIGHT * primary + RECENCY_WEIGHT * recency;
+                        }).reversed())
+                        .toList();
+            }
+        }
+
+        // C-1: 같은 정서 군집 실사용자가 많이 본 글 (로그인 + 프로필 + 검색 아님)
+        if (uid != null && (q == null || q.isBlank())) {
+            ClusterContentService.Result clusterPopular =
+                    clusterContentService.popularPostsForUserCluster(uid, 5);
+            if (clusterPopular != null) {
+                model.addAttribute("clusterPopularPosts", clusterPopular.posts());
+                model.addAttribute("clusterPopularLabel", clusterPopular.clusterLabel());
+            }
         }
 
         model.addAttribute("posts", posts);
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("selectedCategory", selectedCategory);
+        model.addAttribute("sort", activeSort);
         model.addAttribute("query", q);
         model.addAttribute("preferredCategories", preferredCategories);
         model.addAttribute("highlightCategory", preferredCategories.isEmpty() ? null : preferredCategories.get(0));

@@ -43,21 +43,27 @@ cp .env.example .env   # Windows: copy .env.example .env
 
 ### 2. DB 스크립트 (Oracle)
 
-**`APP_USER`**(= `.env`의 `DB_USERNAME`)로 SQL Developer 등에서 **아래 순서대로** 실행합니다.  
-상세·업그레이드·트러블슈팅: [sql/README.md](sql/README.md)
+**APP_USER**(= `.env`의 `DB_USERNAME`)로 접속해 `sql/` 폴더에서 **원샷 스크립트 한 번**이면 아래 필수 항목이 순서대로 적용됩니다. 상세·업그레이드·트러블슈팅: [sql/README.md](sql/README.md)
+
+```sql
+SQL> @00_INSTALL_ALL.sql
+```
+
+개별 실행 순서:
 
 | 순서 | 파일 | 필수 | 내용 |
 |------|------|------|------|
-| 1 | [01_schema/ORACLE_SETUP.sql](sql/01_schema/ORACLE_SETUP.sql) | ✅ | 기본 스키마·시드(회원·공지·커뮤니티·예약·추천도서 등) |
+| 1 | [01_schema/ORACLE_SETUP.sql](sql/01_schema/ORACLE_SETUP.sql) | ✅ | 기본 스키마 DDL + 시드(관리자·예약·추천도서 등, 커뮤니티 더미 없음) |
 | 2 | [02_features/USERS_PROFILE.sql](sql/02_features/USERS_PROFILE.sql) | ✅ | 프로필 컬럼(닉네임·지역·연락처·알림·프로필 이미지) |
 | 3 | [02_features/PRIVACY_CONSENT.sql](sql/02_features/PRIVACY_CONSENT.sql) | ✅ | 민감정보(자가진단) 동의 컬럼 |
 | 4 | [02_features/ASSESSMENT_SEED.sql](sql/02_features/ASSESSMENT_SEED.sql) | ✅ | 자가진단 문항·점수 구간 |
 | 5 | [02_features/MONITORING.sql](sql/02_features/MONITORING.sql) | ✅ | 검사 이력·알림(9종)·댓글 답글 |
 | 6 | [02_features/CARE_REPORT.sql](sql/02_features/CARE_REPORT.sql) | ✅ | AI 위로 편지(`care_reports`) |
 | 7 | [02_features/ACTIVITY_LOG.sql](sql/02_features/ACTIVITY_LOG.sql) | ✅ | 추천 활동 수행 기록 |
-| 8 | [02_features/CHAT_CLUSTERING.sql](sql/02_features/CHAT_CLUSTERING.sql) | 클러스터 사용 시 | 정서 프로필 + 페르소나 시드 |
-| 9 | [03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql](sql/03_optional/CHAT_CLUSTER_REAL_USER_SEED.sql) | 선택 | 데모용 실사용자 시드 |
-| 10 | [03_optional/PROVERBS_SEED.sql](sql/03_optional/PROVERBS_SEED.sql) | 선택 | 홈·커뮤니티·추천 화면 명언 |
+| 8 | [02_features/CHAT_CLUSTERING.sql](sql/02_features/CHAT_CLUSTERING.sql) | 클러스터 사용 시 | 정서 프로필 + 210 페르소나 시드 |
+| (선택) | [03_optional/PROVERBS_SEED.sql](sql/03_optional/PROVERBS_SEED.sql) | 선택 | 홈·커뮤니티·추천 화면 명언 |
+
+> `00_INSTALL_ALL.sql`은 `@@` 상대경로로 위 항목을 호출하므로 반드시 `sql/` 폴더(또는 절대경로) 기준으로 실행하세요. 공지·게시글·데모 사용자 등 더미 데이터는 시드하지 않습니다.
 
 > 알림(`user_alerts`) 컬럼·9종 `alert_type`은 **`MONITORING.sql`에 통합**되어 있습니다. 별도 패치 SQL은 없습니다.
 
@@ -200,7 +206,7 @@ Gemini(감정·검색어) → DB·네이버 후보 → Gemini 3권 선별. 키 �
 
 ## 관리자 계정
 
-`role = 'ADMIN'` 계정으로 `/admin` 접근. 초기 관리자는 `ORACLE_SETUP.sql` 시드에 포함됩니다.
+`role = 'ADMIN'`인 계정으로 로그인하면 `/admin`에서 대시보드·유저 관리·게시글·공지·알림 발송·정서 클러스터(3D)·SQL 콘솔을 사용할 수 있습니다. 초기 관리자 계정은 `01_schema/ORACLE_SETUP.sql` 시드에 포함됩니다(공지·게시글 등 커뮤니티 더미는 시드하지 않음). 등급을 직접 부여하려면:
 
 ```sql
 UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
@@ -255,10 +261,11 @@ src/main/resources/
   static/css|js/    style.css, admin.css, admin-logs.js, activities.js …
 sql/
   README.md
+  00_INSTALL_ALL.sql  원샷 설치 (필수 항목을 @@ 로 순차 호출)
   01_schema/        ORACLE_SETUP.sql
   02_features/      USERS_PROFILE, PRIVACY_CONSENT, ASSESSMENT_SEED,
                     MONITORING, CARE_REPORT, ACTIVITY_LOG, CHAT_CLUSTERING
-  03_optional/      CHAT_CLUSTER_REAL_USER_SEED, PROVERBS_SEED
+  03_optional/      PROVERBS_SEED
   archive/          마이그레이션·복구 전용
 logs/               mindlink.log (gitignore, 관리자 뷰어 대상)
 ```

@@ -49,26 +49,29 @@
                         <circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/>
                     </svg>
                 </span>
-                <span>AI 맞춤 추천</span>
+                <span>오늘의 문장</span>
             </div>
             <p style="margin:0 0 1.1rem;color:var(--muted-foreground);">
-                지금 기분을 짧게 말씀해 주시면 마음이음이 선별해 둔 도서 목록에서 맞는 책을 골라드려요.
+                오늘 하루를 한 문장으로 남겨 보세요. 그 마음을 읽고 마음이음이 선별 도서에서 맞는 책을 골라드려요.
             </p>
             <!-- 입력 영역 -->
             <div id="ai-input-wrap">
                 <div class="ai-input-row">
                     <input type="text" id="ai-msg" class="form-input"
-                           placeholder="예: 요즘 너무 지치고 무기력해요…" maxlength="200"
+                           placeholder="예: 오늘은 사람들 사이에서 유난히 지치고 마음이 무거웠어요" maxlength="200"
                            autocomplete="off">
-                    <button id="ai-submit-btn" class="btn btn-primary">추천받기</button>
+                    <button id="ai-submit-btn" class="btn btn-primary">오늘의 문장으로 추천받기</button>
                 </div>
-                <p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0;">Enter 또는 버튼을 누르세요</p>
+                <p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0;">Enter 또는 버튼을 누르세요 · 입력한 문장은 추천에만 쓰이고 저장되지 않아요</p>
             </div>
         </div>
 
         <!-- ================= 추천 도서 ================= -->
         <!-- [맞춤추천] emotion: Thymeleaf가 URL 파라미터에서 주입 (/recommendations?emotion=DEPRESSION) -->
         <span id="emotion-data" th:data-emotion="${emotion != null ? emotion : 'NORMAL'}" style="display:none;"></span>
+        <!-- 맞춤순 정렬용 3축 norm (로그인+프로필 시에만 렌더) -->
+        <span id="profile-norms" th:if="${stressNorm != null}" style="display:none;"
+              th:data-stress="${stressNorm}" th:data-depression="${depressionNorm}" th:data-anxiety="${anxietyNorm}"></span>
         <!-- 로그인 상태: JS에서 리뷰 폼 분기에 사용 -->
         <span id="ml-login-state"
               th:data-logged-in="${loginUser != null ? 'true' : 'false'}"
@@ -105,13 +108,17 @@
                 <input type="text" id="bookSearch" placeholder="도서명, 저자, 키워드로 검색"/>
             </div>
             <div class="filter-chips" id="bookFilters">
-                <button type="button" class="chip" data-filter="all">전체</button>
                 <button type="button" class="chip" data-filter="DEPRESSION">우울</button>
                 <button type="button" class="chip" data-filter="STRESS">스트레스</button>
                 <button type="button" class="chip" data-filter="ANXIETY">불안</button>
                 <button type="button" class="chip" data-filter="LETHARGY">무기력</button>
                 <button type="button" class="chip" data-filter="RELATIONSHIP">인간관계</button>
             </div>
+            <select id="bookSort" class="form-input" aria-label="도서 정렬"
+                    style="width:auto; padding:0.4rem 0.7rem; font-size:0.85rem; cursor:pointer; flex-shrink:0;">
+                <option value="match">맞춤순</option>
+                <option value="popular">인기순(별점)</option>
+            </select>
         </div>
 
         <div id="booksGrid" class="grid grid-4" style="margin-bottom: 3rem;">
@@ -546,7 +553,42 @@
         var emotionReason = {};
 
         var ALL_EMOTIONS = ['DEPRESSION', 'STRESS', 'ANXIETY', 'LETHARGY', 'RELATIONSHIP'];
-        var activeFilter = (ALL_EMOTIONS.indexOf(userEmotion) !== -1) ? userEmotion : 'all';
+        // 기본은 전체 노출 + 맞춤순 정렬 → 다축 혼합(내 우세 감정 책이 위로, 그 안은 별점).
+        // 칩을 누르면 단일 감정만 보기. (정렬이 우선순위를 잡아주므로 '전체→우울만' 버그 없음)
+        var activeFilter = 'all';
+        var defaultFilter = 'all';
+
+        // ── 정렬(맞춤순/인기순) + 기본 노출 개수 ──
+        var DEFAULT_SHOW = 8;
+        var sortMode = 'match';
+        var normsEl = document.getElementById('profile-norms');
+        var NORMS = (normsEl && normsEl.dataset.stress !== undefined && normsEl.dataset.stress !== '')
+            ? { STRESS: parseFloat(normsEl.dataset.stress) || 0,
+                DEPRESSION: parseFloat(normsEl.dataset.depression) || 0,
+                ANXIETY: parseFloat(normsEl.dataset.anxiety) || 0 }
+            : null;
+        function bayesRating(rating, reviews) {
+            var m = 5, C = 3.5;                       // 리뷰 적을 때 평균(3.5)으로 보정
+            return (reviews / (reviews + m)) * rating + (m / (reviews + m)) * C;
+        }
+        function bookScore(card) {
+            var em = card.dataset.emotion || '';
+            var rb = bayesRating(parseFloat(card.dataset.rating) || 0, parseInt(card.dataset.reviews, 10) || 0);
+            if (sortMode === 'popular') return rb;     // 인기순: 별점(보정)만
+            var relevance = NORMS ? (NORMS[em] || 0) : (em === userEmotion ? 1 : 0);
+            return relevance * 10 + rb;                // 맞춤순: 감정 적합도 우선, 그 안은 별점
+        }
+        function resortGrid() {
+            var cards = Array.prototype.slice.call(grid.querySelectorAll('.book-card'));
+            cards.sort(function (a, b) { return bookScore(b) - bookScore(a); });
+            cards.forEach(function (c) { grid.appendChild(c); });   // 정렬 순서로 재배치
+            applyFilter();
+        }
+        var bookSortEl = document.getElementById('bookSort');
+        if (bookSortEl) bookSortEl.addEventListener('change', function () {
+            sortMode = this.value || 'match';
+            resortGrid();
+        });
 
         var chips = document.querySelectorAll('#bookFilters .chip');
         chips.forEach(function (chip) {
@@ -576,7 +618,7 @@
                         show = true;
                     } else {
                         count++;
-                        show = count <= 3;
+                        show = count <= DEFAULT_SHOW;
                     }
                 }
                 card.classList.toggle('hidden', !show);
@@ -588,6 +630,8 @@
             var article = document.createElement('article');
             article.className = 'book-card';
             article.dataset.emotion = emotionKey;
+            article.dataset.rating = (book.avgRating != null ? book.avgRating : 0);
+            article.dataset.reviews = (book.reviewCount != null ? book.reviewCount : 0);
             var displayTag = (book.bookEmotion && EMOTION_LABEL[book.bookEmotion])
                 ? EMOTION_LABEL[book.bookEmotion]
                 : (EMOTION_LABEL[emotionKey] || '');
@@ -649,10 +693,13 @@
             toggleHost.addEventListener('click', function () {
                 showAll = !showAll;
                 if (showAll) {
+                    // 전체 목록 보기: 감정 필터 해제(모든 책), 칩 비활성
                     activeFilter = 'all';
-                    chips.forEach(function (c) {
-                        c.classList.toggle('active', c.dataset.filter === 'all');
-                    });
+                    chips.forEach(function (c) { c.classList.remove('active'); });
+                } else {
+                    // 추천만 보기로 복귀: 기본 감정으로 되돌리고 해당 칩 활성
+                    activeFilter = defaultFilter;
+                    chips.forEach(function (c) { c.classList.toggle('active', c.dataset.filter === defaultFilter); });
                 }
                 if (toggleLabel) toggleLabel.textContent = showAll ? '추천만 보기' : '전체 목록 보기';
                 applyFilter();
@@ -687,7 +734,7 @@
             flat.forEach(function (item) {
                 grid.appendChild(createBookCard(item.book, item.emotion));
             });
-            applyFilter();
+            resortGrid();
         }).catch(function () {
             grid.innerHTML = '<p class="muted" style="text-align:center;grid-column:1/-1;padding:2rem 0;">도서 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>';
         });
@@ -1070,6 +1117,29 @@
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+            // 위기 신호 감지 시: 지원 안내를 우선 노출하고 책은 접어 둔다 (옵션 B)
+            if (data.crisis) {
+                bodyEl.innerHTML =
+                    '<div style="border:1px solid var(--destructive,#e11d48); background:rgba(225,29,72,0.07); border-radius:0.6rem; padding:1.15rem 1.25rem; margin-bottom:1rem;">'
+                    + '<h3 style="margin:0 0 0.5rem; color:var(--destructive,#e11d48);">혼자 버티지 않으셔도 괜찮아요</h3>'
+                    + '<p style="margin:0 0 0.9rem; line-height:1.7;">' + esc(data.reason || '') + '</p>'
+                    + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">'
+                    + '<a class="btn btn-primary" href="tel:1393">자살예방 상담 1393</a>'
+                    + '<a class="btn btn-secondary" href="/counseling">상담 예약하기</a>'
+                    + '</div></div>'
+                    + '<button id="ml-ai-showbooks" type="button" class="btn btn-secondary" style="font-size:0.85rem;">그래도 도움이 될 책을 보고 싶어요 ▾</button>'
+                    + '<div id="ml-ai-books" class="grid grid-3" style="display:none; margin-top:1rem;"></div>';
+                var cgrid = bodyEl.querySelector('#ml-ai-books');
+                (data.books || []).forEach(function (b) {
+                    var pe = (b.bookEmotion && EMOTION_KO[b.bookEmotion]) ? EMOTION_KO[b.bookEmotion] : (EMOTION_KO[data.emotion] || '');
+                    cgrid.appendChild(renderBookCard(b, pe));
+                });
+                var sb = bodyEl.querySelector('#ml-ai-showbooks');
+                if (sb) sb.addEventListener('click', function () {
+                    cgrid.style.display = (cgrid.style.display === 'none') ? 'grid' : 'none';
+                });
+                return;
+            }
             var label = EMOTION_KO[data.emotion] || '';
             var multiLabel = (data.emotions && data.emotions.length > 1)
                 ? data.emotions.map(function(e) { return EMOTION_KO[e] || e; }).join('·')

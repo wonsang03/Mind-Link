@@ -86,6 +86,29 @@
                 <div id="viz-error" class="viz-error"></div>
             </aside>
         </div>
+
+        <!-- E-1: 실사용자만(페르소나 제외) 군집 통계 -->
+        <section class="card" style="margin-top: 1.5rem; padding: 1.25rem;">
+            <h2 style="font-size: 1.05rem; margin-bottom: 0.25rem;">실사용자 군집 통계
+                <span class="muted" style="font-weight: normal; font-size: 0.82rem;">(페르소나 시드 제외)</span>
+            </h2>
+            <p class="muted" style="font-size: 0.82rem; margin-bottom: 0.75rem;">
+                실제 가입 사용자만 집계한 군집별 인원·평균 정규화 점수입니다.
+            </p>
+            <div class="admin-table-wrap">
+                <table class="admin-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>군집</th><th>유형</th><th>인원</th>
+                            <th>평균 스트레스</th><th>평균 우울</th><th>평균 불안</th>
+                        </tr>
+                    </thead>
+                    <tbody id="real-cluster-stats-body">
+                        <tr><td colspan="6" class="muted">불러오는 중…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </div>
 
@@ -98,5 +121,29 @@
 }
 </script>
 <script type="module" th:src="@{/js/cluster-viz-three.js}"></script>
+<script>
+(function () {
+    var body = document.getElementById('real-cluster-stats-body');
+    if (!body) return;
+    function pct(v) { return Math.round((v || 0) * 100) + '%'; }
+    fetch('/api/chat-cluster/stats/real', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (rows) {
+            if (!rows || rows.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="muted">집계할 실사용자 데이터가 없습니다.</td></tr>';
+                return;
+            }
+            body.innerHTML = rows.map(function (s) {
+                return '<tr><td>' + s.clusterId + '</td><td>' + (s.label || '')
+                    + '</td><td>' + s.memberCount + '</td><td>' + pct(s.avgStressNorm)
+                    + '</td><td>' + pct(s.avgDepressionNorm) + '</td><td>' + pct(s.avgAnxietyNorm)
+                    + '</td></tr>';
+            }).join('');
+        })
+        .catch(function () {
+            body.innerHTML = '<tr><td colspan="6" class="muted">통계를 불러오지 못했습니다.</td></tr>';
+        });
+})();
+</script>
 </body>
 </html>

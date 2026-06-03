@@ -41,21 +41,48 @@
             </div>
         </div>
 
+        <!-- C-1: 같은 정서 유형(군집)에서 많이 본 글 -->
+        <div th:if="${clusterPopularPosts != null and !clusterPopularPosts.isEmpty()}"
+             class="card mb-8" style="margin-bottom: 1.75rem; border: 1px solid rgba(108,92,231,0.25);">
+            <h3 class="mb-2" style="font-size: 1.02rem; color: var(--primary);">나와 비슷한 분들이 많이 본 글</h3>
+            <p class="muted mb-4" style="font-size: 0.82rem;">비슷한 자가진단 경향을 가진 사용자들이 공감한 게시글이에요.</p>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                <li th:each="cp : ${clusterPopularPosts}" style="display: flex; justify-content: space-between; gap: 0.75rem;">
+                    <a th:href="@{/community/{id}(id=${cp.id})}" th:text="${cp.title}"
+                       style="color: var(--text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">제목</a>
+                    <span class="muted" style="flex-shrink: 0; font-size: 0.85rem;" th:text="|♥ ${cp.likes}|">♥ 0</span>
+                </li>
+            </ul>
+        </div>
+
         <div class="card mb-8" style="margin-bottom: 2rem;">
             <form th:action="@{/community}" method="get" class="flex gap-4 mb-4" style="margin-bottom: 1rem; flex-wrap: wrap;">
                 <input type="hidden" name="category" th:value="${selectedCategory}"/>
+                <input type="hidden" name="sort" th:value="${sort}"/>
                 <input type="text" name="q" th:value="${query}"
                        class="form-input" placeholder="검색어를 입력하세요..." style="flex: 1; margin: 0;"/>
                 <button type="submit" class="btn btn-primary">검색</button>
             </form>
 
-            <div class="flex gap-2" style="flex-wrap: wrap;">
-                <a th:each="cat : ${categories}"
-                   th:href="@{/community(category=${cat}, q=${query})}"
-                   th:classappend="${cat == selectedCategory} ? 'btn-primary' : 'btn-secondary'"
-                   class="btn"
-                   style="padding: 0.5rem 1rem; font-size: 0.95rem;"
-                   th:text="${cat}">전체</a>
+            <div class="flex-between" style="gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <div class="flex gap-2" style="flex-wrap: wrap;">
+                    <a th:each="cat : ${categories}"
+                       th:href="@{/community(category=${cat}, q=${query}, sort=${sort})}"
+                       th:classappend="${cat == selectedCategory} ? 'btn-primary' : 'btn-secondary'"
+                       class="btn"
+                       style="padding: 0.5rem 1rem; font-size: 0.95rem;"
+                       th:text="${cat}">전체</a>
+                </div>
+                <select class="form-input" aria-label="정렬 방식"
+                        style="width: auto; padding: 0.45rem 0.8rem; font-size: 0.9rem; cursor: pointer; flex-shrink: 0;"
+                        onchange="if (this.value) { location.href = this.value; }">
+                    <option th:value="@{/community(category=${selectedCategory}, q=${query}, sort='popular')}"
+                            th:selected="${sort == 'popular'}">인기순 (맞춤)</option>
+                    <option th:value="@{/community(category=${selectedCategory}, q=${query}, sort='recent')}"
+                            th:selected="${sort == 'recent'}">최신순</option>
+                    <option th:value="@{/community(category=${selectedCategory}, q=${query}, sort='likes')}"
+                            th:selected="${sort == 'likes'}">좋아요순</option>
+                </select>
             </div>
         </div>
 

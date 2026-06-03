@@ -20,6 +20,9 @@ public class BookDto {
      * DB에서 내려줄 때는 해당 행의 emotion과 동일하게 둔다.
      */
     private final String bookEmotion;
+    /** 평균 별점(리뷰 없으면 0)·리뷰 수 — 추천 페이지 인기순 정렬용 */
+    private final double avgRating;
+    private final int reviewCount;
 
     public BookDto(String title, String author, String publisher,
             String link, String image, String description) {
@@ -28,6 +31,12 @@ public class BookDto {
 
     public BookDto(String title, String author, String publisher,
             String link, String image, String description, String isbn, String bookEmotion) {
+        this(title, author, publisher, link, image, description, isbn, bookEmotion, 0.0, 0);
+    }
+
+    public BookDto(String title, String author, String publisher,
+            String link, String image, String description, String isbn, String bookEmotion,
+            double avgRating, int reviewCount) {
         this.title       = strip(title);
         this.author      = strip(author);
         this.publisher   = publisher   == null ? "" : publisher;
@@ -36,6 +45,8 @@ public class BookDto {
         this.description = strip(description);
         this.isbn        = isbn == null ? "" : isbn.trim();
         this.bookEmotion = bookEmotion == null || bookEmotion.isBlank() ? "" : bookEmotion.trim().toUpperCase(Locale.ROOT);
+        this.avgRating   = avgRating;
+        this.reviewCount = reviewCount;
     }
 
     private static String strip(String s) {

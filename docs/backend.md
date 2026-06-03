@@ -1,6 +1,6 @@
 # 마음이음 백엔드 문서
 
-> **Spring Boot 3 기반 MVC 서버** — Oracle DB(운영) / H2(로컬) 이중 환경  
+> **Spring Boot 4.0.6 기반 MVC 서버** — Oracle DB(운영) / H2(로컬) 이중 환경  
 > 최신화: 2026-06-02
 
 ---
@@ -34,7 +34,7 @@
 
 | 구분 | 기술 | 버전 / 비고 |
 |------|------|------------|
-| **프레임워크** | Spring Boot | 3.x |
+| **프레임워크** | Spring Boot | 4.0.6 |
 | **언어** | Java | 17+ |
 | **ORM** | Spring Data JPA (Hibernate) | Oracle Dialect |
 | **DB (운영)** | Oracle | `jdbc:oracle:thin:@localhost:1521/FREEPDB1` |

@@ -39,13 +39,29 @@ public class RecommendationService {
     private final RecommendationBookRepository repo;
     private final NaverBookApiClient           naverClient;
     private final GeminiClient                 geminiClient;
+    private final com.mindlink.repository.BookReviewRepository bookReviewRepository;
 
     public RecommendationService(RecommendationBookRepository repo,
                           NaverBookApiClient naverClient,
-                          GeminiClient geminiClient) {
+                          GeminiClient geminiClient,
+                          com.mindlink.repository.BookReviewRepository bookReviewRepository) {
         this.repo         = repo;
         this.naverClient  = naverClient;
         this.geminiClient = geminiClient;
+        this.bookReviewRepository = bookReviewRepository;
+    }
+
+    /** book_link → [avgRating, reviewCount] (추천 페이지 인기순 정렬용) */
+    private java.util.Map<String, double[]> reviewStatsByLink() {
+        java.util.Map<String, double[]> map = new java.util.HashMap<>();
+        for (Object[] r : bookReviewRepository.aggregateRatingByBookLink()) {
+            String link = (String) r[0];
+            if (link == null) continue;
+            double avg = r[1] != null ? ((Number) r[1]).doubleValue() : 0;
+            int cnt = r[2] != null ? ((Number) r[2]).intValue() : 0;
+            map.put(link, new double[]{ avg, cnt });
+        }
+        return map;
     }
 
     /**
@@ -61,12 +77,18 @@ public class RecommendationService {
         List<RecommendationBook> dbBooks = repo.findByEmotion(emotion);
 
         if (!dbBooks.isEmpty()) {
+            java.util.Map<String, double[]> stats = reviewStatsByLink();
             List<BookDto> books = dbBooks.stream()
                     .limit(size)
-                    .map(b -> new BookDto(b.getTitle(), b.getAuthor(), b.getPublisher(),
-                            b.getLink(), b.getImage(), b.getDescription(),
-                            b.getIsbn() != null ? b.getIsbn() : "",
-                            b.getEmotion().name()))
+                    .map(b -> {
+                        double[] st = stats.get(b.getLink());
+                        double avg = st != null ? st[0] : 0;
+                        int cnt = st != null ? (int) st[1] : 0;
+                        return new BookDto(b.getTitle(), b.getAuthor(), b.getPublisher(),
+                                b.getLink(), b.getImage(), b.getDescription(),
+                                b.getIsbn() != null ? b.getIsbn() : "",
+                                b.getEmotion().name(), avg, cnt);
+                    })
                     .toList();
             // Gemini 위로 멘트 → 없으면 기본값
             String reason = geminiClient.generateComfortMessage(emotion.name())
@@ -287,11 +309,14 @@ public class RecommendationService {
         }
 
         String lower = userMessage == null ? "" : userMessage.toLowerCase(Locale.ROOT);
-        if (isSelfHarmCrisisMessage(lower)) {
+        boolean crisis = isSelfHarmCrisisMessage(lower);
+        if (crisis) {
             reason = CRISIS_SUPPORT_MESSAGE_PREFIX + reason;
         }
 
-        return new RecommendationResponse(emotion.name(), reason, finalBooks, source);
+        RecommendationResponse response = new RecommendationResponse(emotion.name(), reason, finalBooks, source);
+        response.setCrisis(crisis);
+        return response;
     }
 
     /** Gemini가 고른 인덱스는 이 점수 이상일 때만 채택 (메시지·요약·감정 키워드와 무관한 권수 배제) */
@@ -472,13 +497,16 @@ public class RecommendationService {
             reason = geminiClient.generateComfortMessage(primaryEmotion.name(), message)
                     .orElse(slots.size() >= 2 ? buildMultiEmotionReason(slots) : primaryEmotion.getReason());
         }
-        if (isSelfHarmCrisisMessage(lower)) {
+        boolean crisis = isSelfHarmCrisisMessage(lower);
+        if (crisis) {
             reason = CRISIS_SUPPORT_MESSAGE_PREFIX + reason;
         }
 
         List<String> emotionNames = slots.stream().map(s -> s.emotion().name()).distinct().toList();
         String source = usedGeminiForSlots ? "DB+AI" : "DB";
-        return new RecommendationResponse(primaryEmotion.name(), reason, finalBooks, source, true, emotionNames);
+        RecommendationResponse response = new RecommendationResponse(primaryEmotion.name(), reason, finalBooks, source, true, emotionNames);
+        response.setCrisis(crisis);
+        return response;
     }
 
     /** 복수 감정 탐지 — 독립 스캔, 최대 2개 반환 */

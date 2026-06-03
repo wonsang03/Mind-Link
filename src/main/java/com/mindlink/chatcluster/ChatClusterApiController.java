@@ -111,6 +111,19 @@ public class ChatClusterApiController {
         return ResponseEntity.ok(kmeansEngine.recompute());
     }
 
+    /** E-1 — 실사용자만(페르소나 제외) 군집 통계. ADMIN 전용. */
+    @GetMapping("/stats/real")
+    public ResponseEntity<?> realClusterStats(HttpSession session) {
+        Long uid = sessionUserId(session);
+        if (uid == null) return unauthorized();
+        User user = userService.findById(uid).orElse(null);
+        if (user == null || user.getRole() != UserRole.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "관리자만 조회할 수 있어요."));
+        }
+        return ResponseEntity.ok(profileService.realClusterStats());
+    }
+
     private static Long sessionUserId(HttpSession session) {
         Object uid = session.getAttribute(SessionConst.LOGIN_USER_ID);
         return uid instanceof Long id ? id : null;

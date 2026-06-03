@@ -17,6 +17,9 @@ public class RecommendationResponse {
     private final int count;
     private final String source;         // "DB" | "DB+AI" | "EMPTY"
     private final boolean personalized;
+    private boolean crisis = false;      // 자해·위기 신호 감지 시 true — 프론트에서 지원 안내 우선 노출
+
+    public void setCrisis(boolean crisis) { this.crisis = crisis; }
 
     public RecommendationResponse(String emotion, String reason, List<BookDto> books, String source) {
         this(emotion, reason, books, source, false, List.of());
